@@ -1,4 +1,4 @@
-# maquinados_correa
+# app para maquinados_correa
 
 A new Flutter project.
 
