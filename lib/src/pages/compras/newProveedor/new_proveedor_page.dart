@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:maquinados_correa/src/pages/ventas/newClient/new_client_controller.dart';
+import 'package:maquinados_correa/src/pages/compras/newProveedor/new_proveedor_controller.dart';
 
-class NewClientPage extends StatelessWidget {
+class NewProveedorPage extends StatelessWidget {
 
-  NewClientController con = Get.put(NewClientController());
+  NewProveedorController con = Get.put(NewProveedorController());
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class NewClientPage extends StatelessWidget {
   // caja de datos
   Widget _boxForm(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height*0.30,
+      height: MediaQuery.of(context).size.height*0.60,
       margin: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.35, left: 50, right: 40),
       decoration: BoxDecoration(
           color: Colors.white,
@@ -50,6 +50,10 @@ class NewClientPage extends StatelessWidget {
           children: [
             _textNewCot() ,
             _textFielNumber(),
+            _textFielNombre(),
+            _textFielTelefono(),
+            _textFielCorreo(),
+            _textFielDirec(),
             _buttonSave(context),
 
           ],
@@ -80,15 +84,64 @@ class NewClientPage extends StatelessWidget {
           controller: con.nameController,
           keyboardType: TextInputType.text,
           decoration: InputDecoration(
-            hintText: 'Nombre del cliente', //texto fondo
-            prefixIcon: Icon(Icons.next_week_sharp), //icono
+            hintText: 'Nombre del proveedor', //texto fondo
+            prefixIcon: Icon(Icons.shopping_bag_outlined), //icono
           )
       ),
     );
   }
-  // Texto apellido
-
-
+  Widget _textFielNombre() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: TextField(
+          controller: con.nombreController,
+          keyboardType: TextInputType.text,
+          decoration: InputDecoration(
+            hintText: 'Nombre del vendedor', //texto fondo
+            prefixIcon: Icon(Icons.person), //icono
+          )
+      ),
+    );
+  }
+  Widget _textFielCorreo() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: TextField(
+          controller: con.correoController,
+          keyboardType: TextInputType.text,
+          decoration: InputDecoration(
+            hintText: 'Correo', //texto fondo
+            prefixIcon: Icon(Icons.email_outlined), //icono
+          )
+      ),
+    );
+  }
+  Widget _textFielTelefono() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: TextField(
+          controller: con.telefonoController,
+          keyboardType: TextInputType.text,
+          decoration: InputDecoration(
+            hintText: 'Telefono', //texto fondo
+            prefixIcon: Icon(Icons.phone_enabled_outlined), //icono
+          )
+      ),
+    );
+  }
+  Widget _textFielDirec() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: TextField(
+          controller: con.direcController,
+          keyboardType: TextInputType.text,
+          decoration: InputDecoration(
+            hintText: 'Dirección', //texto fondo
+            prefixIcon: Icon(Icons.directions), //icono
+          )
+      ),
+    );
+  }
   // boton guardar
   Widget _buttonSave(BuildContext context) {
     return Container(
@@ -142,9 +195,9 @@ class NewClientPage extends StatelessWidget {
           margin: EdgeInsets.only(top:70),
           child: Column (
             children: [
-              Icon(Icons.groups, size: 120),
+              Icon(Icons.shopping_cart, size: 120),
               Text(
-                'NUEVO CLIENTE',
+                'NUEVO PROVEEDOR',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 28

@@ -29,14 +29,17 @@ class VendedoresPageController extends GetxController {
       );
 
       ResponseApi responseApi = await vendedoresProvider.create(vendedores);
-      Get.snackbar('Proceso terminado', responseApi.message ?? '');
+      Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
+        colorText: Colors.white,);
       if (responseApi.success == true){
          clearForm();
       }
 
     }
     else {
-      Get.snackbar('Formulario no vslido', 'Ingresa todos los datos para crear una nueva cotizacion');
+      Get.snackbar('Formulario no vslido', 'Ingresa todos los datos para registrar al vendedor', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
     }
   }
 

@@ -154,34 +154,58 @@ class VentasOcListPage extends StatelessWidget {
               ),
             ),
           ),
-          body: TabBarView(
-            children: con.status.map((String status){
-              return FutureBuilder(
-                  future: con.getCotizacion(status),
-                  builder: (context, AsyncSnapshot<List<Cotizacion>> snapshot){
-                    if (snapshot.hasData){
-                      if (snapshot.data!.length > 0) {
-                        return ListView.builder(
-                            itemCount: snapshot.data?.length ?? 0,
-                            itemBuilder: (_, index){
-                              return _cardCotizacion(snapshot.data![index]);
+          body: Column(
+            children: [
+              _searchBar(),
+              Expanded(
+                child: TabBarView(
+                  children: con.status.map((String status){
+                    return FutureBuilder(
+                        future: con.getCotizacion(status),
+                        builder: (context, AsyncSnapshot<List<Cotizacion>> snapshot){
+                          if (snapshot.hasData){
+                            if (snapshot.data!.length > 0) {
+                              return ListView.builder(
+                                  itemCount: snapshot.data?.length ?? 0,
+                                  itemBuilder: (_, index){
+                                    return _cardCotizacion(snapshot.data![index]);
+                                  }
+                                  );
                             }
-                            );
-                      }
-                      else {
-                        return Center(child: NoDataWidget(text:'No hay cotizaciones'));
-                      }
-                    }
-                    else{
-                      return Center(child: NoDataWidget(text: 'No hay cotizaciones'));
-                    }
-                  }
-              );
-            }).toList(),
+                            else {
+                              return Center(child: NoDataWidget(text:'No hay cotizaciones'));
+                            }
+                          }
+                          else{
+                            return Center(child: NoDataWidget(text: 'No hay cotizaciones'));
+                          }
+                        }
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
           )
       ),
     ));
   }
+ Widget _searchBar() {
+   return Padding(
+     padding: const EdgeInsets.all(8.0),
+     child: TextField(
+       onChanged: (value) {
+         con.filterCotizaciones(value);
+       },
+       decoration: InputDecoration(
+         hintText: 'Buscar por número o cliente',
+         prefixIcon: Icon(Icons.search),
+         border: OutlineInputBorder(
+           borderRadius: BorderRadius.circular(8),
+         ),
+       ),
+     ),
+   );
+ }
   Widget _cardCotizacion(Cotizacion cotizacion) {
     return GestureDetector(
       onTap: () => con.goToDetalles(cotizacion),
@@ -259,7 +283,7 @@ class VentasOcListPage extends StatelessWidget {
                       margin: EdgeInsets.only(top: 5),
                       width: double.infinity,
                       alignment: Alignment.center,
-                      child: Text('Fecha: ${ RelativeTimeUtil.getRelativeTime(cotizacion.timestamp ?? 0) }')
+                      child: Text('Fecha: ${cotizacion.fecha ?? ''}')
 
                     ),
                   ],

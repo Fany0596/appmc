@@ -189,7 +189,7 @@ class ProduccionDetallesController extends GetxController {
     }
 
     cotizacion.producto!.forEach((producto) {
-      if (producto.estatus == 'EN ESPERA') {
+      if (producto.estatus != 'CANCELADO') {
         totalCantidad = totalCantidad + producto.cantidad!;
       }
     });
@@ -538,12 +538,21 @@ class ProduccionDetallesController extends GetxController {
         //////////////////////////////////////////////////////////////////
 
     // Guardar el archivo PDF en la memoria del dispositivo
+    Future<Directory?> getDownloadsDirectory() async {
+      if (Platform.isAndroid) {
+        return Directory('/storage/emulated/0/Download');
+      } else {
+        return getApplicationDocumentsDirectory(); // Alternativa para otros sistemas
+      }
+    }
     //final directory = await getExternalStorageDirectory();
     final directory = await getDownloadsDirectory();
     final otNumber = otController.text;
     final file = File('${directory!.path}/OT-$otNumber.pdf');
     await file.writeAsBytes(await pdf.save());
     print('PDF guardado en: ${file.path}');
+    Get.snackbar('DOCUMENTO DESCARGADO EN:', '${file.path}', backgroundColor: Colors.green,
+      colorText: Colors.white,);
     final bytes = await pdf.save();
 
     try {
@@ -1125,12 +1134,20 @@ class ProduccionDetallesController extends GetxController {
           ),
         );
 // Guardar el archivo PDF en la memoria del dispositivo
+        Future<Directory?> getDownloadsDirectory() async {
+          if (Platform.isAndroid) {
+            return Directory('/storage/emulated/0/Download');
+          } else {
+            return getApplicationDocumentsDirectory(); // Alternativa para otros sistemas
+          }
+        }
         final directory = await getDownloadsDirectory();
         //final directory = await getExternalStorageDirectory();
         final file = File('${directory!.path}/HI-${producto.articulo}.pdf');
         await file.writeAsBytes(await pdf.save());
         final bytes = await pdf.save();
-
+         Get.snackbar('DOCUMENTO DESCARGADO EN:', '${file.path}', backgroundColor: Colors.green,
+           colorText: Colors.white,);
          print('PDF guardado en: ${file.path}');
         try {
           await file.writeAsBytes(bytes);

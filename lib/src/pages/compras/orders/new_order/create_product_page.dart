@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:maquinados_correa/src/models/Materiales.dart';
-import 'package:maquinados_correa/src/models/cotizacion.dart';
-import 'package:maquinados_correa/src/pages/compras/orders/new_order/create_oc_controller.dart';
+import 'package:maquinados_correa/src/models/oc.dart';
+import 'package:maquinados_correa/src/pages/compras/orders/new_order/create_product_controller.dart';
 
-class OcPage extends StatelessWidget {
+class ProductPage extends StatelessWidget {
 
-  final OcPageController con = Get.put(OcPageController());
+  final ProductPageController con = Get.put(ProductPageController());
 
   @override
   Widget build(BuildContext context) {
@@ -46,12 +46,12 @@ class OcPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
             _textNewCot() ,
-            _cotizacionList(con.cotizacion),
-            _textFielArticulo(),
+            _ocList(con.oc),
             _textFieldDescription(),
             _materialesList(con.materiales),
             _textFielPrecio(),
             _textFielCantidad(),
+            _textFieldUnid(),
             _textFielTotal(),
             _buttonSave(context)
 
@@ -76,17 +76,34 @@ class OcPage extends StatelessWidget {
       //),
     );
   }
-  // Texto numero
-  Widget _textFielArticulo() {
+  Widget _textFieldUnid() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: TextField(
-          controller: con.articuloController,
-          keyboardType: TextInputType.text,
-          decoration: InputDecoration(
-            hintText: 'Articulo', //texto fondo
-            prefixIcon: Icon(Icons.add_circle), //icono
-          )
+      child: DropdownButtonFormField<String>(
+        icon: Icon(Icons.arrow_drop_down_circle,
+          color: Colors.grey,),
+        decoration: InputDecoration(
+          hintText: 'Unidad',
+          prefixIcon: Icon(Icons.horizontal_rule),
+        ),
+        items: [
+          DropdownMenuItem(
+            child: Text('Pza.'),
+            value: 'Pza.',
+          ),
+          DropdownMenuItem(
+            child: Text('Kg.'),
+            value: 'Kg.',
+          ),
+          DropdownMenuItem(
+            child: Text('Mt.'),
+            value: 'Mt.',
+          ),
+        ],
+        onChanged: (value) {
+          con.selectedUnid.value = value!; // Actualizar el valor seleccionado
+          con.unidController.text = value;
+        },
       ),
     );
   }
@@ -112,7 +129,7 @@ class OcPage extends StatelessWidget {
   Widget _buttonSave(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        con.createProducto(context);
+        con.createProduct(context);
       },
       child: Text('GUARDAR'),
     );
@@ -150,9 +167,9 @@ class OcPage extends StatelessWidget {
         margin: EdgeInsets.only(top:70, bottom: 15),
         child: Column (
           children: [
-            Icon(Icons.auto_awesome_motion, size: 105),
+            Icon(Icons.shopping_cart_outlined, size: 105),
             Text(
-              'NUEVA O.C.',
+              'ARTÍCULO',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -208,7 +225,7 @@ class OcPage extends StatelessWidget {
     });
     return list;
   }
-  Widget _cotizacionList (List<Cotizacion> cotizacion){
+  Widget _ocList (List<Oc> oc){
     return Obx(() => Container(
       padding: EdgeInsets.only(top: 13, bottom: 0, left: 15, right: 10),
       //margin: EdgeInsets.only(top: 10),
@@ -223,27 +240,27 @@ class OcPage extends StatelessWidget {
         elevation: 3,
         isExpanded: true,
         hint: Text(
-          'Selecciona un número de cotización',
+          'Selecciona un número de orden',
           style: TextStyle(
               fontSize: 16
           ),
         ),
-        items: _dropDownItemsc(cotizacion),
-        value: con.idCotizaciones.value == '' ? null : con.idCotizaciones.value,
+        items: _dropDownItemsc(oc),
+        value: con.idOc.value == '' ? null : con.idOc.value,
         onChanged: (option) {
           print('Opcion seleccionada ${option}');
-          con.idCotizaciones.value = option.toString();
+          con.idOc.value = option.toString();
         },
       ),
     ));
   }
-  List<DropdownMenuItem<String>> _dropDownItemsc (List<Cotizacion> cotizacion){
+  List<DropdownMenuItem<String>> _dropDownItemsc (List<Oc> oc){
 
     List<DropdownMenuItem<String>> list =[];
-    cotizacion.forEach((cotizacion) {
+    oc.forEach((oc) {
       list.add(DropdownMenuItem(
-        child: Text(cotizacion.number ?? ''),
-        value: cotizacion.id,
+        child: Text(oc.number ?? ''),
+        value: oc.id,
       ));
     });
     return list;

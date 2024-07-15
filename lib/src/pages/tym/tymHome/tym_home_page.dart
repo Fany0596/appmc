@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:maquinados_correa/src/pages/tym/orders/list/tym_ot_list_controller.dart';
 import 'package:get/get.dart';
+import 'package:maquinados_correa/src/pages/tym/list/tym_ot_list_page.dart';
+import 'package:maquinados_correa/src/pages/tym/tabla/tym_tab_page.dart';
+import 'package:maquinados_correa/src/pages/tym/tymHome/tym_home_controller.dart';
+import 'package:maquinados_correa/src/utils/custom_animated_bottom_bar.dart';
+import '../../profile/info/profile_info_page.dart';
 
-import '../../../../utils/custom_animated_bottom_bar.dart';
-import '../../../produccion/orders/list/produccion_ot_list_page.dart';
-import '../../../profile/info/profile_info_page.dart';
 
-class TiemposOtListPage extends StatelessWidget {
-  TiemposOtListController con = Get.put(TiemposOtListController());
+class TymHomePage extends StatelessWidget {
+  TymHomeController con = Get.put(TymHomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -16,14 +17,16 @@ class TiemposOtListPage extends StatelessWidget {
         body:Obx(() => IndexedStack(
           index: con.indexTab.value,
           children:[
-            ProduccionOtListPage(),
+            TymTabPage(),
+            TymOtListPage(),
             ProfileInfoPage()
           ],
         ))
     );
   }
+
   Widget _bottomBar(){
-    return Obx(() => CustomAnimatedBottomBar(
+    return Obx (() => CustomAnimatedBottomBar(
       containerHeight: 70,
       backgroundColor: Colors.grey,
       showElevation: true,
@@ -39,14 +42,14 @@ class TiemposOtListPage extends StatelessWidget {
             inactiveColor: Colors.black
         ),
         BottomNavyBarItem(
-            icon: Icon(Icons.add),
-            title:Text( 'Añadir'),
+            icon: Icon(Icons.list),
+            title:Text( 'Lista'),
             activeColor: Colors.white,
             inactiveColor: Colors.black
         ),
         BottomNavyBarItem(
-            icon: Icon(Icons.person),
-            title:Text( 'Usuario'),
+            icon: Icon(Icons.add),
+            title:Text( 'Añadir'),
             activeColor: Colors.white,
             inactiveColor: Colors.black
         ),

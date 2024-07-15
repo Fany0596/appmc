@@ -18,7 +18,7 @@ class VentasDetallesPage extends StatelessWidget {
         child:  Scaffold(
           bottomNavigationBar: Container(
             color: Color.fromRGBO(176, 160 , 117, 1),
-            height: 110,
+            height: 150,
             child: Column(
               children: [
                     _totalToPay(context)
@@ -220,8 +220,7 @@ Widget _totalToPay(BuildContext context){
                 ),
               ),
             ),
-            con.cotizacion.status == 'ABIERTA'
-                ? Container(
+            if (con.cotizacion.status == 'ABIERTA') Container(
               margin: EdgeInsets.only(left: 20, top:5),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -265,7 +264,7 @@ Widget _totalToPay(BuildContext context){
                   Container(
                     margin: EdgeInsets.only(left: 45),
                     child: ElevatedButton(
-                      onPressed: () => con.generarPDF(),
+                      onPressed: () => con.generarCot(),
                       style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.all(15),
                           backgroundColor: Colors.black
@@ -327,18 +326,193 @@ Widget _totalToPay(BuildContext context){
                       ),
                     ],
                   ),
+                Column(
+                children: [
+                // Botón de verificación para agregar garantías
+                Container(
+                child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                Checkbox(
+                value: con.reportedimAgregadas.value,
+                onChanged: (value) {
+                // Cambia el estado llamando al método en el controlador
+                con.toggleReportedimAgregadas();
+                },
+                ),
+                Text(
+                'Reporte dimensional',
+                style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                ),
+                ),
+                ],
+                ),
+                ),
+                Column(
+                children: [
+                // Botón de verificación para agregar garantías
+                Container(
+                child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                Checkbox(
+                value: con.garantiasAgregadas.value,
+                onChanged: (value) {
+                // Cambia el estado llamando al método en el controlador
+                con.toggleGarantiasAgregadas();
+                },
+                ),
+                Text(
+                'Agregar Garantías',
+                style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                ),
+                ),
+                ],
+                ),
+                ),
+                ]
+                )
+                ]
+                )
 
                 ],
               )
-            )
-                : Column(
+            ) else
+            con.cotizacion.status == 'GENERADA'
+                ? Column(
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Column(
+                      children: [
+                        Container(
+                          child: Row(
+                            children: [
+                              Text(
+                                'VALORES AGREGADOS',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: con.reportetratAgregadas.value,
+                                onChanged: (value) {
+                                  // Cambia el estado llamando al método en el controlador
+                                  con.toggleReportetratAgregadas();
+                                },
+                              ),
+                              Text(
+                                'Certificado tratamiento',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(right: 5),
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: con.reportematAgregadas.value,
+                                onChanged: (value) {
+                                  // Cambia el estado llamando al método en el controlador
+                                  con.toggleReportematAgregadas();
+                                },
+                              ),
+                              Text(
+                                'Certificado de material',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Container(
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: con.reportedimAgregadas.value,
+                                onChanged: (value) {
+                                  // Cambia el estado llamando al método en el controlador
+                                  con.toggleReportedimAgregadas();
+                                },
+                              ),
+                              Text(
+                                'Reporte dimensional',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(left: 7),
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: con.reporterugAgregadas.value,
+                                onChanged: (value) {
+                                  // Cambia el estado llamando al método en el controlador
+                                  con.toggleReporterugAgregadas();
+                                },
+                              ),
+                              Text(
+                                'Reporte de rugosidad',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      ],
+                    ),
                     Container(
-                      margin: EdgeInsets.only(left: 365),
+                      margin: EdgeInsets.only(left: 95),
+                      child: ElevatedButton(
+                        onPressed: () => con.updateCerrada(),
+                        style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.all(15),
+                            backgroundColor: Colors.green
+                        ),
+                        child: Text(
+                          'CERRAR',
+                          style: TextStyle(
+                              color: Colors.white
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 45, right: 95),
                     child: ElevatedButton(
-                    onPressed: () => con.generarPDF(),
+                    onPressed: () => con.generarCot(),
                     style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.all(15),
                     backgroundColor: Colors.black
@@ -356,8 +530,8 @@ Widget _totalToPay(BuildContext context){
                   children: [
                   // Botón de verificación para agregar garantías
                   Container(
+                    margin: EdgeInsets.only(left: 45, right: 160),
                   child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                   Checkbox(
                   value: con.garantiasAgregadas.value,
@@ -376,11 +550,11 @@ Widget _totalToPay(BuildContext context){
                   ],
                   ),
                   ),
+
                   // Botón de verificación para agregar bancarios
                   Container(
-                  margin: EdgeInsets.only(left: 45),
+                  margin: EdgeInsets.only(left: 45, right: 112),
                   child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                   Checkbox(
                   value: con.bancariosAgregadas.value,
@@ -399,11 +573,85 @@ Widget _totalToPay(BuildContext context){
                   ],
                   ),
                   ),
+
                   ],
                 ),
                   ],)
           ],
         )
+                : Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      child: ElevatedButton(
+                        onPressed: () => con.generarCot(),
+                        style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.all(15),
+                            backgroundColor: Colors.black
+                        ),
+                        child: Text(
+                          'PFD',
+                          style: TextStyle(
+                              color: Colors.white
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    Column(
+                      children: [
+                        // Botón de verificación para agregar garantías
+                        Container(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Checkbox(
+                                value: con.garantiasAgregadas.value,
+                                onChanged: (value) {
+                                  // Cambia el estado llamando al método en el controlador
+                                  con.toggleGarantiasAgregadas();
+                                },
+                              ),
+                              Text(
+                                'Agregar Garantías',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Botón de verificación para agregar bancarios
+                        Container(
+                          margin: EdgeInsets.only(left: 45),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Checkbox(
+                                value: con.bancariosAgregadas.value,
+                                onChanged: (value) {
+                                  // Cambia el estado llamando al método en el controlador
+                                  con.toggleBancariosAgregadas();
+                                },
+                              ),
+                              Text(
+                                'Agregar Datos Bancarios',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],)
+              ],
+            )
       ],
     )
       ]);

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:maquinados_correa/src/models/cotizacion.dart';
-import 'package:maquinados_correa/src/models/producto.dart';
-import 'package:maquinados_correa/src/pages/produccion/tabla/produccion_tab_controller.dart';
+import 'package:flutter/services.dart';
+import 'package:maquinados_correa/src/models/oc.dart';
+import 'package:maquinados_correa/src/pages/compras/tabla/compras_tab_controller.dart';
 import 'package:get/get.dart';
 
-class ProduccionTabPage extends StatelessWidget {
-  ProduccionTabController con = Get.put(ProduccionTabController());
-
+class ComprasTabPage extends StatelessWidget {
+  ComprasTabController con = Get.put(ComprasTabController());
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -61,14 +61,14 @@ class ProduccionTabPage extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => con.goToRegisterPage(), // funcion de boton
+                      onTap: () => con.goToNewProveedorPage(), // funcion de boton
                       child: Container(
                         margin: EdgeInsets.only(top: 10, left: 1),
                         padding: EdgeInsets.all(20),
                         width: double.infinity,
                         color: Colors.white,
                         child: Text(
-                          'Registro de nuevo usuario',
+                          'Registro de nuevo proveedor',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.black,
@@ -114,15 +114,35 @@ class ProduccionTabPage extends StatelessWidget {
           appBar: AppBar(
             title: _encabezado(context),
           ),
-          body: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Column(
-              children: [
-                // Encabezado de la tabla...
-                Expanded(
-                  child: _table(context),
-                ),
-              ],
+          body: Focus(
+            autofocus: true,
+            onKey: (node, event) {
+              if (event is RawKeyDownEvent) {
+                if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                  _scrollController.animateTo(
+                    _scrollController.offset + 50,
+                    duration: Duration(milliseconds: 100),
+                    curve: Curves.easeInOut,
+                  );
+                  return KeyEventResult.handled;
+                } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                  _scrollController.animateTo(
+                    _scrollController.offset - 50,
+                    duration: Duration(milliseconds: 100),
+                    curve: Curves.easeInOut,
+                  );
+                  return KeyEventResult.handled;
+                }
+              }
+              return KeyEventResult.ignored;
+            },
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: _scrollController,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: _table(context),
+              ),
             ),
           ),
         ),
@@ -153,45 +173,48 @@ class ProduccionTabPage extends StatelessWidget {
   }
 
   Widget _table(BuildContext context) {
-    return FutureBuilder<List<Cotizacion>>(
-      future: con.getCotizacion('GENERADA'), // Cambiar a 'GENERADA'
+    return FutureBuilder<List<Oc>>(
+      future: con.getOc('ABIERTA'), // Cambiar a 'GENERADA'
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
-          List<Cotizacion>? cotizaciones = snapshot.data;
-          if (cotizaciones == null || cotizaciones.isEmpty) {
-            return Center(child: Text('No hay cotizaciones generadas'));
+          List<Oc>? oc = snapshot.data;
+          if (oc == null || oc.isEmpty) {
+            return Center(child: Text('No hay ordenes generadas'));
           } else {
+            // Ordenar la lista por número de OC
+            oc.sort((a, b) => a.number!.compareTo(b.number!));
             return DataTable(
               columns: [
-                DataColumn(label: Text('COTIZACIÓN', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('O.T.', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('PEDIDO', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('CLIENTE', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('OC', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('COT.', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('PROVEEDOR', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('ARTICULO', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('MATERIAL', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('CANTIDAD', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('PRECIO', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('TOTAL', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('ESTATUS', style: TextStyle(fontSize: 13),)),
                 DataColumn(
                   label: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('No. PARTE/', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5),),
-                      Text('PLANO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
+                      Text('CANTIDAD', textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
+                      Text('RECIBIDA', textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
                     ],
                   ),
                 ),
-                DataColumn(label: Text('ARTICULO', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('CANTIDAD', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('ESTATUS', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('OPERADOR', style: TextStyle(fontSize: 13),)),
                 DataColumn(
                   label: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('TIEMPO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
-                      Text('ESTIMADO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
+                      Text('FECHA', textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
+                      Text('DE SOLICITUD', textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
                     ],
                   ),
                 ),
@@ -206,37 +229,64 @@ class ProduccionTabPage extends StatelessWidget {
                   ),
                 ),
               ],
-              rows: cotizaciones.expand((cotizacion) {
-                return cotizacion.producto!.map((producto) {
+              rows: oc.expand((oc) {
+                return oc.product!.map((product) {
+                  bool isCantidadDifferent = product.pedido != null && product.pedido!.isNotEmpty &&
+                      int.parse(product.cantidad.toString().split('.')[0]) != int.parse(product.pedido!.split('.')[0]);
+                  bool isCantidadEqual = product.pedido != null && product.pedido!.isNotEmpty &&
+                      int.parse(product.cantidad.toString().split('.')[0]) == int.parse(product.pedido!.split('.')[0]);
+                  bool isFechaEntregaMenor = false;
+                  if (oc.ent != null && oc.ent!.isNotEmpty) {
+                    DateTime fechaEntrega = DateTime.parse(oc.ent!);
+                    if (fechaEntrega.isBefore(DateTime.now())) {
+                      isFechaEntregaMenor = true;
+                    }
+                  }
                   return DataRow(
                     cells: [
-                      DataCell(Text(cotizacion.number ?? '',
+                      DataCell(Text(oc.number ?? '',
                         style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.ot ?? '',
+                      DataCell(Text(oc.cotizacion!.number ?? '',
                         style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.pedido ?? '',
+                      DataCell(Text(oc.provedor!.name ?? '',
                         style: TextStyle(fontSize: 10),)),
-                      DataCell(Text(cotizacion.clientes!.name.toString(),
+                      DataCell(
+                          Container(
+                            color: isCantidadEqual ? Colors.green : Colors.transparent,
+                        child: Text(product!.descr ?? '',
+                          style: TextStyle(fontSize: 10),),
+                      )),
+                      DataCell(Text(product.name ?? '',
+                        style: TextStyle(fontSize: 10),)),
+                      DataCell(Text(product.cantidad.toString(),
                         style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.parte ?? '',
-                        style: TextStyle(fontSize: 10),)),
-                      DataCell(Text(producto.articulo ?? '',
-                        style: TextStyle(fontSize: 10),)),
-                      DataCell(Text(producto.cantidad.toString(),
+                      DataCell(Text('\$${product.precio!.toStringAsFixed(2)}',
+                        style: TextStyle(fontSize: 11),)),
+                      DataCell(Text('\$${product.total!.toStringAsFixed(2)}',
                         style: TextStyle(fontSize: 11),)),
                       DataCell(
                         Container(
-                          color: _getColorForStatus(producto.estatus),
-                          child: Text(producto.estatus ?? '',
+                          color: _getColorForStatus(product.estatus),
+                          child: Text(product.estatus ?? '',
                             style: TextStyle(fontSize: 11),),
                         ),
                       ),
-                      DataCell(Text(producto.estatus ?? '',
+                      DataCell(
+                        Container(
+                          color: isCantidadDifferent ? Colors.red : Colors.green,
+                          child: Text(product.pedido != null && product.pedido!.isNotEmpty ? product.pedido! : '',
+                            style: TextStyle(fontSize: 11),),
+                        ),
+                      ),
+                      DataCell(Text(oc.soli ?? '',
                         style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.fecha ?? '',
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.fecha ?? '',
-                        style: TextStyle(fontSize: 11),)),
+                      DataCell(
+                          Container(
+                      color: isFechaEntregaMenor ? Colors.red : Colors.transparent,
+                      child: Text(oc.ent ?? '',
+                        style: TextStyle(fontSize: 11),),
+                  ),
+                      ),
                     ],
                   );
                 }).toList();

@@ -1,22 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:maquinados_correa/src/models/Materiales.dart';
-import 'package:maquinados_correa/src/models/producto.dart';
-import 'package:maquinados_correa/src/pages/produccion/orders/ot/produccion_ot_controller.dart';
+import 'package:maquinados_correa/src/models/product.dart';
+import 'package:maquinados_correa/src/pages/compras/orders/product/compras_product_controller.dart';
 
-class ProduccionOtPage extends StatelessWidget {
-  Producto? producto;
-  final ProduccionOtController con = Get.put(ProduccionOtController());
+class ComprasProductPage extends StatelessWidget {
+  Product? product;
+  final ComprasProductController con = Get.put(ComprasProductController());
 
-  ProduccionOtPage({@required this.producto});
+  ComprasProductPage({@required this.product});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       body: Obx (() =>  SingleChildScrollView(
+       body:   SingleChildScrollView(
       child: Stack(
         children: [
         Column(
@@ -48,7 +47,6 @@ class ProduccionOtPage extends StatelessWidget {
         ],
       ),
       ),
-       ),
     );
   }
 
@@ -84,7 +82,7 @@ class ProduccionOtPage extends StatelessWidget {
   Widget _textArticulo() {
     return
         Text(
-          'ASIGNACIÓN DE ARTICULO',
+          'RECEPCIÓN DE ARTICULO',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -112,30 +110,24 @@ class ProduccionOtPage extends StatelessWidget {
         children: [
           _textNewCot(),
           _textFielArticulo(),
-          _parte(),
-          //_textFielPedido(),
+          _materialesList(),
           _textFielCantidad(),
-          _materialesList(con.materiales),
-          _textFielPrecio(),
-          _textFielTotal(),
-          //_getDatePickerEnabled(context),
-          //_entrega(context),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              con.producto!.estatus == 'POR ASIGNAR'
+              con.product!.estatus == 'SOLICITADO'
                   ? Container(
               child: _buttonSave(context))
                   : Container(),
-              con.producto!.estatus == 'POR ASIGNAR'
+              con.product!.estatus == 'SOLICITADO'
                   ? Container(
               child: _buttonCancel(context))
               : Container(),
-              con.producto!.estatus == 'CANCELADO'
+              con.product!.estatus == 'CANCELADO'
                   ? Container(
                   child: _buttonSave(context))
                   : Container(),
-              con.producto!.estatus == 'EN ESPERA'
+              con.product!.estatus == 'RECIBIDO'
                   ? Container(
                   child: _buttonCancel(context))
                   : Container(),
@@ -166,7 +158,7 @@ class ProduccionOtPage extends StatelessWidget {
     return Container(
       margin: EdgeInsets.all(10),
       child:TextField(
-        controller: con.articuloController,
+        controller: con.descrController,
         keyboardType: TextInputType.text,
         decoration: InputDecoration(
           hintText: 'Articulo',
@@ -176,104 +168,29 @@ class ProduccionOtPage extends StatelessWidget {
     );
   }
 
-  Widget _materialesList(List<Materiales> materiales) {
+  Widget _materialesList() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: DropdownButton(
-        underline: Container(
-          alignment: Alignment.centerRight,
-          child: Icon(
-            Icons.arrow_drop_down_circle,
-            color: Colors.grey,
-          ),
+      margin: EdgeInsets.all(10),
+      child:TextField(
+        controller: con.nameController,
+        keyboardType: TextInputType.text,
+        decoration: InputDecoration(
+          hintText: 'Material',
+          prefixIcon: Icon(Icons.egg_alt),
         ),
-        elevation: 3,
-        isExpanded: true,
-        hint: Text(
-          'Selecciona un material',
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-        items: _dropDownItems(materiales),
-        value: con.idMateriales.value == '' ? null : con.idMateriales.value,
-        onChanged: (option) {
-          print('Opcion seleccionada ${option}');
-          con.idMateriales.value = option.toString();
-        },
       ),
     );
-  }
-
-  List<DropdownMenuItem<String>> _dropDownItems(List<Materiales> materiales) {
-    List<DropdownMenuItem<String>> list = [];
-    materiales.forEach((materiales) {
-      list.add(
-        DropdownMenuItem(
-          child: Text(materiales.name ?? ''),
-          value: materiales.id,
-        ),
-      );
-    });
-    return list;
   }
 
   Widget _textFielCantidad() {
     return Container(
       margin: EdgeInsets.all(10),
       child: TextField(
-        controller: con.cantidadController,
+        controller: con.pedidoController,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-          hintText: 'Cantidad',
+          hintText: 'Cantidad recibida',
           prefixIcon: Icon(Icons.numbers),
-        ),
-      ),
-    );
-  }
-
-  Widget _parte() {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: TextField(
-        controller: con.parteController,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          hintText: 'No. Parte',
-          prefixIcon: Icon(Icons.list_outlined),
-        ),
-      ),
-    );
-  }
-
-  Widget _textFielTotal() {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: TextField(
-        controller: con.totalController,
-        keyboardType: TextInputType.number,
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(
-            RegExp(r'^\d*\.?\d{0,2}'),
-          ),
-        ],
-        decoration: InputDecoration(
-          hintText: 'Total',
-          prefixIcon: Icon(Icons.attach_money_rounded),
-        ),
-      ),
-    );
-  }
-
-  Widget _textFielPrecio() {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: TextField(
-        controller: con.precioController,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          hintText: 'Precio Unitario',
-          prefixIcon: Icon(Icons.attach_money),
         ),
       ),
     );
@@ -290,7 +207,7 @@ class ProduccionOtPage extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         ),
         child: Text(
-          'ASIGNAR',
+          'RECIBIDO',
           style: TextStyle(
             fontSize: 20,
             color: Colors.white,

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
+import 'package:maquinados_correa/src/models/oc.dart';
+import 'package:maquinados_correa/src/pages/compras/list/compras_oc_list_controller.dart';
 import 'package:maquinados_correa/src/pages/ventas/orders/list/ventas_oc_list_controller.dart';
 import 'package:get/get.dart';
 import 'package:maquinados_correa/src/utils/relative_time_util.dart';
 import 'package:maquinados_correa/src/widgets/no_data_widget.dart';
 
-class VentasOcListPage extends StatelessWidget {
- VentasOcListController con = Get.put(VentasOcListController());
+class ComprasOcListPage extends StatelessWidget {
+ ComprasOcListController con = Get.put(ComprasOcListController());
 
   @override
   Widget build(BuildContext context) {
@@ -59,32 +61,14 @@ class VentasOcListPage extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => con.goToNewVendedorPage(), // funcion de boton
+                      onTap: () => con.goToNewProveedorPage(), // funcion de boton
                       child: Container(
                         margin: EdgeInsets.only(top: 10, left: 1),
                         padding: EdgeInsets.all(20),
                         width: double.infinity,
                         color: Colors.white,
                         child: Text(
-                          'Registro de nuevo vendedor',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-
-                          ),
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => con.goToNewClientePage(), // funcion de boton
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10, left: 1),
-                        padding: EdgeInsets.all(20),
-                        width: double.infinity,
-                        color: Colors.white,
-                        child: Text(
-                          'Registro de nuevo cliente',
+                          'Registro de nuevo proveedor',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.black,
@@ -137,7 +121,6 @@ class VentasOcListPage extends StatelessWidget {
                 child: Wrap(
                   direction: Axis.horizontal,
                 children: [
-                 // _textFieldSearch(context)
                 ],
               ),
               ),
@@ -154,37 +137,59 @@ class VentasOcListPage extends StatelessWidget {
               ),
             ),
           ),
-          body: TabBarView(
-            children: con.status.map((String status){
-              return FutureBuilder(
-                  future: con.getCotizacion(status),
-                  builder: (context, AsyncSnapshot<List<Cotizacion>> snapshot){
-                    if (snapshot.hasData){
-                      if (snapshot.data!.length > 0) {
-                        return ListView.builder(
-                            itemCount: snapshot.data?.length ?? 0,
-                            itemBuilder: (_, index){
-                              return _cardCotizacion(snapshot.data![index]);
+          body: Column(
+            children: [
+              _searchBar(context),
+              Expanded(
+                child: TabBarView(
+                  children: con.status.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    String status = entry.value;
+                    return Obx(() {
+                      if (con.searchText.isEmpty) {
+                        return FutureBuilder(
+                            future: con.getOc(status),
+                            builder: (context, AsyncSnapshot<List<Oc>> snapshot){
+                              if (snapshot.hasData){
+                                if (snapshot.data!.length > 0) {
+                                  List<Oc> sortedOc = snapshot.data!..sort((a, b) => a.number!.compareTo(b.number!));
+                                  return ListView.builder(
+                                      itemCount: sortedOc.length,
+                                      itemBuilder: (_, i){
+                                        return _cardOc(sortedOc[i]);
+                                      }
+                                  );
+                                }
+                                else {
+                                  return Center(child: NoDataWidget(text:'No hay ordenes'));
+                                }
+                              }
+                              else{
+                                return Center(child: NoDataWidget(text: 'No hay ordenes'));
+                              }
                             }
-                            );
+                        );
+                      } else {
+                        con.filterOc(status, index);
+                        return ListView.builder(
+                            itemCount: con.filteredOc.length,
+                            itemBuilder: (_, i){
+                              return _cardOc(con.filteredOc[i]);
+                            }
+                        );
                       }
-                      else {
-                        return Center(child: NoDataWidget(text:'No hay cotizaciones'));
-                      }
-                    }
-                    else{
-                      return Center(child: NoDataWidget(text: 'No hay cotizaciones'));
-                    }
-                  }
-              );
-            }).toList(),
+                    });
+                  }).toList(),
+                )
+              ),
+            ],
           )
       ),
     ));
   }
-  Widget _cardCotizacion(Cotizacion cotizacion) {
+  Widget _cardOc(Oc oc) {
     return GestureDetector(
-      onTap: () => con.goToDetalles(cotizacion),
+      onTap: () => con.goToDetalles(oc),
       child: Container(
         height: 200,
         margin: EdgeInsets.only(left: 15, right: 15, top: 10),
@@ -208,13 +213,30 @@ class VentasOcListPage extends StatelessWidget {
                 ),
                 child: Container(
                   margin: EdgeInsets.only(top: 5),
-                  child: Text(
-                    'Cotizacion: #${cotizacion.number}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(0.5),
+                          child: Text(
+                            '${oc.number}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          _showConfirmDeleteDialog(oc);
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -226,40 +248,40 @@ class VentasOcListPage extends StatelessWidget {
                        margin: EdgeInsets.only(top: 5),
                         width: double.infinity,
                         alignment: Alignment.center,
-                        child: Text('Cliente: ${cotizacion.clientes?.name ?? ''}'),
+                        child: Text('Provedor: ${oc.provedor?.name ?? ''}'),
                     ),
                     Container(
                       margin: EdgeInsets.only(top: 5),
                       width: double.infinity,
                       alignment: Alignment.center,
-                      child: Text('Vendedor: ${cotizacion.vendedores?.name ?? ''}'),
+                      child: Text('Comprador: ${oc.comprador?.name ?? ''}'),
                     ),
                     Container(
                         margin: EdgeInsets.only(top: 5),
                         width: double.infinity,
                         alignment: Alignment.center,
-                        child: Text('Contacto: ${ cotizacion.nombre ?? ''}  ${cotizacion.correo ?? ''} ')
+                        child: Text('Contacto: ${ oc.provedor!.nombre ?? ''} ')
 
                     ),
                     Container(
                         margin: EdgeInsets.only(top: 5),
                         width: double.infinity,
                         alignment: Alignment.center,
-                        child: Text('Telefono: ${cotizacion.telefono ?? ''}')
+                        child: Text('Telefono: ${oc.provedor!.telefono ?? ''}')
 
                     ),
                     Container(
                         margin: EdgeInsets.only(top: 5),
                         width: double.infinity,
                         alignment: Alignment.center,
-                        child: Text('Correo: ${cotizacion.correo ?? ''} ')
+                        child: Text('Correo: ${oc.provedor!.correo ?? ''} ')
 
                     ),
                     Container(
                       margin: EdgeInsets.only(top: 5),
                       width: double.infinity,
                       alignment: Alignment.center,
-                      child: Text('Fecha: ${ RelativeTimeUtil.getRelativeTime(cotizacion.timestamp ?? 0) }')
+                      child: Text('Fecha: ${oc.soli ?? ''}')
 
                     ),
                   ],
@@ -271,7 +293,30 @@ class VentasOcListPage extends StatelessWidget {
       ),
     );
   }
-
+ void _showConfirmDeleteDialog(Oc oc) {
+   Get.defaultDialog(
+     title: 'Confirmación',
+     content: Text('¿Estás seguro de eliminar la oc ${oc.number}?'),
+     actions: [
+       ElevatedButton(
+         onPressed: () {
+           Get.back(); // Cierra el diálogo de confirmación
+         },
+         child: Text('No'),
+       ),
+       ElevatedButton(
+         onPressed: () {
+           con.deleteOc(oc); // Llama al método para eliminar el producto
+           Get.back(); // Cierra el diálogo de confirmación
+         },
+         style: ElevatedButton.styleFrom(
+           backgroundColor: Colors.red,
+         ),
+         child: Text('Sí'),
+       ),
+     ],
+   );
+ }
   Widget _encabezado(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(top: 1,left: 1),
@@ -295,7 +340,24 @@ class VentasOcListPage extends StatelessWidget {
       ),
     );
   }
-
+ Widget _searchBar(BuildContext context) {
+   return Padding(
+     padding: const EdgeInsets.all(8.0),
+     child: TextField(
+       onChanged: (value) {
+         con.searchText.value = value;
+         con.filterOc(con.status[DefaultTabController.of(context)!.index], DefaultTabController.of(context)!.index);
+       },
+       decoration: InputDecoration(
+         hintText: 'Buscar por OC o cliente',
+         prefixIcon: Icon(Icons.search),
+         border: OutlineInputBorder(
+           borderRadius: BorderRadius.circular(8),
+         ),
+       ),
+     ),
+   );
+ }
 
 }
 

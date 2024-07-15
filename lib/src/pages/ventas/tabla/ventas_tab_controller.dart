@@ -7,7 +7,7 @@ import 'package:maquinados_correa/src/models/user.dart';
 import 'package:maquinados_correa/src/providers/cotizacion_provider.dart';
 import 'package:maquinados_correa/src/providers/producto_provider.dart';
 
-class ProduccionTabController extends GetxController{
+class VentasTabController extends GetxController{
 
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   TextEditingController clienteController = TextEditingController();
@@ -22,7 +22,12 @@ class ProduccionTabController extends GetxController{
 
   }
 
-
+  void goToNewVendedorPage(){
+    Get.toNamed('/ventas/newVendedor');
+  }
+  void goToNewClientePage(){
+    Get.toNamed('/ventas/newClient');
+  }
   void signOut() {
     GetStorage().remove('user');
     Get.offNamedUntil('/', (route) => false); //Elimina el historial de las pantallas y regresa al login

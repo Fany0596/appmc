@@ -22,6 +22,8 @@ class CotizacionPageController extends GetxController {
   TextEditingController telefonoController = TextEditingController();
   TextEditingController condicionesController = TextEditingController();
   TextEditingController descuentoController = TextEditingController();
+  TextEditingController reqController = TextEditingController();
+  TextEditingController fechaController = TextEditingController();
 
   VendedoresProvider vendedoresProvider = VendedoresProvider();
   ClientesProvider clientesProvider = ClientesProvider();
@@ -91,6 +93,8 @@ class CotizacionPageController extends GetxController {
     String telefono = telefonoController.text;
     String descuento = descuentoController.text;
     String condiciones = condicionesController.text;
+    String req = reqController.text;
+    String fecha = fechaController.text;
     print('NUMBER: ${number}');
     print('NOMBRE: ${nombre}');
     print('CORREO: ${correo}');
@@ -105,9 +109,12 @@ class CotizacionPageController extends GetxController {
       Cotizacion cotizacion = Cotizacion(
         number: number,
         ent: ent,
+          fecha: fecha,
         nombre: nombre,
         correo: correo,
+          req: req,
           condiciones: condiciones,
+        descuento:descuento,
         telefono: telefono,
         idVendedores: idVendedores.value,
         idClientes: idClientes.value
@@ -120,29 +127,43 @@ class CotizacionPageController extends GetxController {
 
         ResponseApi responseApi = ResponseApi.fromJson(json.decode(res));
         progressDialog.close();
-        Get.snackbar('Proceso terminado', responseApi.message ?? '');
+        Get.snackbar('Proceso terminado', responseApi.message ?? '',backgroundColor: Colors.green,
+          colorText: Colors.white,);
+        if (responseApi.success!) { // Si la respuesta es exitosa, navegar a la página de roles
+          goToRoles();
+        }
       });
     }
   }
   bool isValidForm(String number, String ent, String condiciones) {
     if (number.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa número de cotización');
+      Get.snackbar('Formulario no valido', 'Ingresa número de cotización',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
     if (ent.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa tiempo de entrega');
+      Get.snackbar('Formulario no valido', 'Ingresa tiempo de entrega',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
     if (condiciones.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa las condiciones de pago');
+      Get.snackbar('Formulario no valido', 'Ingresa las condiciones de pago',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
     if (idVendedores == null) {
-      Get.snackbar('Formulario no valido', 'Selecciona un vendedor');
+      Get.snackbar('Formulario no valido', 'Selecciona un vendedor',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
     if (idClientes == null) {
-      Get.snackbar('Formulario no valido', 'Selecciona un cliente');
+      Get.snackbar('Formulario no valido', 'Selecciona un cliente',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
 
@@ -195,6 +216,8 @@ class CotizacionPageController extends GetxController {
     numberController.text = '';
 
   }
-
+  void goToRoles() {
+    Get.offNamedUntil('/roles', (route) => false);
+  }
 
 }

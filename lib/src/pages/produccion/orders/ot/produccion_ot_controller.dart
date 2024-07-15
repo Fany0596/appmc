@@ -71,7 +71,9 @@ class ProduccionOtController extends GetxController {
     // Verifica que todas las propiedades del producto estén definidas
     if (articulo.isEmpty || precio.isEmpty || cantidad.isEmpty ||
         productId.isEmpty|| parte.isEmpty) {
-      Get.snackbar('Formulario no válido', 'Por favor ingresa todos los datos');
+      Get.snackbar('Formulario no válido', 'Por favor ingresa todos los datos', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return;
     }
 
@@ -113,22 +115,30 @@ class ProduccionOtController extends GetxController {
         // Mostrar el resultado de la solicitud
         Get.snackbar(
           responseApi.success! ? 'Éxito' : 'Error',
-          responseApi.message ?? '',
+          responseApi.message ?? '', backgroundColor: Colors.green,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
         );
       } catch (e) {
         print('Error al actualizar el producto: $e');
-        Get.snackbar('Error', 'Ocurrió un error al actualizar el producto');
+        Get.snackbar('Error', 'Ocurrió un error al actualizar el producto', backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,);
       }
     }
     }
     bool isValidForm(String articulo, String precio, String total,
         String cantidad, String parte) {
       if (articulo.isEmpty) {
-        Get.snackbar('Formulario no valido', 'Llene todos los campos');
+        Get.snackbar('Formulario no valido', 'Llene todos los campos', backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,);
         return false;
       }
       if (idMateriales == null) {
-        Get.snackbar('Formulario no valido', 'Selecciona un material');
+        Get.snackbar('Formulario no valido', 'Selecciona un material', backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,);
         return false;
       }
 
@@ -145,7 +155,9 @@ class ProduccionOtController extends GetxController {
     print('ID del producto a actualizar: $productId');
     // Verifica que todas las propiedades del producto estén definidas
     if ( materiales.isEmpty) {
-      Get.snackbar('Formulario no válido', 'Por favor ingresa el material');
+      Get.snackbar('Formulario no válido', 'Por favor ingresa el material', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return;
     }
 
@@ -186,12 +198,15 @@ class ProduccionOtController extends GetxController {
         // Mostrar el resultado de la solicitud
         Get.snackbar(
           responseApi.success! ? 'Éxito' : 'Error',
-          responseApi.message ?? '',
+          responseApi.message ?? '', backgroundColor: Colors.green,
+          colorText: Colors.white,
         );
 
       } catch (e) {
         print('Error al actualizar el producto: $e');
-        Get.snackbar('Ocurrió un error al actualizar el producto', 'Verifique los campos');
+        Get.snackbar('Ocurrió un error al actualizar el producto', 'Verifique los campos', backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,);
       }
     }
   }

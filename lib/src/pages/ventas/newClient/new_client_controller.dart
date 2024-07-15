@@ -25,14 +25,17 @@ class NewClientController extends GetxController {
       );
 
       ResponseApi responseApi = await clientesProvider.create(clientes);
-      Get.snackbar('Proceso terminado', responseApi.message ?? '');
+      Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
+        colorText: Colors.white,);
       if (responseApi.success == true){
          clearForm();
       }
 
     }
     else {
-      Get.snackbar('Formulario no valido', 'Ingresa todos los datos para crear un nuevo cliente');
+      Get.snackbar('Formulario no valido', 'Ingresa todos los datos para crear un nuevo cliente', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
     }
   }
 

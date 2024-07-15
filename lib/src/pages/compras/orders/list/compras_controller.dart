@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:maquinados_correa/src/models/oc.dart';
 import 'package:maquinados_correa/src/models/product.dart';
 import 'package:maquinados_correa/src/models/response_api.dart';
@@ -13,7 +16,6 @@ import 'package:maquinados_correa/src/providers/product_provider.dart';
 import 'package:maquinados_correa/src/providers/provedor_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
 import 'package:logger/logger.dart';
 
 class ComprasDetallesController extends GetxController {
@@ -69,6 +71,11 @@ class ComprasDetallesController extends GetxController {
     Get.toNamed(
         '/compras/orders/product', arguments: {'product': product.toJson()});
   }
+  void goToProductUpdate(Product product) {
+    print('Producto seleccionado: $product');
+    Get.toNamed(
+        '/compras/update/product', arguments: {'product': product.toJson()});
+  }
   void updateCancelada() async {
 
     ResponseApi responseApi = await ocProvider.updatecancelada(oc);
@@ -87,14 +94,30 @@ class ComprasDetallesController extends GetxController {
       totalt.value = totalt.value + product.total!;
     });
   }
-  Future<void> generarPDF() async {
+  void deleteProduct(Product product) async {
+    ResponseApi responseApi = await productProvider.deleted(product.id!); // Llama al backend para eliminar el producto
+    if (responseApi.success == true) {
+      Get.snackbar('Éxito', responseApi.message ?? 'Producto eliminado correctamente', backgroundColor: Colors.green,
+        colorText: Colors.white,);
+      if (responseApi.success!) { // Si la respuesta es exitosa, navegar a la página de roles
+        goToHome();
+      }
+    } else {
+      Get.snackbar('Error', responseApi.message ?? 'Error al eliminar el producto', backgroundColor: Colors.red,
+        colorText: Colors.white,);
+    }
+  }
+  void goToHome() {
+    Get.offNamedUntil('/compras/home', (route) => false);
+  }
+  Future<void> generarOc() async {
     // Accede a la imagen desde los activos de tu aplicación
     ByteData imageData = await rootBundle.load('assets/img/logoC.png');
     // Convierte los datos de la imagen a un arreglo de bytes
     Uint8List bytess = imageData.buffer.asUint8List();
     // Obtener la lista de productos en espera
     List<Product> productEspera = oc.product!
-        .where((product) => product.estatus == 'SOLICITADO')
+        .where((product) => product.estatus != 'CANCELADO')
         .toList();
     // Crear una lista de listas para almacenar los datos de los productos
     List<List<String>> productData = [];
@@ -118,7 +141,7 @@ class ComprasDetallesController extends GetxController {
           locale: 'es_MX', symbol: '\$').format(product.total);
       productData.add([
         (i + 1).toString(),
-        product.descr.toString(),
+        '${product.descr} Material: ${product.name}',
         cantidadFormatted,
         product.unid.toString(), // Puedes reemplazar con el dato real si lo tienes
         precioFormatted,
@@ -200,7 +223,7 @@ class ComprasDetallesController extends GetxController {
                               1: pw.FixedColumnWidth(70), // Ancho de la segunda columna
                             },
                             data: [
-                              ['Fecha:', '$currentDate'],
+                              ['Fecha:', '${oc.soli}'],
                             ],
                             cellAlignment: pw.Alignment.topLeft,
                             headerAlignment: pw.Alignment.topLeft,
@@ -640,11 +663,22 @@ class ComprasDetallesController extends GetxController {
     );
     //////////////////////////////////////////////////////////////////
 
+
+    Future<Directory?> getDownloadsDirectory() async {
+      if (Platform.isAndroid) {
+        return Directory('/storage/emulated/0/Download');
+      } else {
+        return getApplicationDocumentsDirectory(); // Alternativa para otros sistemas
+      }
+    }
     // Guardar el archivo PDF en la memoria del dispositivo
-    //final directory = await getExternalStorageDirectory();
     final directory = await getDownloadsDirectory();
+    //final directory = await getExternalStorageDirectory();
+    //final directory = await getDownloadsDirectory();
     final file = File('${directory!.path}/${oc.number}.pdf');
     await file.writeAsBytes(await pdf.save());
+    Get.snackbar('DOCUMENTO DESCARGADO EN:', '${file.path}', backgroundColor: Colors.green,
+      colorText: Colors.white,);
     print('PDF guardado en: ${file.path}');
     final bytes = await pdf.save();
 
@@ -654,10 +688,7 @@ class ComprasDetallesController extends GetxController {
     } catch (e) {
       logger.e('Error al escribir el archivo: $e');
     }
-    // // Guardar el archivo PDF en la memoria del dispositivo
-    // final dir = (await getApplicationDocumentsDirectory()).path;
-    // final file = File('$dir/ejemplo.pdf');
-    // await file.writeAsBytes(bytes);
+
   }
   List<pw.Widget> getProductDetails() {
     List<pw.Widget> details = [];

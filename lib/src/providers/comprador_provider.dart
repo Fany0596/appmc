@@ -1,18 +1,19 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:maquinados_correa/src/environment/environment.dart';
+import 'package:maquinados_correa/src/models/comprador.dart';
 import 'package:maquinados_correa/src/models/vendedor.dart';
 import 'package:maquinados_correa/src/models/response_api.dart';
 import '../models/user.dart';
 
-class VendedoresProvider extends GetConnect {
+class CompradorProvider extends GetConnect {
 
-  String  url = Environment.API_URL + "api/vendedor";
+  String  url = Environment.API_URL + "api/comprador";
 
   User userSession = User.fromJson(GetStorage().read('user') ?? {});
 
   // para mostrar la lista de vendedores
-  Future<List<Vendedores>> getAll() async {
+  Future<List<Comprador>> getAll() async {
     Response response = await get(
         '$url/getAll',
         headers: {
@@ -26,16 +27,15 @@ class VendedoresProvider extends GetConnect {
       return[];
     }
 
-    List<Vendedores> vendedores = Vendedores.fromJsonList(response.body);
+    List<Comprador> comprador = Comprador.fromJsonList(response.body);
 
-    return vendedores;
+    return comprador;
   }
 
-  Future<ResponseApi> create(Vendedores vendedores) async {
+  Future<ResponseApi> create(Comprador comprador) async {
     Response response = await post(
         '$url/create',
-        vendedores.toJson(),
-        //contentType: 'application/json; charset=UTF-8',
+        comprador.toJson(),
         headers: {
           'Content-Type': 'application/json',
           'Authorization' : userSession.sessionToken ?? ''

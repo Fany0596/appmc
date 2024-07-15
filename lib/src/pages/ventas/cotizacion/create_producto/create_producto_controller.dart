@@ -111,7 +111,8 @@ class ProductoPageController extends GetxController {
 
          ResponseApi responseApi = ResponseApi.fromJson(json.decode(res));
         progressDialog.close();
-       Get.snackbar('Proceso terminado', responseApi.message ?? '');
+       Get.snackbar('Proceso terminado', responseApi.message ?? '',backgroundColor: Colors.green,
+         colorText: Colors.white,);
        if (responseApi.success == true) {
          clearForm();
        }
@@ -120,19 +121,39 @@ class ProductoPageController extends GetxController {
   }
   bool isValidForm(String articulo, String precio, String total, String cantidad, String descr) {
     if (articulo.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa número de cotización');
+      Get.snackbar('Formulario no valido', 'Ingresa número de cotización',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
+      return false;
+    }
+    if (precio.isEmpty) {
+      Get.snackbar('Formulario no valido', 'Ingresa precio',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
+      return false;
+    }
+    if (cantidad.isEmpty) {
+      Get.snackbar('Formulario no valido', 'Ingresa cantidad',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
     if (descr.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa la descripción');
+      Get.snackbar('Formulario no valido', 'Ingresa la descripción',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
     if (idCotizaciones == null) {
-      Get.snackbar('Formulario no valido', 'Selecciona un vendedor');
+      Get.snackbar('Formulario no valido', 'Selecciona un vendedor',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
     if (idMateriales == null) {
-      Get.snackbar('Formulario no valido', 'Selecciona un cliente');
+      Get.snackbar('Formulario no valido', 'Selecciona un cliente',  backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
 

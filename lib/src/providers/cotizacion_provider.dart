@@ -103,6 +103,20 @@ class CotizacionProvider extends GetConnect {
 
     return responseApi;
   }
+  Future<ResponseApi> updatecerrada(Cotizacion cotizacion) async {
+    Response response = await put(
+        '$url/updatecerrada',
+        cotizacion.toJson(),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': userSession.sessionToken ?? ''
+        }
+    ); // ESPERAR HASTA QUE EL SERVIDOR NOS RETORNE LA RESPUESTA
+
+    ResponseApi responseApi = ResponseApi.fromJson(response.body);
+
+    return responseApi;
+  }
   Future<ResponseApi> updategenerada(Cotizacion cotizacion) async {
     Response response = await put(
         '$url/updategenerada',

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -32,6 +33,10 @@ class VentasDetallesController extends GetxController {
   List<String> estatus = <String>['POR ASIGNAR','EN ESPERA', 'EN PROCESO', 'SUSPENDIDO', 'TERMINADO', 'LIBERADO','ENTREGADO', 'CANCELADO'].obs;
 
   var garantiasAgregadas = false.obs;
+  var reportedimAgregadas = false.obs;
+  var reporterugAgregadas = false.obs;
+  var reportematAgregadas = false.obs;
+  var reportetratAgregadas = false.obs;
   var bancariosAgregadas = false.obs;
 
   // Método para cambiar el estado de garantías agregadas
@@ -42,6 +47,22 @@ class VentasDetallesController extends GetxController {
   void toggleBancariosAgregadas() {
     bancariosAgregadas.value = !bancariosAgregadas.value;
     print('valor Bancarios: ${bancariosAgregadas.value}');
+  }
+  void toggleReportedimAgregadas() {
+    reportedimAgregadas.value = !reportedimAgregadas.value;
+    print('valor reporte dim: ${reportedimAgregadas.value}');
+  }
+  void toggleReportematAgregadas() {
+    reportematAgregadas.value = !reportematAgregadas.value;
+    print('valor reporte mat: ${reportematAgregadas.value}');
+  }
+  void toggleReporterugAgregadas() {
+    reporterugAgregadas.value = !reporterugAgregadas.value;
+    print('valor reporte rug: ${reporterugAgregadas.value}');
+  }
+  void toggleReportetratAgregadas() {
+    reportetratAgregadas.value = !reportetratAgregadas.value;
+    print('valor reporte trat: ${reportetratAgregadas.value}');
   }
 
 VentasDetallesController(){
@@ -68,52 +89,76 @@ VentasDetallesController(){
 
       ResponseApi responseApi = await cotizacionProvider.updateconfirmada(
           cotizacion);
-      Get.snackbar('Proceso terminado', responseApi.message ?? '');
+      Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
+        colorText: Colors.white,);
       if (responseApi.success == true) {
         Get.offNamedUntil('/ventas/home', (route) => false);
 
     }
     else {
-      Get.snackbar('Peticion denegada', 'verifique informacion');
+      Get.snackbar('Peticion denegada', 'verifique informacion', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
     }
   }
   void updateCancelada() async {
 
     ResponseApi responseApi = await cotizacionProvider.updatecancelada(
         cotizacion);
-    Get.snackbar('Proceso terminado', responseApi.message ?? '');
+    Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
+      colorText: Colors.white,);
     if (responseApi.success == true) {
       Get.offNamedUntil('/ventas/home', (route) => false);
 
     }
     else {
-      Get.snackbar('Peticion denegada', 'verifique informacion');
+      Get.snackbar('Peticion denegada', 'verifique informacion', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
     }
   }
-  void getTotal(){
+  void updateCerrada() async {
+
+    ResponseApi responseApi = await cotizacionProvider.updatecerrada(cotizacion);
+    Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
+      colorText: Colors.white,);
+    if (responseApi.success == true) {
+      Get.offNamedUntil('/ventas/home', (route) => false);
+
+    }
+    else {
+      Get.snackbar('Peticion denegada', 'verifique informacion', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
+    }
+  }
+  void getTotal() {
     totalt.value = 0.0;
     cotizacion.producto!.forEach((producto) {
-      totalt.value = totalt.value + producto.total!;
+      if (producto.estatus != 'CANCELADO') {
+        totalt.value += producto.total!;
+      }
     });
   }
   List<pw.Widget> contenidoPDF = [];
   List<pw.Widget> garantiasWidget = [];
+  List<pw.Widget> reportedimWidget = [];
+  List<pw.Widget> reportetratWidget = [];
+  List<pw.Widget> reportematWidget = [];
+  List<pw.Widget> reporterugWidget = [];
   List<pw.Widget> bancariosWidget = [];
 
-  Future<void> generarPDF() async {
+  Future<void> generarCot() async {
     // Accede a la imagen desde los activos de tu aplicación
     ByteData imageData = await rootBundle.load('assets/img/logoC.png');
     // Convierte los datos de la imagen a un arreglo de bytes
     Uint8List bytess = imageData.buffer.asUint8List();
     // Obtener la lista de productos en espera
     List<Producto> productosAsignar = cotizacion.producto!
-        .where((producto) => producto.estatus == 'POR ASIGNAR')
+        .where((producto) => producto.estatus != 'CANCELADO')
         .toList();
     // Crear una lista de listas para almacenar los datos de los productos
     List<List<String>> productosData = [];
-
-    // Agregar los encabezados a la lista de datos
-    productosData.add(['CANT.', 'DESCRIPCIÓN', 'P. UNIT.', 'TOTAL']);
 
     // Agregar los datos de cada producto a la lista de datos
     for (int i = 0; i < productosAsignar.length; i++) {
@@ -148,8 +193,8 @@ VentasDetallesController(){
     final pdfPageFormat = PdfPageFormat.letter;
 
 
-    final pw.TextStyle headerTextStyle = pw.TextStyle(
-        fontWeight: pw.FontWeight.bold, fontSize: 10);
+    final pw.TextStyle headerTextStyle = pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10);
+    final pw.TextStyle headertTextStyle = pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11, color: PdfColors.white);
     final pw.TextStyle dataTextStyle = pw.TextStyle(fontSize: 9);
     final cotizacionTextStyle = pw.TextStyle(color: PdfColors.red, fontSize: 9, fontWeight: pw.FontWeight.bold,);
     final creditTextStyle = pw.TextStyle(color: PdfColors.red, fontSize: 9);
@@ -178,7 +223,7 @@ VentasDetallesController(){
                     1: pw.FixedColumnWidth(70), // Ancho de la segunda columna
                   },
                   data: [
-                    ['Cliente:', '${cotizacion.clientes!.name}'],
+                    ['Cliente:', '${cotizacion.clientes!.name != null ? cotizacion.clientes!.name!.split('-').last.trim() : ''}'],
                   ],
                   border: null,
                   cellAlignment: pw.Alignment.center,
@@ -231,7 +276,7 @@ VentasDetallesController(){
                   },
                   //context: context,
                   data: [
-                    ['Contacto:', '${cotizacion.nombre}'],
+                    ['Contacto:', '${cotizacion.nombre ?? ''}'],
                   ],
                   border: null,
                   cellAlignment: pw.Alignment.center,
@@ -286,7 +331,7 @@ VentasDetallesController(){
                     1: pw.FixedColumnWidth(70), // Ancho de la segunda columna
                   },
                   data: [
-                    ['Requerimiento:', ''],
+                    ['Requerimiento:', '${cotizacion.req ?? ''}'],
                   ],
                   border: null,
                   cellAlignment: pw.Alignment.center,
@@ -351,6 +396,40 @@ VentasDetallesController(){
           pw.SizedBox(height: 2),
           // Espacio entre la tabla y otro contenido
         ],
+      ),pw.Row(
+        children: [
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                // Agregar la tabla vertical en la esquina superior derecha
+                pw.Table.fromTextArray(
+                  //context: context,
+                  columnWidths: {
+                    0: pw.FixedColumnWidth(30),
+                    // Ancho de la primera columna
+                    1: pw.FixedColumnWidth(190),
+                    // Ancho de la segunda columna
+                    2: pw.FixedColumnWidth(40),
+                    // Ancho de la tercera columna
+                    3: pw.FractionColumnWidth(.09),
+                    // Ancho de la cuarta columna (fracción del ancho disponible) // Ancho de la segunda columna
+                  },
+                  data: [
+                    ['CANT.', 'DESCRIPCIÓN', 'P/U', 'TOTAL'],
+                  ],
+                  //border: null,
+                  cellAlignment: pw.Alignment.center,
+                  headerAlignment: pw.Alignment.center,
+                  headerDecoration: pw.BoxDecoration(
+                    color: PdfColors.blueAccent700, // Color de fondo del encabezado
+                  ),
+                  headerStyle: headertTextStyle,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       // tabla con los datos de los productos
       pw.Table(
@@ -368,9 +447,7 @@ VentasDetallesController(){
         children: productosData.map((row) {
           return pw.TableRow(
             children: row.map((cell) {
-              final textStyle = productosData.indexOf(row) == 0
-                  ? headerTextStyle
-                  : dataTextStyle;
+              final textStyle = dataTextStyle;
               return pw.Container(
                 alignment: pw.Alignment.center,
                 child: pw.Text(
@@ -387,7 +464,6 @@ VentasDetallesController(){
           children: [
             pw.Spacer(),
             pw.Column(
-              //mainAxisAlignment: pw.MainAxisAlignment.end,
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 // Agregar la tabla vertical en la esquina superior derecha
@@ -549,10 +625,11 @@ VentasDetallesController(){
       pw.SizedBox(height: 5), // Espacio de 2 cm
       pw.Divider(color: PdfColors.red),
       pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
           children: [
             pw.Expanded(
               child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
                   // Agregar la tabla vertical en la esquina superior derecha
                   pw.Table.fromTextArray(
@@ -562,7 +639,7 @@ VentasDetallesController(){
                     },
                     data: [
                       [
-                        '                                                                                              VALORES AGREGADOS\n\n°Reportes dimensiónales con equipos digitales y certificados (envío vía mail previo a la entrega con evidencia fotográfica).\n°Reporte de rugosidad (en caso de ser necesario).\n°Certificados de calidad de tratamiento termico.\n°Certificado de calidad de materiales.\n'
+                        '                                                                                          VALORES AGREGADOS'
                       ],
                     ],
                     border: null,
@@ -570,12 +647,32 @@ VentasDetallesController(){
                     headerAlignment: pw.Alignment.topLeft,
                     headerStyle: blue2TextStyle,
                   ),
+
                 ],
               ),
             ),
           ]
       ),
-      pw.SizedBox(height: 10), // Espacio de 2 cm
+      pw.Row(
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  if (reportedimAgregadas.value)
+                    ...reportedimWidget,
+                  if (reporterugAgregadas.value)
+                    ...reporterugWidget,
+                  if (reportetratAgregadas.value)
+                    ...reportetratWidget,
+                  if (reportematAgregadas.value)
+                    ...reportematWidget,
+
+                ],
+              ),
+            ),
+          ]
+      ),
     ];
     if (bancariosAgregadas == true) {
     bancariosWidget = [
@@ -595,6 +692,9 @@ VentasDetallesController(){
                       ['DATOS BANCARIOS'],
                     ],
                     cellAlignment: pw.Alignment.center,
+                    headerDecoration: pw.BoxDecoration(
+                      color: PdfColors.blueAccent700, // Color de fondo del encabezado
+                    ),
                   ),
                 ],
               ),
@@ -619,6 +719,9 @@ VentasDetallesController(){
                     ],
                     cellAlignment: pw.Alignment.center,
                     headerStyle: cotizacionTextStyle,
+                    headerDecoration: pw.BoxDecoration(
+                      color: PdfColors.grey, // Color de fondo del encabezado
+                    ),
                   ),
                 ],
               ),
@@ -740,6 +843,9 @@ VentasDetallesController(){
                     ],
                     cellAlignment: pw.Alignment.center,
                     headerStyle: cotizacionTextStyle,
+                    headerDecoration: pw.BoxDecoration(
+                      color: PdfColors.grey, // Color de fondo del encabezado
+                    ),
                   ),
                 ],
               ),
@@ -845,6 +951,126 @@ VentasDetallesController(){
       pw.SizedBox(height: 10), // Espacio de 3 cm
     ];
   }
+    if (reportedimAgregadas == true) {
+      reportedimWidget = [
+        pw.Row(
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Table.fromTextArray(
+                    //context: context,
+                    columnWidths: {
+                      0: pw.FixedColumnWidth(30), // Ancho de la primera columna
+                    },
+                    data: [
+                      [
+                        '°Reportes dimensiónales con equipos digitales y certificados (envío vía mail previo a la entrega con evidencia fotográfica).'
+                      ],
+                    ],
+                    border: null,
+                    cellAlignment: pw.Alignment.center,
+                    headerAlignment: pw.Alignment.topLeft,
+                    headerStyle: blue2TextStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+    if (reporterugAgregadas == true) {
+      reporterugWidget = [
+        pw.Row(
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Table.fromTextArray(
+                    //context: context,
+                    columnWidths: {
+                      0: pw.FixedColumnWidth(30), // Ancho de la primera columna
+                    },
+                    data: [
+                      [
+                        '°Reporte de rugosidad (en caso de ser necesario).'
+                      ],
+                    ],
+                    border: null,
+                    cellAlignment: pw.Alignment.center,
+                    headerAlignment: pw.Alignment.topLeft,
+                    headerStyle: blue2TextStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+    if (reportetratAgregadas == true) {
+      reportetratWidget = [
+        pw.Row(
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Table.fromTextArray(
+                    //context: context,
+                    columnWidths: {
+                      0: pw.FixedColumnWidth(30), // Ancho de la primera columna
+                    },
+                    data: [
+                      [
+                        '°Certificados de calidad de tratamiento termico.'
+                      ],
+                    ],
+                    border: null,
+                    cellAlignment: pw.Alignment.center,
+                    headerAlignment: pw.Alignment.topLeft,
+                    headerStyle: blue2TextStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+    if (reportematAgregadas == true) {
+      reportematWidget = [
+        pw.Row(
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Table.fromTextArray(
+                    //context: context,
+                    columnWidths: {
+                      0: pw.FixedColumnWidth(30), // Ancho de la primera columna
+                    },
+                    data: [
+                      [
+                        '°Certificados de calidad de material.'
+                      ],
+                    ],
+                    border: null,
+                    cellAlignment: pw.Alignment.center,
+                    headerAlignment: pw.Alignment.topLeft,
+                    headerStyle: blue2TextStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
     if (garantiasAgregadas == true) {
       garantiasWidget = [
         pw.Row(
@@ -919,6 +1145,9 @@ VentasDetallesController(){
                         ['COTIZACIÓN'],
                       ],
                       cellAlignment: pw.Alignment.center,
+                      headerDecoration: pw.BoxDecoration(
+                        color: PdfColors.blueAccent700, // Color de fondo
+                      ),
                     ),
                   ],
                 ),
@@ -952,7 +1181,7 @@ VentasDetallesController(){
                           1: pw.FixedColumnWidth(70), // Ancho de la segunda columna
                         },
                         data: [
-                          ['Fecha:', '$currentDate'],
+                          ['Fecha:', '${cotizacion.fecha}'],
                         ],
                         cellAlignment: pw.Alignment.center,
                         headerStyle: dataTextStyle,
@@ -1007,9 +1236,9 @@ VentasDetallesController(){
                 ...garantiasWidget,
 
 
-              pw.SizedBox(height: 20), // Espacio de 2 c
+              pw.SizedBox(height: 10), // Espacio de 2 c
               pw.Container(
-                margin: pw.EdgeInsets.only(left: 250), // Margen superior
+                alignment: pw.Alignment.center,
                 child: pw.Text(
                   'Atentamente',
                   textAlign: pw.TextAlign.center,
@@ -1019,7 +1248,7 @@ VentasDetallesController(){
                 ),
               ),
               pw.Container(
-                margin: pw.EdgeInsets.only(left: 238), // Margen superior
+                alignment: pw.Alignment.center,
                 child: pw.Text(
                   '${cotizacion.vendedores!.name}',
                   textAlign: pw.TextAlign.center,
@@ -1027,7 +1256,7 @@ VentasDetallesController(){
                 ),
               ),
               pw.Container(
-                margin: pw.EdgeInsets.only(left: 240), // Margen superior
+                alignment: pw.Alignment.center,
                 child: pw.Text(
                   'Cel:${cotizacion.vendedores!.number}',
                   textAlign: pw.TextAlign.center,
@@ -1035,7 +1264,7 @@ VentasDetallesController(){
                 ),
               ),
               pw.Container(
-                margin: pw.EdgeInsets.only(left: 193), // Margen superior
+                alignment: pw.Alignment.center,
                 child: pw.Text(
                   '${cotizacion.vendedores!.email}',
                   textAlign: pw.TextAlign.center,
@@ -1050,10 +1279,19 @@ VentasDetallesController(){
     //////////////////////////////////////////////////////////////////
 
     // Guardar el archivo PDF en la memoria del dispositivo
+    Future<Directory?> getDownloadsDirectory() async {
+      if (Platform.isAndroid) {
+        return Directory('/storage/emulated/0/Download');
+      } else {
+        return getApplicationDocumentsDirectory(); // Alternativa para otros sistemas
+      }
+    }
     //final directory = await getExternalStorageDirectory();
     final directory = await getDownloadsDirectory();
     final file = File('${directory!.path}/${cotizacion.number}.pdf');
     await file.writeAsBytes(await pdf.save());
+    Get.snackbar('DOCUMENTO DESCARGADO EN:', '${file.path}', backgroundColor: Colors.green,
+      colorText: Colors.white,);
     print('PDF guardado en: ${file.path}');
     final bytes = await pdf.save();
 

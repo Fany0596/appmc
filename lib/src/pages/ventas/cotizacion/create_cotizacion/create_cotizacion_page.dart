@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 import 'package:maquinados_correa/src/models/Client.dart';
 import 'package:maquinados_correa/src/models/vendedor.dart';
 import 'package:maquinados_correa/src/pages/ventas/cotizacion/create_cotizacion/create_cotizacion_controller.dart';
@@ -46,6 +47,8 @@ class CotizacionPage extends StatelessWidget {
         children: [
           _textNewCot(),
           _textFielNumber(),
+          _textFielFecha(context),
+          _textFieldReq(),
           _textFielEnt(),
           _clientesList(con.clientes),
           _vendedoresList(con.vendedores),
@@ -87,6 +90,39 @@ class CotizacionPage extends StatelessWidget {
       ),
     );
   }
+  Widget _textFielFecha(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(left: 10, right: 10),
+      child: GestureDetector(
+        onTap: () {
+          _selectDat(context);
+        },
+        child: AbsorbPointer(
+          child: TextFormField(
+            controller: con.fechaController,
+            keyboardType: TextInputType.datetime,
+            decoration: InputDecoration(
+              hintText: 'Fecha',
+              hintStyle: TextStyle(fontSize: 14),
+              prefixIcon: Icon(Icons.calendar_today),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDat(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2035),
+    );
+    if (picked != null) {
+      con.fechaController.text = DateFormat('dd-MM-yyyy').format(picked);
+    }
+  }
   Widget _textFielEnt() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -95,7 +131,7 @@ class CotizacionPage extends StatelessWidget {
         keyboardType: TextInputType.text,
         decoration: InputDecoration(
           hintText: 'Tiempo de entrega', //texto fondo
-          prefixIcon: Icon(Icons.date_range), //icono
+          prefixIcon: Icon(Icons.timer), //icono
         ),
       ),
     );
@@ -189,6 +225,21 @@ class CotizacionPage extends StatelessWidget {
             hintText: 'Condiciones de pago',
             prefixIcon: Container(
                 child: Icon(Icons.credit_card)
+            )
+        ),
+      ),
+    );
+  }
+  Widget _textFieldReq() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: TextField(
+        controller: con.reqController,
+        keyboardType: TextInputType.text,
+        decoration: InputDecoration(
+            hintText: 'Requerimiento',
+            prefixIcon: Container(
+                child: Icon(Icons.quiz_outlined)
             )
         ),
       ),

@@ -1,30 +1,42 @@
 import 'dart:convert';
 
-Clientes clientesFromJson(String str) => Clientes.fromJson(json.decode(str));
+Provedor provedorFromJson(String str) => Provedor.fromJson(json.decode(str));
 
-String clientesToJson(Clientes data) => json.encode(data.toJson());
+String provedorToJson(Provedor data) => json.encode(data.toJson());
 
-class Clientes {
+class Provedor {
   String? id;
   String? name;
+  String? nombre;
+  String? correo;
+  String? telefono;
+  String? direc;
 
-  Clientes({
+  Provedor({
     this.id,
     this.name,
+    this.nombre,
+    this.correo,
+    this.telefono,
+    this.direc,
 
   });
 
-  factory Clientes.fromJson(Map<String, dynamic> json) => Clientes(
+  factory Provedor.fromJson(Map<String, dynamic> json) => Provedor(
     id: json["id"],
     name: json["name"],
+    nombre: json["nombre"],
+    correo: json["correo"],
+    telefono: json["telefono"],
+    direc: json["direc"],
 
   );
 
-  static List<Clientes> fromJsonList(List<dynamic> jsonList) {
-    List<Clientes> toList = [];
+  static List<Provedor> fromJsonList(List<dynamic> jsonList) {
+    List<Provedor> toList = [];
     jsonList.forEach((item) {
-      Clientes clientes = Clientes.fromJson(item);
-      toList.add(clientes);
+      Provedor provedor = Provedor.fromJson(item);
+      toList.add(provedor);
     });
     return toList;
   }
@@ -32,6 +44,10 @@ class Clientes {
   Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
+    "nombre": nombre,
+    "correo": correo,
+    "telefono": telefono,
+    "direc": direc,
 
   };
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:maquinados_correa/src/models/oc.dart';
 import 'package:maquinados_correa/src/models/product.dart';
 import 'package:maquinados_correa/src/pages/compras/orders/list/compras_controller.dart';
 import 'package:maquinados_correa/src/widgets/no_data_widget.dart';
@@ -7,6 +8,7 @@ import 'package:intl/intl.dart';
 
 class ComprasDetallesPage extends StatelessWidget {
   ComprasDetallesController con = Get.put(ComprasDetallesController());
+
   String formatCurrency(double amount) {
     final currencyFormat = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
     return currencyFormat.format(amount);
@@ -128,11 +130,10 @@ class ComprasDetallesPage extends StatelessWidget {
     );
   }
   Widget _cardProduct(Product product) {
-    print('material del producto: ${product.name}');
     return GestureDetector(
-      onTap: () => con.goToProduct( product),
+      onTap: () => con.goToProduct(product),
       child: Container(
-        height: 180,
+        height: 195,
         margin: EdgeInsets.only(left: 15, right: 15, top: 10),
         child: Card(
           elevation: 3.0,
@@ -140,27 +141,48 @@ class ComprasDetallesPage extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          child:Stack(
+          child: Stack(
             children: [
               Container(
                 height: 30,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(15),
-                      topRight: Radius.circular(15),
-                    )
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
+                  ),
                 ),
                 child: Container(
                   margin: EdgeInsets.only(top: 5),
-                  child: Text(
-                    'Producto: ${product.descr}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () => con.goToProductUpdate(product),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            'Producto: ${product.descr}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          _showConfirmDeleteDialog(product);
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -173,14 +195,12 @@ class ComprasDetallesPage extends StatelessWidget {
                       width: double.infinity,
                       alignment: Alignment.center,
                       child: Text('Descripción: ${product.descr ?? ''}'),
-
                     ),
                     Container(
                       margin: EdgeInsets.only(top: 5),
                       width: double.infinity,
                       alignment: Alignment.center,
                       child: Text('Material: ${product.name ?? ''}'),
-
                     ),
                     Container(
                       margin: EdgeInsets.only(top: 5),
@@ -205,10 +225,33 @@ class ComprasDetallesPage extends StatelessWidget {
               ),
             ],
           ),
-
         ),
-
       ),
+    );
+  }
+
+  void _showConfirmDeleteDialog(Product product) {
+    Get.defaultDialog(
+      title: 'Confirmación',
+      content: Text('¿Estás seguro de eliminar el producto ${product.descr}?'),
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            Get.back(); // Cierra el diálogo de confirmación
+          },
+          child: Text('No'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            con.deleteProduct(product); // Llama al método para eliminar el producto
+            Get.back(); // Cierra el diálogo de confirmación
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+          ),
+          child: Text('Sí'),
+        ),
+      ],
     );
   }
   Widget _totalToPay(BuildContext context){
@@ -218,6 +261,7 @@ class ComprasDetallesPage extends StatelessWidget {
         children: [
           Divider(height: 1, color: Colors.white),
           Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                 margin: EdgeInsets.only(left: 10, top: 10),
@@ -230,52 +274,16 @@ class ComprasDetallesPage extends StatelessWidget {
                   ),
                 ),
               ),
-              con.oc.status == 'ABIERTA'
-                  ? Container(
+                if (con.oc.status == 'CERRADA')
+                  Container(
                   margin: EdgeInsets.only(left: 20, top:5),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Column(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(left: 10),
-                            child: ElevatedButton(
-                              onPressed: () => con.updateCancelada(),
-                              style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.all(15),
-                                  backgroundColor: Colors.red
-                              ),
-                              child: Text(
-                                'CANCELAR',
-                                style: TextStyle(
-                                    color: Colors.white
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                       Container(
                         margin: EdgeInsets.only(left: 45),
                         child: ElevatedButton(
-                          onPressed: () => con.updateOc(),
-                          style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.all(15),
-                              backgroundColor: Colors.green
-                          ),
-                          child: Text(
-                            'CONFIRMAR',
-                            style: TextStyle(
-                                color: Colors.white
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 45),
-                        child: ElevatedButton(
-                          onPressed: () => con.generarPDF(),
+                          onPressed: () => con.generarOc(),
                           style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.all(15),
                               backgroundColor: Colors.black
@@ -290,15 +298,17 @@ class ComprasDetallesPage extends StatelessWidget {
                       ),
                     ],
                   )
-              )
-                  : Column(
+              ) else
+                  con.oc.status == 'ABIERTA'
+                      ? Column(
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Column(
                         children: [
                           Container(
-                            margin: EdgeInsets.only(left: 460),
+                            margin: EdgeInsets.only(left: 10),
                             child: ElevatedButton(
                               onPressed: () => con.updateCancelada(),
                               style: ElevatedButton.styleFrom(
@@ -334,7 +344,7 @@ class ComprasDetallesPage extends StatelessWidget {
                       Container(
                         margin: EdgeInsets.only(left: 65),
                         child: ElevatedButton(
-                          onPressed: () => con.generarPDF(),
+                          onPressed: () => con.generarOc(),
                           style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.all(15),
                               backgroundColor: Colors.black
@@ -350,6 +360,63 @@ class ComprasDetallesPage extends StatelessWidget {
                     ],)
                 ],
               )
+                      :Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(left: 10),
+                            child: ElevatedButton(
+                              onPressed: () => con.updateCancelada(),
+                              style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.all(15),
+                                  backgroundColor: Colors.red
+                              ),
+                              child: Text(
+                                'CANCELAR',
+                                style: TextStyle(
+                                    color: Colors.white
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 45),
+                        child: ElevatedButton(
+                          onPressed: () => con.updateOc(),
+                          style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.all(15),
+                              backgroundColor: Colors.green
+                          ),
+                          child: Text(
+                            'CERRAR',
+                            style: TextStyle(
+                                color: Colors.white
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 45),
+                        child: ElevatedButton(
+                          onPressed: () => con.generarOc(),
+                          style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.all(15),
+                              backgroundColor: Colors.black
+                          ),
+                          child: Text(
+                            'PFD',
+                            style: TextStyle(
+                                color: Colors.white
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
             ],
           )
         ]);

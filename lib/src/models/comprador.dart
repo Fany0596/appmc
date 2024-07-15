@@ -1,24 +1,24 @@
 import 'dart:convert';
 
-Vendedores vendedoresFromJson(String str) => Vendedores.fromJson(json.decode(str));
+Comprador compradorFromJson(String str) => Comprador.fromJson(json.decode(str));
 
-String vendedoresToJson(Vendedores data) => json.encode(data.toJson());
+String compradorToJson(Comprador data) => json.encode(data.toJson());
 
-class Vendedores {
+class Comprador {
   String? id;
   String? name;
   String? number;
   String? email;
 
-  Vendedores({
+  Comprador({
     this.id,
     this.name,
     this.number,
     this.email,
   });
 
-  factory Vendedores.fromJson(Map<String, dynamic> json) =>
-      Vendedores(
+  factory Comprador.fromJson(Map<String, dynamic> json) =>
+      Comprador(
         id: json["id"],
         name: json["name"],
         number: json["number"],
@@ -27,11 +27,11 @@ class Vendedores {
 
 
 
-  static List<Vendedores> fromJsonList(List<dynamic> jsonList) {
-    List<Vendedores> toList = [];
+  static List<Comprador> fromJsonList(List<dynamic> jsonList) {
+    List<Comprador> toList = [];
     jsonList.forEach((item) {
-      Vendedores vendedores = Vendedores.fromJson(item);
-      toList.add(vendedores);
+      Comprador comprador = Comprador.fromJson(item);
+      toList.add(comprador);
     });
     return toList;
   }

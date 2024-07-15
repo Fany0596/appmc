@@ -1,22 +1,23 @@
 import 'dart:convert';
 
-Producto productoFromJson(String str) => Producto.fromJson(json.decode(str));
+Product productFromJson(String str) => Product.fromJson(json.decode(str));
 
-String productoToJson(Producto data) => json.encode(data.toJson());
+String productToJson(Product data) => json.encode(data.toJson());
 
-class Producto {
+class Product {
   String? id;
   String? articulo;
   String? descr;
+  String? unid;
   double? precio;
   double? total;
   double? cantidad;
   String? idCotizaciones;
+  String? idOc;
   String? idMateriales;
   String? estatus;
   String? pedido;
   String? fecha;
-  String? desc;
   String? ot;
   String? parte;
   String? name;
@@ -24,19 +25,20 @@ class Producto {
   int? quantity;
 
 
-  Producto({
+  Product({
     this.id,
     this.articulo,
     this.descr,
+    this.unid,
     this.precio,
     this.total,
     this.cantidad,
     this.idCotizaciones,
+    this.idOc,
     this.idMateriales,
     this.estatus,
     this.pedido,
     this.fecha,
-    this.desc,
     this.ot,
     this.parte,
     this.name,
@@ -45,19 +47,20 @@ class Producto {
 
   });
 
-  factory Producto.fromJson(Map<String, dynamic> json) => Producto(
+  factory Product.fromJson(Map<String, dynamic> json) => Product(
     id: json["id"],
     articulo: json["articulo"],
     descr: json["descr"],
+    unid: json["unid"],
     precio: json["precio"].toDouble(),
     total: json["total"].toDouble(),
     cantidad: json["cantidad"].toDouble(),
     idCotizaciones: json["id_cotizaciones"],
+    idOc: json["id_oc"],
     idMateriales: json["id_materiales"],
     estatus: json["estatus"],
     pedido: json["pedido"],
     fecha: json["fecha"],
-    desc: json["desc"],
     ot: json["ot"],
     parte: json["parte"],
     name: json["name"],
@@ -65,11 +68,11 @@ class Producto {
     quantity: json["quantity"],
 
   );
-  static List<Producto> fromJsonList(List<dynamic> jsonList) {
-    List<Producto> toList = [];
+  static List<Product> fromJsonList(List<dynamic> jsonList) {
+    List<Product> toList = [];
     jsonList.forEach((item) {
-      Producto producto = Producto.fromJson(item);
-      toList.add(producto);
+      Product product = Product.fromJson(item);
+      toList.add(product);
     });
     return toList;
   }
@@ -78,15 +81,16 @@ class Producto {
     "id": id,
     "articulo": articulo,
     "descr": descr,
+    "unid": unid,
     "precio": precio,
     "total": total,
     "cantidad": cantidad,
     "id_cotizaciones": idCotizaciones,
+    "id_oc": idOc,
     "id_materiales": idMateriales,
     "estatus": estatus,
     "pedido": pedido,
     "fecha": fecha,
-    "desc": desc,
     "ot": ot,
     "parte": parte,
     "name": name,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:maquinados_correa/src/models/Client.dart';
+import 'package:maquinados_correa/src/models/oc.dart';
 import 'package:maquinados_correa/src/models/producto.dart';
 import 'package:maquinados_correa/src/models/vendedor.dart';
 
@@ -11,8 +12,10 @@ class Cotizacion {
   String? id;
   String? number;
   String? ent;
+  String? fecha;
   String? nombre;
   String? correo;
+  String? req;
   String? telefono;
   String? status;
   String? condiciones;
@@ -24,19 +27,23 @@ class Cotizacion {
   Vendedores? vendedores;
   int? quantity;
   List<Producto>? producto = [];
+  List<Oc>? oc = [];
 
 
   Cotizacion({
     this.id,
     this.number,
     this.ent,
+    this.fecha,
     this.nombre,
     this.correo,
+    this.req,
     this.telefono,
     this.status,
     this.condiciones,
     this.descuento,
     this.producto,
+    this.oc,
     this.timestamp,
     this.idVendedores,
     this.idClientes,
@@ -49,13 +56,16 @@ class Cotizacion {
     id: json["id"],
     number: json["number"],
     ent: json["ent"],
+    fecha: json["fecha"],
     nombre: json["nombre"],
     correo: json["correo"],
+    req: json["req"],
     telefono: json["telefono"],
     status: json["status"],
     condiciones: json["condiciones"],
     descuento: json["descuento"],
     producto: json["producto"] != null ? List<Producto>.from(json["producto"].map((model) => model is Producto ? model : Producto.fromJson(model))) : [],
+    oc: json["oc"] != null ? List<Oc>.from(json["oc"].map((model) => model is Oc ? model : Oc.fromJson(model))) : [],
     timestamp: json["timestamp"],
     idVendedores: json["id_vendedores"],
     idClientes: json["id_clientes"],
@@ -77,13 +87,16 @@ class Cotizacion {
     "id": id,
     "number": number,
     "ent": ent,
+    "fecha": fecha,
     "nombre": nombre,
     "correo": correo,
+    "req": req,
     "telefono": telefono,
     "status": status,
     "condiciones": condiciones,
     "descuento": descuento,
     "producto": producto,
+    "oc": oc,
     "timestamp": timestamp,
     "id_vendedores": idVendedores,
     "id_clientes": idClientes,

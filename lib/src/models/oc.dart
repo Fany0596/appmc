@@ -1,74 +1,85 @@
 import 'dart:convert';
 import 'package:maquinados_correa/src/models/Client.dart';
-import 'package:maquinados_correa/src/models/producto.dart';
-import 'package:maquinados_correa/src/models/vendedor.dart';
+import 'package:maquinados_correa/src/models/comprador.dart';
+import 'package:maquinados_correa/src/models/cotizacion.dart';
+import 'package:maquinados_correa/src/models/product.dart';
+import 'package:maquinados_correa/src/models/provedor.dart';
 
-Cotizacion cotizacionFromJson(String str) => Cotizacion.fromJson(json.decode(str));
+Oc ocFromJson(String str) => Oc.fromJson(json.decode(str));
 
-String cotizacionToJson(Cotizacion data) => json.encode(data.toJson());
+String ocToJson(Oc data) => json.encode(data.toJson());
 
-class Cotizacion {
+class Oc {
   String? id;
   String? number;
   String? ent;
-  String? nombre;
-  String? correo;
-  String? telefono;
+  String? soli;
   String? status;
   String? condiciones;
-  String? descuento;
+  String? tipo;
+  String? moneda;
+  String? envio;
+  String? coment;
   int? timestamp;
-  String? idVendedores;
-  String? idClientes;
-  Clientes? clientes;
-  Vendedores? vendedores;
+  String? idComprador;
+  String? idProvedor;
+  String? idCotizaciones;
+  Comprador? comprador;
+  Provedor? provedor;
+  Cotizacion? cotizacion;
   int? quantity;
-  List<Producto>? producto = [];
+  List<Product>? product = [];
 
 
-  Cotizacion({
+  Oc({
     this.id,
     this.number,
     this.ent,
-    this.nombre,
-    this.correo,
-    this.telefono,
+    this.soli,
     this.status,
     this.condiciones,
-    this.descuento,
-    this.producto,
+    this.tipo,
+    this.moneda,
+    this.envio,
+    this.coment,
+    this.product,
     this.timestamp,
-    this.idVendedores,
-    this.idClientes,
-    this.clientes,
-    this.vendedores,
+    this.idComprador,
+    this.idProvedor,
+    this.idCotizaciones,
+    this.comprador,
+    this.provedor,
+    this.cotizacion,
     this.quantity,
   });
 
-  factory Cotizacion.fromJson(Map<String, dynamic> json) => Cotizacion(
+  factory Oc.fromJson(Map<String, dynamic> json) => Oc(
     id: json["id"],
     number: json["number"],
     ent: json["ent"],
-    nombre: json["nombre"],
-    correo: json["correo"],
-    telefono: json["telefono"],
+    soli: json["soli"],
     status: json["status"],
     condiciones: json["condiciones"],
-    descuento: json["descuento"],
-    producto: json["producto"] != null ? List<Producto>.from(json["producto"].map((model) => model is Producto ? model : Producto.fromJson(model))) : [],
+    tipo: json["tipo"],
+    moneda: json["moneda"],
+    envio: json["envio"],
+    coment: json["coment"],
+    product: json["product"] != null ? List<Product>.from(json["product"].map((model) => model is Product ? model : Product.fromJson(model))) : [],
     timestamp: json["timestamp"],
-    idVendedores: json["id_vendedores"],
-    idClientes: json["id_clientes"],
-    clientes: json['clientes'] is String ? clientesFromJson(json['clientes']) : json['clientes'] is Clientes ? json['clientes'] : Clientes.fromJson(json['clientes'] ?? {}),
-    vendedores: json['vendedores'] is String ? vendedoresFromJson(json['vendedores']) : json['vendedores'] is Vendedores ? json['vendedores'] : Vendedores.fromJson(json['vendedores'] ?? {}),
+    idComprador: json["id_comprador"],
+    idProvedor: json["id_provedor"],
+    idCotizaciones: json["id_cotizaciones"],
+    comprador: json['comprador'] is String ? compradorFromJson(json['comprador']) : json['comprador'] is Comprador ? json['comprador'] : Comprador.fromJson(json['comprador'] ?? {}),
+    provedor: json['provedor'] is String ? provedorFromJson(json['provedor']) : json['provedor'] is Provedor ? json['provedor'] : Provedor.fromJson(json['provedor'] ?? {}),
+    cotizacion: json['cotizaciones'] is String ? cotizacionFromJson(json['cotizaciones']) : json['cotizaciones'] is Cotizacion ? json['cotizaciones'] : Cotizacion.fromJson(json['cotizaciones'] ?? {}),
     quantity: json["quantity"],
   );
 
-  static List<Cotizacion> fromJsonList(List<dynamic> jsonList) {
-    List<Cotizacion> toList = [];
+  static List<Oc> fromJsonList(List<dynamic> jsonList) {
+    List<Oc> toList = [];
     jsonList.forEach((item) {
-      Cotizacion cotizacion = Cotizacion.fromJson(item);
-      toList.add(cotizacion);
+      Oc oc = Oc.fromJson(item);
+      toList.add(oc);
     });
     return toList;
   }
@@ -77,18 +88,21 @@ class Cotizacion {
     "id": id,
     "number": number,
     "ent": ent,
-    "nombre": nombre,
-    "correo": correo,
-    "telefono": telefono,
+    "soli": soli,
     "status": status,
     "condiciones": condiciones,
-    "descuento": descuento,
-    "producto": producto,
+    "tipo": tipo,
+    "moneda": moneda,
+    "envio": envio,
+    "coment": coment,
+    "product": product,
     "timestamp": timestamp,
-    "id_vendedores": idVendedores,
-    "id_clientes": idClientes,
-    "clientes" : clientes,
-    "vendedores" : vendedores,
+    "id_comprador": idComprador,
+    "id_provedor": idProvedor,
+    "id_cotizaciones": idCotizaciones,
+    "comprador" : comprador,
+    "provedor" : provedor,
+    "cotizacion" : cotizacion,
     "quantity": quantity,
   };
 }
