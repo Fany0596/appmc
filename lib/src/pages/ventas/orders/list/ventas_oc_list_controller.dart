@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:async';
 import 'package:get_storage/get_storage.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
+import 'package:maquinados_correa/src/models/response_api.dart';
 import 'package:maquinados_correa/src/models/user.dart';
 import 'package:maquinados_correa/src/providers/cotizacion_provider.dart';
 
@@ -17,9 +19,11 @@ class VentasOcListController extends GetxController{
   @override
   void onInit() {
     super.onInit();
-    _loadCotizaciones();
+    loadCotizaciones();
   }
-  Future<void> _loadCotizaciones() async {
+  Future<void> loadCotizaciones() async {
+    cotizaciones.clear();
+    filteredCotizaciones.clear();
     for (var status in this.status) {
       var cotizacionesList = await cotizacionProvider.findByStatus(status);
       cotizaciones.addAll(cotizacionesList);
@@ -39,6 +43,19 @@ class VentasOcListController extends GetxController{
     return filteredCotizaciones.where((cotizacion) => cotizacion.status == status).toList();
   }
 
+  void deleteCotizacion(Cotizacion cotizacion) async {
+    ResponseApi responseApi = await cotizacionProvider.deleted(cotizacion.id!); // Llama al backend para eliminar el producto
+    if (responseApi.success == true) {
+      Get.snackbar('Éxito', responseApi.message ?? 'Producto eliminado correctamente', backgroundColor: Colors.green,
+        colorText: Colors.white,);
+      if (responseApi.success!) { // Si la respuesta es exitosa, navegar a la página de roles
+        reloadPage();
+      }
+    } else {
+      Get.snackbar('Error', responseApi.message ?? 'Error al eliminar el producto', backgroundColor: Colors.red,
+        colorText: Colors.white,);
+    }
+  }
 
   void signOut() {
     GetStorage().remove('user');
@@ -61,6 +78,10 @@ class VentasOcListController extends GetxController{
    Get.toNamed('/ventas/orders/detalles', arguments: {
      'cotizacion': cotizacion.toJson()
    });
+  }
+  void reloadPage() {
+    onInit();
+    update();         // Actualizar el controlador
   }
 }
 

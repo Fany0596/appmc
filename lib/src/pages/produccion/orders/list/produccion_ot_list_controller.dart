@@ -17,8 +17,13 @@ class ProduccionOtListController extends GetxController {
     super.onInit();
     _loadCotizaciones();
   }
-
+  void reloadPage() {
+    onInit();
+    update();         // Actualizar el controlador
+  }
   Future<void> _loadCotizaciones() async {
+    cotizaciones.clear();
+    filteredCotizaciones.clear();
     for (var status in this.status) {
       var cotizacionesList = await cotizacionProvider.findByStatus(status);
       cotizaciones.addAll(cotizacionesList);

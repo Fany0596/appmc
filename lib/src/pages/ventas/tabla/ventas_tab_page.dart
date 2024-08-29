@@ -90,6 +90,23 @@ class VentasTabPage extends StatelessWidget {
                     ),
                   ),
                 ),
+                GestureDetector(
+                  onTap: () => con.exportToExcel(), // Llamada a la función
+                  child: Container(
+                    margin: EdgeInsets.only(top: 10, left: 1),
+                    padding: EdgeInsets.all(20),
+                    width: double.infinity,
+                    color: Colors.white,
+                    child: Text(
+                      'Exportar a Excel',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
                 Row(
                   children: [
                     Container(
@@ -264,7 +281,9 @@ class VentasTabPage extends StatelessWidget {
                         ),
                       ),
                       DataCell(Text(producto.name ?? '', style: TextStyle(fontSize: 10))),
-                      DataCell(Text('\$${producto.precio!.toStringAsFixed(2)}', style: TextStyle(fontSize: 10))),
+                      DataCell(GestureDetector(
+                          onTap: () => con.goToPrice(producto),child: Text('\$${producto.pmaterial ?? '----'}',
+                          style: TextStyle(fontSize: 10)))),
                       DataCell(Text('\$${producto.precio!.toStringAsFixed(2)}', style: TextStyle(fontSize: 10))),
                       DataCell(Text(producto.fecha ?? '', style: TextStyle(fontSize: 10))),
                     ],
@@ -282,13 +301,13 @@ class VentasTabPage extends StatelessWidget {
     switch (estatus) {
       case 'EN ESPERA':
         return Colors.grey;
-      case 'EN PROCESO':
+      case 'RETRABAJO':
         return Colors.yellow;
       case 'SUSPENDIDO':
         return Colors.orange;
-      case 'DETENIDA':
+      case 'RECHAZADO':
         return Colors.red;
-      case 'TERMINADO':
+      case 'EN PROCESO':
         return Colors.lightGreenAccent;
       case 'LIBERADO':
         return Colors.green;

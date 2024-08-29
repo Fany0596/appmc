@@ -131,6 +131,66 @@ class CotizacionProvider extends GetConnect {
 
     return responseApi;
   }
+  Future<ResponseApi> deleted(String cotizacionId) async {
+    final response = await delete(
+        '$url/deleted/$cotizacionId',
+        headers: {
+          //'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': userSession.sessionToken ?? ''
+        });
+
+    if (response.body == null) {
+      Get.snackbar('Error', 'No se pudo actualizar la informacion');
+      return ResponseApi();
+    }
+    if (response.statusCode == 401){
+      Get.snackbar('Error', 'No estas autorizado para actualizar los datos');
+      return ResponseApi();
+    }
+    ResponseApi responseApi = ResponseApi.fromJson(response.body);
+
+    return responseApi;
+  }
+  Future<List<Cotizacion>> getExcel() async {
+    Response response = await get(
+        '$url/getExcel',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization' : userSession.sessionToken ?? ''
+        }
+    );
+
+    if (response.statusCode == 401){
+      Get.snackbar('Petición denegada', 'Tu usuario no puede leer esta informacion');
+      return[];
+    }
+
+    List<Cotizacion> cotizacion= Cotizacion.fromJsonList(response.body);
+
+    return cotizacion;
+  }
+  Future<Cotizacion?> getCotizacionById(String cotizacionId) async {
+    Response response = await get(
+      '$url/findById/$cotizacionId',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': userSession.sessionToken ?? '',
+      },
+    );
+
+    if (response.statusCode == 401) {
+      Get.snackbar('Petición denegada', 'Tu usuario no puede leer esta información');
+      return null;
+    }
+
+    if (response.statusCode == 201 && response.body != null) {
+      return Cotizacion.fromJson(response.body[0]); // Ajuste para manejar un solo objeto
+    } else {
+      Get.snackbar('Error', 'No se pudo obtener la cotización');
+      return null;
+    }
+  }
 
 }
 

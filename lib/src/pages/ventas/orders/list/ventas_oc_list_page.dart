@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
 import 'package:maquinados_correa/src/pages/ventas/orders/list/ventas_oc_list_controller.dart';
 import 'package:get/get.dart';
-import 'package:maquinados_correa/src/utils/relative_time_util.dart';
 import 'package:maquinados_correa/src/widgets/no_data_widget.dart';
 
 class VentasOcListPage extends StatelessWidget {
@@ -128,18 +127,23 @@ class VentasOcListPage extends StatelessWidget {
           ),
           ),
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(110),//ancho del appbar
+            preferredSize: Size.fromHeight(120),//ancho del appbar
             child: AppBar(
-              title: _encabezado(context),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _encabezado(context),
+                  _buttonReload(),
+                ],
+              ),
               flexibleSpace: Container(
                 margin: EdgeInsets.only(top: 30, bottom: 10),
                 alignment: Alignment.center,
                 child: Wrap(
                   direction: Axis.horizontal,
-                children: [
-                 // _textFieldSearch(context)
-                ],
-              ),
+                  children: [
+                  ],
+                ),
               ),
               bottom: TabBar(
                 isScrollable: true,
@@ -232,13 +236,30 @@ class VentasOcListPage extends StatelessWidget {
                 ),
                 child: Container(
                   margin: EdgeInsets.only(top: 5),
-                  child: Text(
-                    'Cotizacion: #${cotizacion.number}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(0.5),
+                          child: Text(
+                            '${cotizacion.number}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          _showConfirmDeleteDialog(cotizacion);
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -295,31 +316,71 @@ class VentasOcListPage extends StatelessWidget {
       ),
     );
   }
-
+ void _showConfirmDeleteDialog(Cotizacion cotizacion) {
+   Get.defaultDialog(
+     title: 'Confirmación',
+     content: Text('¿Estás seguro de eliminar la cotizacion ${cotizacion.number}?'),
+     actions: [
+       ElevatedButton(
+         onPressed: () {
+           Get.back(); // Cierra el diálogo de confirmación
+         },
+         child: Text('No'),
+       ),
+       ElevatedButton(
+         onPressed: () {
+           con.deleteCotizacion(cotizacion); // Llama al método para eliminar el producto
+           Get.back(); // Cierra el diálogo de confirmación
+         },
+         style: ElevatedButton.styleFrom(
+           backgroundColor: Colors.red,
+         ),
+         child: Text('Sí'),
+       ),
+     ],
+   );
+ }
   Widget _encabezado(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 1,left: 1),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          //alignment: Alignment.topLeft,
-          children: [Image.asset(
-            'assets/img/LOGO1.png',
-            width: 55, //ancho de imagen
-            height: 55, //alto de imagen
-          ),
-            Text(
-              '  MAQUINADOS CORREA',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+      child: Column(
+        children: [
+          Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [Image.asset(
+                'assets/img/LOGO1.png',
+                width: 55, //ancho de imagen
+                height: 55, //alto de imagen
               ),
-            ),
-          ]
+                Text(
+                  '  MAQUINADOS CORREA',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ]
+          ),
+        ],
       ),
     );
   }
-
+ Widget _buttonReload() {
+   return SafeArea( // deja espacio de la barra del telefono
+     child: Container(
+       alignment: Alignment.topRight,
+       margin: EdgeInsets.only(right: 20),
+       child: IconButton(
+           onPressed: () => con.reloadPage(),
+           icon: Icon(
+             Icons.refresh,
+             color: Colors.white,
+             size: 30,
+           )
+       ),
+     ),
+   );
+ }
 
 }
 

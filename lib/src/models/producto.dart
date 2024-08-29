@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:maquinados_correa/src/models/proceso.dart';
+
 Producto productoFromJson(String str) => Producto.fromJson(json.decode(str));
 
 String productoToJson(Producto data) => json.encode(data.toJson());
@@ -15,13 +17,18 @@ class Producto {
   String? idMateriales;
   String? estatus;
   String? pedido;
+  String? operador;
+  String? operacion;
   String? fecha;
   String? desc;
   String? ot;
   String? parte;
   String? name;
   String? number;
+  String? pdfFile;
+  String? pmaterial;
   int? quantity;
+  List<Proceso>? procesos; // Lista de procesos de producción
 
 
   Producto({
@@ -35,6 +42,8 @@ class Producto {
     this.idMateriales,
     this.estatus,
     this.pedido,
+    this.operador,
+    this.operacion,
     this.fecha,
     this.desc,
     this.ot,
@@ -42,6 +51,9 @@ class Producto {
     this.name,
     this.number,
     this.quantity,
+    this.pdfFile,
+    this.pmaterial,
+    this.procesos,
 
   });
 
@@ -56,6 +68,8 @@ class Producto {
     idMateriales: json["id_materiales"],
     estatus: json["estatus"],
     pedido: json["pedido"],
+    operador: json["operador"],
+    operacion: json["operacion"],
     fecha: json["fecha"],
     desc: json["desc"],
     ot: json["ot"],
@@ -63,6 +77,9 @@ class Producto {
     name: json["name"],
     number: json["number"],
     quantity: json["quantity"],
+    pdfFile: json["pdfFile"],
+    pmaterial: json["pmaterial"],
+    procesos: json["procesos"] != null ? List<Proceso>.from(json["procesos"].map((x) => Proceso.fromJson(x))) : null,
 
   );
   static List<Producto> fromJsonList(List<dynamic> jsonList) {
@@ -85,6 +102,8 @@ class Producto {
     "id_materiales": idMateriales,
     "estatus": estatus,
     "pedido": pedido,
+    "operador": operador,
+    "operacion": operacion,
     "fecha": fecha,
     "desc": desc,
     "ot": ot,
@@ -92,6 +111,9 @@ class Producto {
     "name": name,
     "number": number,
     "quantity": quantity,
+    "pdfFile": pdfFile,
+    "pmaterial": pmaterial,
+    "procesos": procesos != null ? List<dynamic>.from(procesos!.map((x) => x.toJson())) : null,
 
   };
 }

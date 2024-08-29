@@ -8,17 +8,21 @@ import 'package:maquinados_correa/src/providers/cotizacion_provider.dart';
 class TymOtListController extends GetxController {
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   CotizacionProvider cotizacionProvider = CotizacionProvider();
-  List<String> status = <String>['GENERADA'].obs;
+  List<String> estatus = <String>['EN ESPERA', 'EN PROCESO', 'SUSPENDIDO', 'SIG. PROCESO', 'RETRABAJO','RECHAZADO', 'LIBERADO', 'ENTREGADO'].obs;
 
   RxList<Producto> allProducts = <Producto>[].obs;
   RxList<Producto> filteredProducts = <Producto>[].obs;
   var searchQuery = ''.obs;
+  var selectedStatus = 'EN ESPERA'.obs;
 
   @override
   void onInit() {
     super.onInit();
     getProductsFromCotizaciones('GENERADA');
     searchQuery.listen((query) {
+      filterProducts();
+    });
+    selectedStatus.listen((status) {
       filterProducts();
     });
   }
@@ -36,32 +40,50 @@ class TymOtListController extends GetxController {
   }
 
   void filterProducts() {
+    var filteredByStatus = allProducts.where((producto) => producto.estatus == selectedStatus.value).toList();
     if (searchQuery.value.isEmpty) {
-      filteredProducts.value = allProducts;
+      filteredProducts.value = filteredByStatus;
     } else {
-      filteredProducts.value = allProducts.where((producto) {
+      filteredProducts.value = filteredByStatus.where((producto) {
         return producto.articulo!.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
             producto.ot!.toLowerCase().contains(searchQuery.value.toLowerCase());
       }).toList();
     }
   }
+
+  void updateProducts() {
+    getProductsFromCotizaciones('GENERADA');
+  }
+
+  void goToOt(Producto producto) {
+    print('Producto seleccionado: $producto');
+    Get.toNamed('/tym/list/tiempos', arguments: {'producto': producto.toJson()});
+  }
+
   void signOut() {
     GetStorage().remove('user');
-    Get.offNamedUntil('/', (route) => false); //Elimina el historial de las pantallas y regresa al login
+    Get.offNamedUntil('/', (route) => false); // Elimina el historial de las pantallas y regresa al login
   }
-  void goToPerfilPage(){
+
+  void goToPerfilPage() {
     Get.toNamed('/profile/info');
   }
+
   void goToRoles() {
     Get.offNamedUntil('/roles', (route) => false);
   }
 
-  void goToDetalles(Cotizacion cotizacion){
+  void goToDetalles(Cotizacion cotizacion) {
     Get.toNamed('/produccion/orders/detalles_produccion', arguments: {
       'cotizacion': cotizacion.toJson()
     });
   }
-  void goToRegisterPage(){
+
+  void goToRegisterPage() {
     Get.toNamed('/tym/newOperador');
+  }
+  void reloadPage() {
+    onInit();
+    update();         // Actualizar el controlador
   }
 }

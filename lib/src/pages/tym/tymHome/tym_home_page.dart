@@ -18,8 +18,7 @@ class TymHomePage extends StatelessWidget {
           index: con.indexTab.value,
           children:[
             TymTabPage(),
-            TymOtListPage(),
-            ProfileInfoPage()
+            TymOtListPage()
           ],
         ))
     );
@@ -44,12 +43,6 @@ class TymHomePage extends StatelessWidget {
         BottomNavyBarItem(
             icon: Icon(Icons.list),
             title:Text( 'Lista'),
-            activeColor: Colors.white,
-            inactiveColor: Colors.black
-        ),
-        BottomNavyBarItem(
-            icon: Icon(Icons.add),
-            title:Text( 'Añadir'),
             activeColor: Colors.white,
             inactiveColor: Colors.black
         ),

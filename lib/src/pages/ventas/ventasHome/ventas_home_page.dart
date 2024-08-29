@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maquinados_correa/src/pages/ventas/cotizacion/create_producto/create_producto_page.dart';
-import 'package:maquinados_correa/src/pages/ventas/newClient/new_client_page.dart';
-import 'package:maquinados_correa/src/pages/ventas/newVendedor/new_vendedor_page.dart';
 import 'package:maquinados_correa/src/pages/ventas/orders/list/ventas_oc_list_page.dart';
 import 'package:maquinados_correa/src/pages/ventas/tabla/ventas_tab_page.dart';
 import 'package:maquinados_correa/src/pages/ventas/ventasHome/ventas_home_controller.dart';
 import 'package:maquinados_correa/src/utils/custom_animated_bottom_bar.dart';
-
-
-
-import '../../produccion/orders/list/produccion_ot_list_page.dart';
-import '../../profile/info/profile_info_page.dart';
 import '../cotizacion/create_cotizacion/create_cotizacion_page.dart';
 
 

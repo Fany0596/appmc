@@ -8,7 +8,6 @@ import 'package:maquinados_correa/src/pages/ventas/cotizacion/create_producto/cr
 
 class ProductoPage extends StatelessWidget {
 
-  //ProductoPageController con = Get.put(ProductoPageController());
   final ProductoPageController con = Get.put(ProductoPageController());
 
   @override
@@ -19,6 +18,7 @@ class ProductoPage extends StatelessWidget {
         children: [
             _backGroundCover(context),
             _boxForm(context),
+            _buttonReload(),
             _encabezado(context),
             _textAdd(context)
           ],
@@ -39,34 +39,71 @@ class ProductoPage extends StatelessWidget {
   // caja de datos
   Widget _boxForm(BuildContext context) {
     return Container(
-      //height: MediaQuery.of(context).size.height*0.70,
+      height: MediaQuery.of(context).size.height*1.30,
       margin: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.29, left: 30, right: 20),
       color: Colors.white,
       padding: EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-            _textNewCot() ,
-            _cotizacionList(con.cotizacion),
-            _textFielArticulo(),
-            _textFieldDescription(),
-            _materialesList(con.materiales),
-            _textFielPrecio(),
-            _textFielCantidad(),
-            _textFielTotal(),
-            _buttonSave(context)
-
+          _textNewCot(),
+          _cotizacionList(con.cotizacion),
+          _materialesList(con.materiales),
+          _textFielArticulo(),
+          _textFieldDescription(),
+          _textFielPrecio(),
+          _textFielCantidad(),
+          _textFielTotal(),
+          _buttonAddProduct(context),
+          _listaPendientes(),
+          _buttonSaveAll(context)
           ],
         ),
     );
   }
-
+  Widget _listaPendientes() {
+    return GetBuilder<ProductoPageController>(
+      builder: (controller) => Column(
+        children: [
+          Text('Productos pendientes de guardar: ${controller.productosPendientes.length}'),
+          Container(
+            height: 200, // Ajusta este valor según tus necesidades
+            child: ListView.builder(
+              itemCount: controller.productosPendientes.length,
+              itemBuilder: (context, index) {
+                final producto = controller.productosPendientes[index];
+                return ListTile(
+                  title: Text(producto.articulo ?? 'Sin artículo'),
+                  subtitle: Text('Cantidad: ${producto.cantidad ?? 0}, Precio: ${producto.precio ?? 0.0}'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      controller.removeProducto(index);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buttonAddProduct(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => con.agregarProducto(context),
+      child: Text('AGREGAR PRODUCTO'),
+    );
+  }
+  Widget _buttonSaveAll(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => con.guardarTodosLosProductos(context),
+      child: Text('GUARDAR TODOS LOS PRODUCTOS'),
+    );
+  }
   // Texto ingrese datos
   Widget _textNewCot() {
     return
-      //Container(
-     // margin: EdgeInsets.only(top: 20, bottom: 15),
-      //child:
     Text(
         'INGRESE LOS SIGUIENTES DATOS',
         style: TextStyle(
@@ -153,7 +190,7 @@ class ProductoPage extends StatelessWidget {
             Text(
               '     MAQUINADOS CORREA',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -313,6 +350,21 @@ class ProductoPage extends StatelessWidget {
       ),
     );
   }
-
+  Widget _buttonReload() {
+    return SafeArea( // deja espacio de la barra del telefono
+      child: Container(
+        alignment: Alignment.topRight,
+        margin: EdgeInsets.only(right: 20, top: 120),
+        child: IconButton(
+            onPressed: () => con.reloadPage(),
+            icon: Icon(
+              Icons.refresh,
+              color: Colors.white,
+              size: 30,
+            )
+        ),
+      ),
+    );
+  }
 }
 

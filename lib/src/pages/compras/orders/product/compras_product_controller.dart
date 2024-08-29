@@ -23,8 +23,7 @@ class ComprasProductController extends GetxController {
   TextEditingController pedidoController = TextEditingController();
   TextEditingController precioController = TextEditingController();
   TextEditingController nameController = TextEditingController();
-
-
+  TextEditingController recepController = TextEditingController();
 
   var idMateriales = ''.obs;
   List<Materiales> materiales = <Materiales>[].obs;
@@ -54,6 +53,7 @@ class ComprasProductController extends GetxController {
 
   void updated(BuildContext context) async {
     String pedido = pedidoController.text;
+    String recep = recepController.text;
 
     // Asegúrate de tener el ID del producto que deseas actualizar
     String productId = product?.id ?? ''; // Esto asume que el ID está presente en el objeto producto
@@ -66,15 +66,22 @@ class ComprasProductController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,);
       return;
     }
+    if ( recep.isEmpty) {
+      Get.snackbar('Formulario no válido', 'Por favor ingresa la fecha de recepción', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
+      return;
+    }
 
     print('CANTIDAD: ${pedido}');
     ProgressDialog progressDialog = ProgressDialog(context: context);
 
 
-    if (isValidForm( pedido)) { //valida que no esten vacios los campos
+    if (isValidForm( pedido, recep)) { //valida que no esten vacios los campos
       Product myproduct = Product(
           id: product!.id,
           pedido: pedido,
+          recep: recep,
           //pedido: double.parse(cantidad),
           estatus: 'RECIBIDO'
       );
@@ -103,8 +110,14 @@ class ComprasProductController extends GetxController {
       }
     }
   }
-  bool isValidForm( String pedido) {
+  bool isValidForm( String pedido, String recep) {
     if (pedido.isEmpty) {
+      Get.snackbar('Formulario no valido', 'Llene todos los campos', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
+      return false;
+    }
+    if (recep.isEmpty) {
       Get.snackbar('Formulario no valido', 'Llene todos los campos', backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,);

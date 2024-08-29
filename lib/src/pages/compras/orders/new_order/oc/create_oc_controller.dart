@@ -118,9 +118,6 @@ class OcPageController extends GetxController {
     print('ID Comprador: ${idComprador}');
     ProgressDialog progressDialog = ProgressDialog(context: context);
 
-
-
-
     if (isValidForm(idProvedor.value, ent, soli, condiciones, tipo, moneda)){ //valida que no esten vacios los campos
       Oc oc = Oc(
         number: number,
@@ -144,9 +141,7 @@ class OcPageController extends GetxController {
         progressDialog.close();
         Get.snackbar('Proceso terminado', responseApi.message ?? '',backgroundColor: Colors.green,
           colorText: Colors.white,);
-        if (responseApi.success!) { // Si la respuesta es exitosa, navegar a la página de roles
-          goToRoles();
-        }
+        clearForm();
       });
     }
   }
@@ -254,10 +249,9 @@ class OcPageController extends GetxController {
     numberController.text = '';
     entController.text = '';
     soliController.text = '';
+    idCotizaciones.value = '';
+    idProvedor.value = '';
     update();
-  }
-  void goToRoles() {
-    Get.offNamedUntil('/roles', (route) => false);
   }
 
 }

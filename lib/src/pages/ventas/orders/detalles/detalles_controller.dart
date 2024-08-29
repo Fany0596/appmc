@@ -8,6 +8,7 @@ import 'package:maquinados_correa/src/models/cotizacion.dart';
 import 'package:maquinados_correa/src/models/producto.dart';
 import 'package:maquinados_correa/src/models/response_api.dart';
 import 'package:maquinados_correa/src/models/user.dart';
+import 'package:maquinados_correa/src/pages/ventas/orders/list/ventas_oc_list_controller.dart';
 import 'package:maquinados_correa/src/providers/cotizacion_provider.dart';
 import 'package:maquinados_correa/src/providers/producto_provider.dart';
 import 'package:maquinados_correa/src/providers/vendedor_provider.dart';
@@ -26,11 +27,12 @@ class VentasDetallesController extends GetxController {
 
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   var totalt = 0.0.obs;
+  var isTotalToPayExpanded = false.obs;
 
   CotizacionProvider cotizacionProvider = CotizacionProvider();
   ProductoProvider productoProvider = ProductoProvider();
   VendedoresProvider vendedoresProvider = VendedoresProvider();
-  List<String> estatus = <String>['POR ASIGNAR','EN ESPERA', 'EN PROCESO', 'SUSPENDIDO', 'TERMINADO', 'LIBERADO','ENTREGADO', 'CANCELADO'].obs;
+  List<String> estatus = <String>['POR ASIGNAR','EN ESPERA', 'EN PROCESO', 'SUSPENDIDO', 'SIG. PROCESO','RETRABAJO','RECHAZADO', 'LIBERADO','ENTREGADO', 'CANCELADO'].obs;
 
   var garantiasAgregadas = false.obs;
   var reportedimAgregadas = false.obs;
@@ -64,14 +66,11 @@ class VentasDetallesController extends GetxController {
     reportetratAgregadas.value = !reportetratAgregadas.value;
     print('valor reporte trat: ${reportetratAgregadas.value}');
   }
-
 VentasDetallesController(){
   print('Cotizacion: ${cotizacion.toJson()}');
   getTotal();
 }
-  Future<List<Producto>> getProducto(String estatus) async {
-    return await productoProvider.findByStatus(estatus);
-  }
+
   RxList<Producto> productosPorEstatus = <Producto>[].obs;
 
   // Método para cargar los productos de la cotización según el estatus seleccionado
@@ -85,31 +84,51 @@ VentasDetallesController(){
     print('Productos por estado $estatus: $productosPorEstatus');
 
   }
+  void deleteProduct(Producto producto) async {
+    ResponseApi responseApi = await productoProvider.deleted(
+        producto.id!); // Llama al backend para eliminar el producto
+    if (responseApi.success == true) {
+      Get.snackbar(
+        'Éxito', responseApi.message ?? 'Producto eliminado correctamente',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,);
+      if (responseApi.success!) { // Si la respuesta es exitosa, navegar a la página de roles
+        reloadPage();
+      }
+    } else {
+      Get.snackbar(
+        'Error', responseApi.message ?? 'Error al eliminar el producto',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,);
+    }
+  }
+
+  void goToProductUpdate(Producto producto) {
+    print('Producto seleccionado: $producto');
+    Get.toNamed(
+        '/ventas/update/update', arguments: {'producto': producto.toJson()});
+  }
   void updateCotizacion() async {
 
       ResponseApi responseApi = await cotizacionProvider.updateconfirmada(
           cotizacion);
-      Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
-        colorText: Colors.white,);
       if (responseApi.success == true) {
-        Get.offNamedUntil('/ventas/home', (route) => false);
-
-    }
+        Get.snackbar('Proceso terminado', responseApi.message ?? '',
+          backgroundColor: Colors.green,colorText: Colors.white,);
+      }
     else {
       Get.snackbar('Peticion denegada', 'verifique informacion', backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
+        colorText: Colors.white,);
     }
   }
   void updateCancelada() async {
 
     ResponseApi responseApi = await cotizacionProvider.updatecancelada(
         cotizacion);
-    Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
-      colorText: Colors.white,);
-    if (responseApi.success == true) {
-      Get.offNamedUntil('/ventas/home', (route) => false);
 
+    if (responseApi.success == true) {
+      Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
+        colorText: Colors.white,);
     }
     else {
       Get.snackbar('Peticion denegada', 'verifique informacion', backgroundColor: Colors.red,
@@ -120,11 +139,10 @@ VentasDetallesController(){
   void updateCerrada() async {
 
     ResponseApi responseApi = await cotizacionProvider.updatecerrada(cotizacion);
-    Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
-      colorText: Colors.white,);
-    if (responseApi.success == true) {
-      Get.offNamedUntil('/ventas/home', (route) => false);
 
+    if (responseApi.success == true) {
+      Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green,
+        colorText: Colors.white,);
     }
     else {
       Get.snackbar('Peticion denegada', 'verifique informacion', backgroundColor: Colors.red,
@@ -140,6 +158,30 @@ VentasDetallesController(){
       }
     });
   }
+  void reloadPage() async {
+    // Llamar al método del provider para obtener la cotización por ID
+    Cotizacion? cotizacionActualizada = await cotizacionProvider.getCotizacionById(cotizacion.id!);
+
+    if (cotizacionActualizada != null) {
+      // Actualizar la cotización con los nuevos datos
+      cotizacion = cotizacionActualizada;
+
+      // Actualizar los productos por cada estado
+      for (String estado in estatus) {
+        await cargarProductosPorEstatus(estado);
+      }
+
+      // Recalcular el total
+      getTotal();
+
+      // Notificar a los widgets que los datos han cambiado
+      update();
+    } else {
+      // Manejo de errores o estado nulo
+      Get.snackbar('Error', 'No se pudo cargar la cotización');
+    }
+  }
+
   List<pw.Widget> contenidoPDF = [];
   List<pw.Widget> garantiasWidget = [];
   List<pw.Widget> reportedimWidget = [];
@@ -1121,7 +1163,7 @@ VentasDetallesController(){
               pw.Expanded(
                 child: pw.Center(
                   child: pw.Text(
-                    'MAQUINADOS CORREA',
+                    '',
                     style: pw.TextStyle(
                       fontSize: 20,
                       fontWeight: pw.FontWeight.bold,

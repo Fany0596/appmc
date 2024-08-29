@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
+
 import 'package:get/get.dart';
 import 'package:maquinados_correa/src/models/Materiales.dart';
 import 'package:maquinados_correa/src/models/producto.dart';
@@ -72,7 +72,7 @@ class ProduccionOtPage extends StatelessWidget {
         Text(
           'MAQUINADOS CORREA',
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),

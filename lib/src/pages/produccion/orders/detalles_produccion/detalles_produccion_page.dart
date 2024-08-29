@@ -12,100 +12,104 @@ class ProduccionDetallesPage extends StatelessWidget {
     final currencyFormat = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
     return currencyFormat.format(amount);
   }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() => DefaultTabController(
-      length: con.estatus.length,
-      child:  Scaffold(
-        bottomNavigationBar: Container(
-          color: Color.fromRGBO(176, 160 , 117, 1),
-          height: 255,
-          child: Column(
-            children: [
-              _textFielPedido(context),
-              _entrega(context),
-              _textOT(),
-              _totalToPay(context)
-            ],
-          ),
-        ),
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(130),//ancho del appbar
-          child: AppBar(
-            title: _encabezado(context),
-            flexibleSpace: Container(
-              margin: EdgeInsets.only(top: 50, bottom: 10),
-              alignment: Alignment.center,
-              child: Wrap(
-                direction: Axis.horizontal,
+        length: con.estatus.length,
+        child: Scaffold(
+            bottomNavigationBar: Container(
+              color: Color.fromRGBO(176, 160, 117, 1),
+              height: 255,
+              child: Column(
                 children: [
-                  //_textFieldSearch(context)
-                  _textCot(context)
+                  _textFielPedido(context),
+                  _entrega(context),
+                  _textOT(),
+                  _totalToPay(context)
                 ],
               ),
             ),
-            bottom: TabBar(
-              isScrollable: true,
-              indicatorColor: Colors.grey,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.black,
-              tabs: List<Widget>.generate(con.estatus.length, (index) {
-                return Tab(
-                  child: Text(con.estatus[index]),
-                );
-              }),
-               onTap: (index) {
-                con.cargarProductosPorEstatus(con.estatus[index]); // Cargar productos al cambiar de pestaña
-               },
-            ),
-          ),
-        ),
-
-            body:TabBarView(
-            children: con.estatus.map((estado) {
-              List<Producto> productosPorEstado = con.cotizacion.producto!
-              .where((Producto producto) => producto.estatus == estado)
-              .toList();
-                    return productosPorEstado.isNotEmpty
-                        ? ListView(
-                      children: productosPorEstado.map((producto) {
-                        return _cardProducto(context, producto);
-                      }).toList(),
-                    )
-                        : Center(
-                      child: NoDataWidget(
-                        text: 'No hay ningún producto en estado $estado',
-                      ),
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(130), //ancho del appbar
+              child: AppBar(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _encabezado(context),
+                    _buttonReload(),
+                  ],
+                ),
+                flexibleSpace: Container(
+                  margin: EdgeInsets.only(top: 30, bottom: 10),
+                  alignment: Alignment.center,
+                  child: Wrap(
+                    direction: Axis.horizontal,
+                    children: [
+                      //_textFieldSearch(context)
+                      _textCot(context)
+                    ],
+                  ),
+                ),
+                bottom: TabBar(
+                  isScrollable: true,
+                  indicatorColor: Colors.grey,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.black,
+                  tabs: List<Widget>.generate(con.estatus.length, (index) {
+                    return Tab(
+                      child: Text(con.estatus[index]),
                     );
-                  }).toList(),
-                )
-    )
-                ));
+                  }),
+                  onTap: (index) {
+                    con.cargarProductosPorEstatus(con.estatus[
+                        index]); // Cargar productos al cambiar de pestaña
+                  },
+                ),
+              ),
+            ),
+            body: TabBarView(
+              children: con.estatus.map((estado) {
+                List<Producto> productosPorEstado = con.cotizacion.producto!
+                    .where((Producto producto) => producto.estatus == estado)
+                    .toList();
+                return productosPorEstado.isNotEmpty
+                    ? ListView(
+                        children: productosPorEstado.map((producto) {
+                          return _cardProducto(context, producto);
+                        }).toList(),
+                      )
+                    : Center(
+                        child: NoDataWidget(
+                          text: 'No hay ningún producto en estado $estado',
+                        ),
+                      );
+              }).toList(),
+            ))));
   }
 
   Widget _encabezado(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 1,left: 1),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [Image.asset(
-            'assets/img/LOGO1.png',
-            width: 55, //ancho de imagen
-            height: 55, //alto de imagen
+      margin: EdgeInsets.only(top: 1, left: 1),
+      child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+        Image.asset(
+          'assets/img/LOGO1.png',
+          width: 55, //ancho de imagen
+          height: 55, //alto de imagen
+        ),
+        Text(
+          '  MAQUINADOS CORREA',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
-            Text(
-              '  MAQUINADOS CORREA',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ]
-      ),
+        ),
+      ]),
     );
   }
-  Widget _textCot (BuildContext context){
+
+  Widget _textCot(BuildContext context) {
     return Container(
       // return SafeArea(
       //child: Container(
@@ -116,18 +120,15 @@ class ProduccionDetallesPage extends StatelessWidget {
           decoration: InputDecoration(
             hintText: 'Cotización #${con.cotizacion.number}',
             enabled: false,
-            hintStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.white
-            ),
-          )
-      ),
+            hintStyle: TextStyle(fontSize: 20, color: Colors.white),
+          )),
       //)
     );
   }
+
   Widget _cardProducto(BuildContext context, Producto producto) {
-    return  GestureDetector(
-        onTap: () => con.goToOt( producto),
+    return GestureDetector(
+        onTap: () => con.goToOt(producto),
         child: Container(
           height: 180,
           margin: EdgeInsets.only(left: 15, right: 15, top: 10),
@@ -137,7 +138,7 @@ class ProduccionDetallesPage extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),
-            child:Stack(
+            child: Stack(
               children: [
                 Container(
                   height: 30,
@@ -147,17 +148,14 @@ class ProduccionDetallesPage extends StatelessWidget {
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(15),
                         topRight: Radius.circular(15),
-                      )
-                  ),
+                      )),
                   child: Container(
                     margin: EdgeInsets.only(top: 5),
                     child: Text(
                       'Producto: ${producto.articulo}',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15
-                      ),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                   ),
                 ),
@@ -170,7 +168,6 @@ class ProduccionDetallesPage extends StatelessWidget {
                         width: double.infinity,
                         alignment: Alignment.center,
                         child: Text('Material: ${producto.name ?? ''}'),
-
                       ),
                       Container(
                         margin: EdgeInsets.only(top: 5),
@@ -182,24 +179,25 @@ class ProduccionDetallesPage extends StatelessWidget {
                         margin: EdgeInsets.only(top: 5),
                         width: double.infinity,
                         alignment: Alignment.center,
-                        child: Text('Precio: ${formatCurrency(producto.precio ?? 0.0)}'),
+                        child: Text(
+                            'Precio: ${formatCurrency(producto.precio ?? 0.0)}'),
                       ),
                       Container(
                         margin: EdgeInsets.only(top: 5),
                         width: double.infinity,
                         alignment: Alignment.center,
-                        child: Text('Total: ${formatCurrency(producto.total ?? 0.0)}'),
+                        child: Text(
+                            'Total: ${formatCurrency(producto.total ?? 0.0)}'),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-
           ),
-
         ));
   }
+
   Widget _textFielPedido(BuildContext context) {
     return Container(
       //margin: EdgeInsets.all(10),
@@ -265,7 +263,8 @@ class ProduccionDetallesPage extends StatelessWidget {
       ),
     );
   }
-  Widget _totalToPay(BuildContext context){
+
+  Widget _totalToPay(BuildContext context) {
     return Column(
       children: [
         Divider(height: 1, color: Colors.white),
@@ -274,39 +273,49 @@ class ProduccionDetallesPage extends StatelessWidget {
           child: Text(
             'TOTAL: ${formatCurrency(con.totalt.value)}',
             style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 19
-            ),
+                fontWeight: FontWeight.bold, color: Colors.white, fontSize: 19),
           ),
         ),
         con.cotizacion.status == 'CONFIRMADA'
             ? Container(
-          //margin: EdgeInsets.only(to),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(left: 15),
-                  child: ElevatedButton(
-                    onPressed: () => con.generar(),
-                    style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.all(25),
-                        backgroundColor: Colors.green
-                    ),
-                    child: Text(
-                      'GENERAR',
-                      style: TextStyle(
-                          color: Colors.white
+                //margin: EdgeInsets.only(to),
+                child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(left: 15),
+                    child: ElevatedButton(
+                      onPressed: () => con.generar(),
+                      style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.all(25),
+                          backgroundColor: Colors.green),
+                      child: Text(
+                        'GENERAR',
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
-                  ),
-                )
-              ],
-            )
-        )
+                  )
+                ],
+              ))
             : Container()
       ],
+    );
+  }
+
+  Widget _buttonReload() {
+    return SafeArea(
+      // deja espacio de la barra del telefono
+      child: Container(
+        alignment: Alignment.topRight,
+        margin: EdgeInsets.only(right: 20),
+        child: IconButton(
+            onPressed: () => con.reloadPage(),
+            icon: Icon(
+              Icons.refresh,
+              color: Colors.white,
+              size: 30,
+            )),
+      ),
     );
   }
 }

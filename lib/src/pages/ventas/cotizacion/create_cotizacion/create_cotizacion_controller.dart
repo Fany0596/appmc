@@ -27,7 +27,7 @@ class CotizacionPageController extends GetxController {
 
   VendedoresProvider vendedoresProvider = VendedoresProvider();
   ClientesProvider clientesProvider = ClientesProvider();
-
+  Rx<String> selectedCondition = Rx<String>('');
   ImagePicker picker = ImagePicker();
 
   var idVendedores = ''.obs;
@@ -127,11 +127,16 @@ class CotizacionPageController extends GetxController {
 
         ResponseApi responseApi = ResponseApi.fromJson(json.decode(res));
         progressDialog.close();
-        Get.snackbar('Proceso terminado', responseApi.message ?? '',backgroundColor: Colors.green,
-          colorText: Colors.white,);
-        if (responseApi.success!) { // Si la respuesta es exitosa, navegar a la página de roles
-          goToRoles();
+        if (responseApi.success != true) {
+          progressDialog.close();
+          Get.snackbar('Error', 'No se pudo guardar la cotización',
+              backgroundColor: Colors.red, colorText: Colors.white);
+          return;
         }
+        progressDialog.close();
+        Get.snackbar('Éxito', responseApi.message ?? '',backgroundColor: Colors.green,
+          colorText: Colors.white,);
+        clearForm();
       });
     }
   }
@@ -214,7 +219,17 @@ class CotizacionPageController extends GetxController {
 
   void clearForm(){
     numberController.text = '';
-
+    fechaController.text = '';
+    entController.text = '';
+    reqController.text = '';
+    condicionesController.text = '';
+    descuentoController.text = '';
+    nombreController.text = '';
+    correoController.text = '';
+    telefonoController.text = '';
+    idClientes.value = '';
+    idVendedores.value = '';
+    getNextQuoteNumber();
   }
   void goToRoles() {
     Get.offNamedUntil('/roles', (route) => false);

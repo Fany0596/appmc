@@ -19,8 +19,7 @@ class ProduccionHomePage extends StatelessWidget {
           index: con.indexTab.value,
           children:[
             ProduccionTabPage(),
-            ProduccionOtListPage(),
-            ProfileInfoPage()
+            ProduccionOtListPage()
           ],
         ))
     );
@@ -43,14 +42,8 @@ class ProduccionHomePage extends StatelessWidget {
             inactiveColor: Colors.black
         ),
         BottomNavyBarItem(
-            icon: Icon(Icons.create),
-            title:Text( 'Crear'),
-            activeColor: Colors.white,
-            inactiveColor: Colors.black
-        ),
-        BottomNavyBarItem(
-            icon: Icon(Icons.add),
-            title:Text( 'Añadir'),
+            icon: Icon(Icons.list),
+            title:Text( 'Lista'),
             activeColor: Colors.white,
             inactiveColor: Colors.black
         ),

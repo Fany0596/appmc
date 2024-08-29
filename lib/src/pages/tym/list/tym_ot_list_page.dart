@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:maquinados_correa/src/models/cotizacion.dart';
 import 'package:maquinados_correa/src/models/producto.dart';
 import 'package:get/get.dart';
 import 'package:maquinados_correa/src/pages/tym/list/tym_ot_list_controller.dart';
@@ -11,17 +10,26 @@ class TymOtListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() => DefaultTabController(
-      length: con.status.length,
+      length: con.estatus.length,
       child: Scaffold(
         drawer: _buildDrawer(),
         appBar: AppBar(
-          title: _encabezado(context),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _encabezado(context),
+              _buttonReload(),
+            ],
+          ),
           bottom: TabBar(
             isScrollable: true,
             indicatorColor: Colors.grey,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.black,
-            tabs: con.status.map((status) => Tab(child: Text(status))).toList(),
+            onTap: (index) {
+              con.selectedStatus.value = con.estatus[index];
+            },
+            tabs: con.estatus.map((estatus) => Tab(child: Text(estatus))).toList(),
           ),
         ),
         body: Column(
@@ -29,7 +37,7 @@ class TymOtListPage extends StatelessWidget {
             _buildSearchBar(),
             Expanded(
               child: TabBarView(
-                children: con.status.map((status) {
+                children: con.estatus.map((estatus) {
                   return Obx(() {
                     if (con.filteredProducts.isEmpty) {
                       return Center(child: NoDataWidget(text: 'No hay productos'));
@@ -81,7 +89,7 @@ class TymOtListPage extends StatelessWidget {
           Text(
             '  MAQUINADOS CORREA',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -93,7 +101,7 @@ class TymOtListPage extends StatelessWidget {
 
   Widget _cardProduct(Producto producto) {
     return GestureDetector(
-      onTap: () => con.goToDetalles(producto as Cotizacion),
+      onTap: () => con.goToOt(producto),
       child: Card(
         elevation: 3.0,
         color: Colors.white,
@@ -231,6 +239,22 @@ class TymOtListPage extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+  Widget _buttonReload() {
+    return SafeArea( // deja espacio de la barra del telefono
+      child: Container(
+        alignment: Alignment.topRight,
+        margin: EdgeInsets.only(right: 20),
+        child: IconButton(
+            onPressed: () => con.reloadPage(),
+            icon: Icon(
+              Icons.refresh,
+              color: Colors.white,
+              size: 30,
+            )
         ),
       ),
     );

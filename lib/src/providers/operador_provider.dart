@@ -10,6 +10,7 @@ class OperadorProvider extends GetConnect {
   String  url = Environment.API_URL + "api/operador";
 
   User userSession = User.fromJson(GetStorage().read('user') ?? {});
+  RxList<Operador> operadores = <Operador>[].obs;
 
   // para mostrar la lista de vendedores
   Future<List<Operador>> getAll() async {
@@ -44,5 +45,22 @@ class OperadorProvider extends GetConnect {
     ResponseApi responseApi = ResponseApi.fromJson(response.body);
 
     return responseApi;
+  }
+  Future<void> loadOperadores() async {
+    Response response = await get(
+        '$url/getAll',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': userSession.sessionToken ?? ''
+        }
+    );
+
+    if (response.statusCode == 401) {
+      Get.snackbar('Petición denegada', 'Tu usuario no puede leer esta información');
+      operadores.value = [];
+      return;
+    }
+
+    operadores.value = Operador.fromJsonList(response.body);
   }
 }

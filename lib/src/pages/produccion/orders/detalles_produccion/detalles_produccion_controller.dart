@@ -32,9 +32,7 @@ class ProduccionDetallesController extends GetxController {
 
   CotizacionProvider cotizacionProvider = CotizacionProvider();
   ProductoProvider productoProvider = ProductoProvider();
-  List<String> estatus = <String>['POR ASIGNAR', 'EN ESPERA', 'CANCELADO'].obs;
-
-  //'EN PROCESO', 'SUSPENDIDO', 'TERMINADO', 'LIBERADO','ENTREGADO', 'CANCELADO'].obs;
+  List<String> estatus = <String>['POR ASIGNAR', 'EN ESPERA', 'EN PROCESO','SIG. PROCESO','RETRABAJO', 'RECHAZADO', 'LIBERADO', 'ENTREGADO','CANCELADO'].obs;
 
   TextEditingController pedidoController = TextEditingController();
   TextEditingController entregaController = TextEditingController();
@@ -43,6 +41,7 @@ class ProduccionDetallesController extends GetxController {
   ProduccionDetallesController() {
     print('Cotizacion: ${cotizacion.toJson()}');
     getTotal();
+    getTotalCantidad();
     if (cotizacion.status == 'GENERADA') {
       cotizacion.producto?.forEach((producto) {
         // Establecer los valores de pedido, fecha de entrega y OT con los datos de los productos
@@ -72,28 +71,54 @@ class ProduccionDetallesController extends GetxController {
         productosCotizacion.where((producto) => producto.estatus == estatus));
     print('Productos por estado $estatus: $productosPorEstatus');
   }
+   void reloadPage() async {
+     // Llamar al método del provider para obtener la cotización por ID
+     Cotizacion? cotizacionActualizada = await cotizacionProvider.getCotizacionById(cotizacion.id!);
 
-  void updateCotizacion() async {
+     if (cotizacionActualizada != null) {
+       // Actualizar la cotización con los nuevos datos
+       cotizacion = cotizacionActualizada;
+
+       // Actualizar los productos por cada estado
+       for (String estado in estatus) {
+         await cargarProductosPorEstatus(estado);
+       }
+
+       // Recalcular el total
+       getTotal();
+
+       // Notificar a los widgets que los datos han cambiado
+       update();
+     } else {
+       // Manejo de errores o estado nulo
+       Get.snackbar('Error', 'No se pudo cargar la cotización');
+     }
+   }
+
+
+   void updateCotizacion() async {
     ResponseApi responseApi = await cotizacionProvider.updateconfirmada(
         cotizacion);
-    Get.snackbar('Proceso terminado', responseApi.message ?? '');
     if (responseApi.success == true) {
-      Get.offNamedUntil('/produccion/home', (route) => false);
+      Get.snackbar('Proceso terminado', responseApi.message ?? '',
+        backgroundColor: Colors.green,colorText: Colors.white,);
     }
     else {
-      Get.snackbar('Peticion denegada', 'verifique informacion');
+      Get.snackbar('Peticion denegada', 'verifique informacion',
+        backgroundColor: Colors.red,colorText: Colors.white,);
     }
   }
 
   void updateCancelada() async {
     ResponseApi responseApi = await cotizacionProvider.updatecancelada(
         cotizacion);
-    Get.snackbar('Proceso terminado', responseApi.message ?? '');
     if (responseApi.success == true) {
-      Get.offNamedUntil('/produccion/home', (route) => false);
+      Get.snackbar('Proceso terminado', responseApi.message ?? '',
+        backgroundColor: Colors.green,colorText: Colors.white,);
     }
     else {
-      Get.snackbar('Peticion denegada', 'verifique informacion');
+      Get.snackbar('Peticion denegada', 'verifique informacion',
+        backgroundColor: Colors.red,colorText: Colors.white,);
     }
   }
 
@@ -103,9 +128,35 @@ class ProduccionDetallesController extends GetxController {
       if (producto.estatus == 'EN ESPERA') {
         totalt.value = totalt.value + producto.total!;
       }
+      if (producto.estatus == 'SIG. PROCESO') {
+        totalt.value = totalt.value + producto.total!;
+      }
+      if (producto.estatus == 'EN PROCESO') {
+        totalt.value = totalt.value + producto.total!;
+      }
+      if (producto.estatus == 'RETRABAJO') {
+        totalt.value = totalt.value + producto.total!;
+      }
+      if (producto.estatus == 'RECHAZADO') {
+        totalt.value = totalt.value + producto.total!;
+      }
+      if (producto.estatus == 'LIBERADO') {
+        totalt.value = totalt.value + producto.total!;
+      }
+      if (producto.estatus == 'ENTREGADO') {
+        totalt.value = totalt.value + producto.total!;
+      }
     });
   }
+   void getTotalCantidad() {
+     cotizacion.producto!.forEach((producto) {
+       if (producto.estatus != 'CANCELADO') {
+         totalCantidad = totalCantidad + producto.cantidad!;
+         print('Total cantidad  $totalCantidad');
 
+       }
+     });
+   }
   void goToOt(Producto producto) {
     print('Producto seleccionado: $producto');
     Get.toNamed(
@@ -135,20 +186,19 @@ class ProduccionDetallesController extends GetxController {
 
         Stream stream = (await productoProvider.generar(miproducto)) as Stream;
         stream.listen((res) {
-          //progressDialog.close();
           ResponseApi responseApi = ResponseApi.fromJson(json.decode(res));
-          Get.snackbar('Éxito', 'Producto actualizado correctamente');
+          Get.snackbar('Éxito', 'Producto actualizado correctamente',
+            backgroundColor: Colors.green,colorText: Colors.white,);
           print('Response Api Update: ${responseApi.data}');
-          //progressDialog.close();
 
         });
       });
     }
     ResponseApi responseApi = await cotizacionProvider.updategenerada(
         cotizacion);
-    Get.snackbar('Proceso terminado', responseApi.message ?? '');
     if (responseApi.success == true) {
-      Get.offNamedUntil('/produccion/home', (route) => false);
+      Get.snackbar('Proceso terminado', responseApi.message ?? '',
+        backgroundColor: Colors.green,colorText: Colors.white,);
     }
     else {
       Get.snackbar('Peticion denegada', 'verifique informacion');
@@ -174,7 +224,7 @@ class ProduccionDetallesController extends GetxController {
     Uint8List bytess = imageData.buffer.asUint8List();
     // Obtener la lista de productos en espera
     List<Producto> productosEspera = cotizacion.producto!
-        .where((producto) => producto.estatus == 'EN ESPERA')
+        .where((producto) => producto.estatus != 'POR ASIGNAR')
         .toList();
     // Crear una lista de listas para almacenar los datos de los productos
     List<List<String>> productosData = [];
@@ -188,11 +238,7 @@ class ProduccionDetallesController extends GetxController {
       productosData.add([(i + 1).toString(), producto.cantidad.toString(), producto.parte.toString(), producto.articulo.toString()]);
     }
 
-    cotizacion.producto!.forEach((producto) {
-      if (producto.estatus != 'CANCELADO') {
-        totalCantidad = totalCantidad + producto.cantidad!;
-      }
-    });
+
     final currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     List<List<String>> data = [
@@ -245,7 +291,7 @@ class ProduccionDetallesController extends GetxController {
                       pw.Expanded(
                         child: pw.Center(
                           child: pw.Text(
-                            'MAQUINADOS CORREA',
+                            'ORDEN DE TRABAJO',
                             style: pw.TextStyle(
                               fontSize: 20,
                               fontWeight: pw.FontWeight.bold,
@@ -561,10 +607,7 @@ class ProduccionDetallesController extends GetxController {
     } catch (e) {
       logger.e('Error al escribir el archivo: $e');
     }
-    // // Guardar el archivo PDF en la memoria del dispositivo
-    // final dir = (await getApplicationDocumentsDirectory()).path;
-    // final file = File('$dir/ejemplo.pdf');
-    // await file.writeAsBytes(bytes);
+
   }
   List<pw.Widget> getProductDetails() {
     List<pw.Widget> details = [];
@@ -597,10 +640,10 @@ class ProduccionDetallesController extends GetxController {
       Uint8List byteess = imageData2.buffer.asUint8List();
 
     List<Producto> productosEspera = cotizacion.producto!
-        .where((producto) => producto.estatus == 'EN ESPERA')
+        .where((producto) => producto.estatus != 'POR ASIGNAR')
         .toList();
     productosEspera.forEach((producto) async {
-      if (producto.estatus == "EN ESPERA") {
+      if (producto.estatus != "POR ASIGNAR") {
         final currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
         List<List<String>> datad = [
           ['Código'],
@@ -1142,7 +1185,6 @@ class ProduccionDetallesController extends GetxController {
           }
         }
         final directory = await getDownloadsDirectory();
-        //final directory = await getExternalStorageDirectory();
         final file = File('${directory!.path}/HI-${producto.articulo}.pdf');
         await file.writeAsBytes(await pdf.save());
         final bytes = await pdf.save();

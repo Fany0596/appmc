@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maquinados_correa/src/models/producto.dart';
 import 'package:maquinados_correa/src/pages/Generico/detalles/generico_detalles_controller.dart';
+import 'package:maquinados_correa/src/pages/tym/tabla/tym_tab_controller.dart';
 import 'package:maquinados_correa/src/widgets/no_data_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:maquinados_correa/src/pages/produccion/orders/detalles_produccion/detalles_produccion_controller.dart';
 import 'package:maquinados_correa/src/pages/ventas/orders/detalles/detalles_controller.dart';
-import 'package:maquinados_correa/src/pages/compras/orders/list/compras_controller.dart';
 
 class GenericoDetallesPage extends StatelessWidget {
   final ProduccionDetallesController produccionDetallesController = Get.put(ProduccionDetallesController());
   final VentasDetallesController ventasDetallesController = Get.put(VentasDetallesController());
-  //final ComprasDetallesController comprasDetallesController = Get.put(ComprasDetallesController());
+  final TymTabController tymTabController = Get.put(TymTabController());
+
   GenericoDetallesController con = Get.put(GenericoDetallesController());
   String formatCurrency(double amount) {
     final currencyFormat = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
@@ -62,7 +63,6 @@ class GenericoDetallesPage extends StatelessWidget {
               ),
             ),
 
-             ///////////////////////
             body: TabBarView(
               children: con.estatus.map((String estado) {
                 // Filtrar los productos por estado
@@ -136,7 +136,7 @@ class GenericoDetallesPage extends StatelessWidget {
   Widget _cardProducto(Producto producto) {
     print('material del producto: ${producto.name}');
     return Container(
-        height: 160,
+        height: 190,
         margin: EdgeInsets.only(left: 15, right: 15, top: 10),
         child: Card(
           elevation: 3.0,
@@ -196,6 +196,39 @@ class GenericoDetallesPage extends StatelessWidget {
                       width: double.infinity,
                       alignment: Alignment.center,
                       child: Text('Total: ${formatCurrency(producto.total ?? 0.0)}'),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 5),
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            child: ElevatedButton(
+                              onPressed: () => con.generarPDFs(producto),
+                              child: Text('Hoja de Insp.'),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            child: ElevatedButton(
+                              onPressed: () => con.descargarPDF(producto.pdfFile ?? ''),
+                              child: Text('Reporte Dim.'),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            child: ElevatedButton(
+                              onPressed: () {
+                              tymTabController.generarPDF(producto);
+                              },
+                              child: Text('Reporte Tiemp.'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
-import 'package:maquinados_correa/src/models/producto.dart';
 import 'package:maquinados_correa/src/pages/produccion/tabla/produccion_tab_controller.dart';
 import 'package:get/get.dart';
 
@@ -79,6 +78,23 @@ class ProduccionTabPage extends StatelessWidget {
                         ),
                       ),
                     ),
+                    GestureDetector(
+                      onTap: () => con.exportToExcel(), // Llamada a la función
+                      child: Container(
+                        margin: EdgeInsets.only(top: 10, left: 1),
+                        padding: EdgeInsets.all(20),
+                        width: double.infinity,
+                        color: Colors.white,
+                        child: Text(
+                          'Exportar a Excel',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                     Row(
                       children: [
                         Container(
@@ -93,6 +109,7 @@ class ProduccionTabPage extends StatelessWidget {
                               )
                           ),
                         ),
+
                         Container(
                           margin: EdgeInsets.only(top: 20, left: 160),
                           alignment: Alignment.topRight,
@@ -142,7 +159,9 @@ class ProduccionTabPage extends StatelessWidget {
               controller: _scrollController,
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
-                child: _table(context),
+                child:
+                    _table(context),
+
               ),
             ),
           ),
@@ -252,12 +271,23 @@ class ProduccionTabPage extends StatelessWidget {
                             style: TextStyle(fontSize: 11),),
                         ),
                       ),
-                      DataCell(Text(producto.estatus ?? '',
+                      DataCell(Text(producto.operador ?? '',
                         style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.fecha ?? '',
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.fecha ?? '',
-                        style: TextStyle(fontSize: 11),)),
+                      DataCell(
+                        FutureBuilder<Map<String, String>>(
+                          future: con.calcularTiempoEstimado(producto.id!),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error', style: TextStyle(fontSize: 11));
+                            } else {
+                              return Text(snapshot.data?['total'] ?? 'N/A', style: TextStyle(fontSize: 11));
+                            }
+                          },
+                        ),
+                      ),
+                      _buildFechaEntregaCell(producto.fecha),
                     ],
                   );
                 }).toList();
@@ -273,13 +303,13 @@ class ProduccionTabPage extends StatelessWidget {
     switch (estatus) {
       case 'EN ESPERA':
         return Colors.grey;
-      case 'EN PROCESO':
+      case 'RETRABAJO':
         return Colors.yellow;
       case 'SUSPENDIDO':
         return Colors.orange;
-      case 'DETENIDA':
+      case 'RECHAZADO':
         return Colors.red;
-      case 'TERMINADO':
+      case 'EN PROCESO':
         return Colors.lightGreenAccent;
       case 'LIBERADO':
         return Colors.green;
@@ -289,4 +319,32 @@ class ProduccionTabPage extends StatelessWidget {
         return Colors.white; // Color por defecto
     }
   }
+  Color _getColorForDeliveryDate(String? fechaEntrega) {
+    if (fechaEntrega == null) return Colors.transparent; // Si la fecha es nula, no se aplica ningún color
+
+    DateTime fechaEntregaDate = DateTime.parse(fechaEntrega);
+    DateTime ahora = DateTime.now();
+    int diferenciaDias = fechaEntregaDate.difference(ahora).inDays;
+
+    if (diferenciaDias <= 0) {
+      return Colors.red; // Fecha de entrega es hoy o ya ha pasado
+    } else if (diferenciaDias <= 5) {
+      return Colors.orange; // Faltan 5 días o menos para la fecha de entrega
+    } else {
+      return Colors.transparent; // No se aplica ningún color
+    }
+  }
+  DataCell _buildFechaEntregaCell(String? fechaEntrega) {
+    return DataCell(
+      Container(
+        color: _getColorForDeliveryDate(fechaEntrega),
+        padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 6.0),
+        child: Text(
+          fechaEntrega ?? '',
+          style: TextStyle(fontSize: 11),
+        ),
+      ),
+    );
+  }
 }
+

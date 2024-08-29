@@ -228,6 +228,16 @@ class ComprasTabPage extends StatelessWidget {
                     ],
                   ),
                 ),
+                DataColumn(
+                  label: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('FECHA', textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
+                      Text('DE RECEPCIÓN', textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
+                    ],
+                  ),
+                ),
               ],
               rows: oc.expand((oc) {
                 return oc.product!.map((product) {
@@ -244,49 +254,90 @@ class ComprasTabPage extends StatelessWidget {
                   }
                   return DataRow(
                     cells: [
-                      DataCell(Text(oc.number ?? '',
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(oc.cotizacion!.number ?? '',
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(oc.provedor!.name ?? '',
-                        style: TextStyle(fontSize: 10),)),
-                      DataCell(
-                          Container(
-                            color: isCantidadEqual ? Colors.green : Colors.transparent,
-                        child: Text(product!.descr ?? '',
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToProduct(product),
+                        child: Text(oc.number ?? '',
+                          style: TextStyle(fontSize: 11),),
+                      )),
+                      DataCell(GestureDetector(
+                  onTap: () => con.goToProduct(product),
+                        child: Text(oc.cotizacion!.number ?? '',
+                          style: TextStyle(fontSize: 11),),
+                      )),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToProduct(product),
+                        child: Text(oc.provedor!.name ?? '',
                           style: TextStyle(fontSize: 10),),
                       )),
-                      DataCell(Text(product.name ?? '',
-                        style: TextStyle(fontSize: 10),)),
-                      DataCell(Text(product.cantidad.toString(),
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text('\$${product.precio!.toStringAsFixed(2)}',
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text('\$${product.total!.toStringAsFixed(2)}',
-                        style: TextStyle(fontSize: 11),)),
                       DataCell(
-                        Container(
-                          color: _getColorForStatus(product.estatus),
-                          child: Text(product.estatus ?? '',
-                            style: TextStyle(fontSize: 11),),
+                          GestureDetector(
+                            onTap: () => con.goToProduct(product),
+                            child: Container(
+                              color: isCantidadEqual ? Colors.green : Colors.transparent,
+                                                    child: Text(product!.descr ?? '',
+                            style: TextStyle(fontSize: 10),),
+                                                  ),
+                          )),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToProduct(product),
+                        child: Text(product.name ?? '',
+                          style: TextStyle(fontSize: 10),),
+                      )),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToProduct(product),
+                        child: Text(product.cantidad.toString(),
+                          style: TextStyle(fontSize: 11),),
+                      )),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToProduct(product),
+                        child: Text('\$${product.precio!.toStringAsFixed(2)}',
+                          style: TextStyle(fontSize: 11),),
+                      )),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToProduct(product),
+                        child: Text('\$${product.total!.toStringAsFixed(2)}',
+                          style: TextStyle(fontSize: 11),),
+                      )),
+                      DataCell(
+                        GestureDetector(
+                          onTap: () => con.goToProduct(product),
+                          child: Container(
+                            color: _getColorForStatus(product.estatus),
+                            child: Text(product.estatus ?? '',
+                              style: TextStyle(fontSize: 11),),
+                          ),
                         ),
                       ),
                       DataCell(
-                        Container(
-                          color: isCantidadDifferent ? Colors.red : Colors.green,
-                          child: Text(product.pedido != null && product.pedido!.isNotEmpty ? product.pedido! : '',
-                            style: TextStyle(fontSize: 11),),
+                        GestureDetector(
+                          onTap: () => con.goToProduct(product),
+                          child: Container(
+                            color: isCantidadDifferent ? Colors.red : Colors.green,
+                            child: Text(product.pedido != null && product.pedido!.isNotEmpty ? product.pedido! : '',
+                              style: TextStyle(fontSize: 11),),
+                          ),
                         ),
                       ),
-                      DataCell(Text(oc.soli ?? '',
-                        style: TextStyle(fontSize: 11),)),
+                      DataCell(GestureDetector(
+                  onTap: () => con.goToProduct(product),
+                        child: Text(oc.soli ?? '',
+                          style: TextStyle(fontSize: 11),),
+                      )),
                       DataCell(
-                          Container(
-                      color: isFechaEntregaMenor ? Colors.red : Colors.transparent,
-                      child: Text(oc.ent ?? '',
-                        style: TextStyle(fontSize: 11),),
-                  ),
+                        GestureDetector(
+                          onTap: () => con.goToProduct(product),
+                            child: Container(
+                                                  color: isFechaEntregaMenor ? Colors.red : Colors.transparent,
+                                                  child: Text(oc.ent ?? '',
+                                                    style: TextStyle(fontSize: 11),),
+                                              ),
+                          ),
                       ),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToProduct(product),
+                        child: Text(product.recep ?? '',
+                          style: TextStyle(fontSize: 11),),
+                      )),
                     ],
                   );
                 }).toList();

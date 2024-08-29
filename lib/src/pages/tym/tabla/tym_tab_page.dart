@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
@@ -5,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:maquinados_correa/src/pages/tym/tabla/tym_tab_controller.dart';
 
 class TymTabPage extends StatelessWidget {
-  TymTabController con = Get.put(TymTabController());
+  final TymTabController con = Get.put(TymTabController());
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -33,8 +34,7 @@ class TymTabPage extends StatelessWidget {
                     Container(
                       margin: EdgeInsets.only(top: 10, bottom: 0),
                       child: Text(
-                        '${con.user.value.name ?? ''}  ${con.user.value
-                            .lastname}',
+                        '${con.user.value.name ?? ''}  ${con.user.value.lastname}',
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.black,
@@ -55,7 +55,6 @@ class TymTabPage extends StatelessWidget {
                             fontSize: 13,
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
-
                           ),
                         ),
                       ),
@@ -73,7 +72,6 @@ class TymTabPage extends StatelessWidget {
                             fontSize: 13,
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
-
                           ),
                         ),
                       ),
@@ -174,7 +172,7 @@ class TymTabPage extends StatelessWidget {
 
   Widget _table(BuildContext context) {
     return FutureBuilder<List<Cotizacion>>(
-      future: con.getCotizacion('GENERADA'), // Cambiar a 'GENERADA'
+      future: con.cotizaciones.value,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -188,7 +186,6 @@ class TymTabPage extends StatelessWidget {
             return DataTable(
               columns: [
                 DataColumn(label: Text('O.T.', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('CLIENTE', style: TextStyle(fontSize: 13),)),
                 DataColumn(
                   label: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -209,6 +206,16 @@ class TymTabPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Text('TIEMPO EN', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
+                      Text('PROCESO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
+                    ],
+                  ),
+                ),
+                DataColumn(
+                  label: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
                       Text('TIEMPO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
                       Text('ESTIMADO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
                     ],
@@ -224,36 +231,94 @@ class TymTabPage extends StatelessWidget {
                     ],
                   ),
                 ),
+                DataColumn(label: Text('REPORTE', style: TextStyle(fontSize: 13),)),
               ],
               rows: cotizaciones.expand((cotizacion) {
                 return cotizacion.producto!.where((producto) => producto.estatus != 'CANCELADO').map((producto) {
                   return DataRow(
                     cells: [
-                      DataCell(Text(producto.ot ?? '',
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(cotizacion.clientes!.name.toString(),
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.parte ?? '',
-                        style: TextStyle(fontSize: 10),)),
-                      DataCell(Text(producto.articulo ?? '',
-                        style: TextStyle(fontSize: 10),)),
-                      DataCell(Text(producto.cantidad.toString(),
-                        style: TextStyle(fontSize: 11),)),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToOt(producto),
+                        child: Text(producto.ot ?? '',
+                          style: TextStyle(fontSize: 11),),
+                      )),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToOt(producto),
+                        child: Text(producto.parte ?? '',
+                          style: TextStyle(fontSize: 10),),
+                      )),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToOt(producto),
+                        child: Text(producto.articulo ?? '',
+                          style: TextStyle(fontSize: 10),),
+                      )),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToOt(producto),
+                        child: Text(producto.cantidad.toString(),
+                          style: TextStyle(fontSize: 11),),
+                      )),
                       DataCell(
-                        Container(
-                          color: _getColorForStatus(producto.estatus),
-                          child: Text(producto.estatus ?? '',
-                            style: TextStyle(fontSize: 11),),
+                        GestureDetector(
+                          onTap: () => con.goToOt(producto),
+                          child: Container(
+                            color: _getColorForStatus(producto.estatus),
+                            child: Text(producto.estatus ?? '',
+                              style: TextStyle(fontSize: 11),),
+                          ),
                         ),
                       ),
-                      DataCell(Text(producto.estatus ?? '',
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.estatus ?? '',
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.fecha ?? '',
-                        style: TextStyle(fontSize: 11),)),
-                      DataCell(Text(producto.fecha ?? '',
-                        style: TextStyle(fontSize: 11),)),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToOt(producto),
+                        child: Text(producto.operacion ?? '',
+                          style: TextStyle(fontSize: 11),),
+                      )),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToOt(producto),
+                        child: Text(producto.operador ?? '',
+                            style: TextStyle(fontSize: 11)),
+                      )),
+                      DataCell(
+                        FutureBuilder<Map<String, String>>(
+                          future: con.calcularTiempoEstimado(producto.id!),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error', style: TextStyle(fontSize: 11));
+                            } else {
+                              return Text(snapshot.data?['actual'] ?? 'N/A', style: TextStyle(fontSize: 11));
+                            }
+                          },
+                        ),
+                      ),
+                      DataCell(
+                        FutureBuilder<Map<String, String>>(
+                          future: con.calcularTiempoEstimado(producto.id!),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error', style: TextStyle(fontSize: 11));
+                            } else {
+                              return Text(snapshot.data?['total'] ?? 'N/A', style: TextStyle(fontSize: 11));
+                            }
+                          },
+                        ),
+                      ),
+                      _buildFechaEntregaCell(producto.fecha),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToOt(producto),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.picture_as_pdf, size: 18, color: Colors.red),
+                              onPressed: () async {
+                                await con.generarPDF(producto);
+                              },
+                            ),
+                          ],
+                        ),
+                      )),
                     ],
                   );
                 }).toList();
@@ -264,18 +329,19 @@ class TymTabPage extends StatelessWidget {
       },
     );
   }
+
   // Función para obtener el color según el estatus
   Color _getColorForStatus(String? estatus) {
     switch (estatus) {
       case 'EN ESPERA':
         return Colors.grey;
-      case 'EN PROCESO':
+      case 'RETRABAJO':
         return Colors.yellow;
       case 'SUSPENDIDO':
         return Colors.orange;
-      case 'DETENIDA':
+      case 'RECHAZADO':
         return Colors.red;
-      case 'TERMINADO':
+      case 'EN PROCESO':
         return Colors.lightGreenAccent;
       case 'LIBERADO':
         return Colors.green;
@@ -284,5 +350,32 @@ class TymTabPage extends StatelessWidget {
       default:
         return Colors.white; // Color por defecto
     }
+  }
+  Color _getColorForDeliveryDate(String? fechaEntrega) {
+    if (fechaEntrega == null) return Colors.transparent; // Si la fecha es nula, no se aplica ningún color
+
+    DateTime fechaEntregaDate = DateTime.parse(fechaEntrega);
+    DateTime ahora = DateTime.now();
+    int diferenciaDias = fechaEntregaDate.difference(ahora).inDays;
+
+    if (diferenciaDias <= 0) {
+      return Colors.red; // Fecha de entrega es hoy o ya ha pasado
+    } else if (diferenciaDias <= 5) {
+      return Colors.orange; // Faltan 5 días o menos para la fecha de entrega
+    } else {
+      return Colors.transparent; // No se aplica ningún color
+    }
+  }
+  DataCell _buildFechaEntregaCell(String? fechaEntrega) {
+    return DataCell(
+      Container(
+        color: _getColorForDeliveryDate(fechaEntrega),
+        padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 6.0),
+        child: Text(
+          fechaEntrega ?? '',
+          style: TextStyle(fontSize: 11),
+        ),
+      ),
+    );
   }
 }

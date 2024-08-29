@@ -23,14 +23,15 @@ class ProductPageController extends GetxController {
   OcProvider ocProvider = OcProvider();
 
   MaterialesProvider materialesProvider = MaterialesProvider();
-
+  List<Product> productosPendientes = [];
   var idOc = ''.obs;
   List<Oc> oc = <Oc>[].obs;
   var idMateriales = ''.obs;
   List<Materiales> materiales = <Materiales>[].obs;
   ProductProvider productProvider = ProductProvider();
-
-
+  List<Oc> allOc = <Oc>[].obs;
+  List<Oc> filteredOc = <Oc>[].obs;
+  
   ProductPageController() {
     precioController.addListener(updateTotal);
     cantidadController.addListener(updateTotal);
@@ -46,12 +47,22 @@ class ProductPageController extends GetxController {
     // Actualiza el valor del controlador de "Total"
     totalController.text = total.toStringAsFixed(2);
   }
+
   void getOc() async {
     var result = await ocProvider.getAll();
-    oc.clear();
-    oc.addAll(result);
+    allOc.clear();
+    allOc.addAll(result);
+    filterOc();
   }
-  void getMateriales() async {
+
+  void filterOc() {
+    filteredOc.clear();
+    filteredOc.addAll(allOc.where((oc) =>
+    oc.status != 'CERRADA' && oc.status != 'CANCELADA'
+    ));
+    update();
+  }
+    void getMateriales() async {
     var result = await materialesProvider.getAll();
     materiales.clear();
     materiales.addAll(result);
@@ -109,7 +120,7 @@ class ProductPageController extends GetxController {
        Get.snackbar('Proceso terminado', responseApi.message ?? '',backgroundColor: Colors.green,
          colorText: Colors.white,);
        if (responseApi.success == true) {
-         clearForm();
+         clearForm2();
        }
        });
     }
@@ -136,7 +147,67 @@ class ProductPageController extends GetxController {
 
     return true;
   }
+  void guardarTodosLosProductos(BuildContext context) async {
+    if (productosPendientes.isEmpty) {
+      Get.snackbar('Error', 'No hay productos para guardar',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
 
+    ProgressDialog progressDialog = ProgressDialog(context: context);
+    progressDialog.show(max: 100, msg: 'Guardando productos...');
+
+    for (var product in productosPendientes) {
+      List<File> images = [];
+      Stream stream = await productProvider.create(product, images);
+      await for (var res in stream) {
+        ResponseApi responseApi = ResponseApi.fromJson(json.decode(res));
+        if (responseApi.success != true) {
+          progressDialog.close();
+          Get.snackbar('Error', 'No se pudo guardar el producto: ${product.descr}',
+              backgroundColor: Colors.red, colorText: Colors.white);
+          return;
+        }
+      }
+    }
+
+    progressDialog.close();
+    Get.snackbar('Éxito', 'Todos los productos han sido guardados',
+        backgroundColor: Colors.green, colorText: Colors.white);
+    productosPendientes.clear();
+    clearForm();
+  }
+  void removeProducto(int index) {
+    productosPendientes.removeAt(index);
+    update(); // Esto actualizará la UI
+  }
+  void agregarProducto(BuildContext context) {
+    String descr = descrController.text;
+    String precio = precioController.text;
+    String cantidad = cantidadController.text;
+
+    // Calcula el total multiplicando precio y cantidad
+    double total = double.parse(precio) * double.parse(cantidad);
+
+    if (isValidForm(precio, total.toString(), cantidad, descr)) {
+      double total = double.parse(precio) * double.parse(cantidad);
+
+      Product product = Product(
+          descr: descr,
+          precio: double.parse(precio),
+          total: total,
+          cantidad: double.parse(cantidad),
+          idOc: idOc.value,
+          idMateriales: idMateriales.value
+      );
+
+      productosPendientes.add(product);
+      clearForm2();
+      update();
+      Get.snackbar('Producto agregado', 'El producto se ha agregado a la lista',
+          backgroundColor: Colors.green, colorText: Colors.white);
+    }
+  }
      void clearForm() {
        descrController.text = '';
        precioController.text = '';
@@ -146,5 +217,17 @@ class ProductPageController extends GetxController {
        idMateriales.value = '';
        update();
      }
-
+  void clearForm2() {
+    descrController.text = '';
+    precioController.text = '';
+    cantidadController.text = '';
+    totalController.text = '';
+    idMateriales.value = '';
+    update();
+  }
+  void reloadPage() {
+    getOc();
+    getMateriales();
+    update();         // Actualizar el controlador
+  }
 }

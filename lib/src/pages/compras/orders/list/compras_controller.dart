@@ -38,6 +38,29 @@ class ComprasDetallesController extends GetxController {
     print('OC: ${oc.toJson()}');
     getTotal();
   }
+  void reloadPage() async {
+    // Llamar al método del provider para obtener la cotización por ID
+    Oc? ocActualizada = await ocProvider.getOcById(oc.id!);
+
+    if (ocActualizada != null) {
+      // Actualizar la cotización con los nuevos datos
+      oc = ocActualizada;
+
+      // Actualizar los productos por cada estado
+      for (String estado in estatus) {
+        await cargarProductPorEstatus(estado);
+      }
+
+      // Recalcular el total
+      getTotal();
+
+      // Notificar a los widgets que los datos han cambiado
+      update();
+    } else {
+      // Manejo de errores o estado nulo
+      Get.snackbar('Error', 'No se pudo cargar la cotización');
+    }
+  }
   Future<List<Product>> getProduct(String estatus) async {
     return await productProvider.findByStatus(estatus);
   }
@@ -59,8 +82,6 @@ class ComprasDetallesController extends GetxController {
     ResponseApi responseApi = await ocProvider.updatecerrada(oc);
     Get.snackbar('Proceso terminado', responseApi.message ?? '');
     if (responseApi.success == true) {
-      Get.offNamedUntil('/compras/home', (route) => false);
-
     }
     else {
       Get.snackbar('Peticion denegada', 'verifique informacion');
@@ -81,8 +102,6 @@ class ComprasDetallesController extends GetxController {
     ResponseApi responseApi = await ocProvider.updatecancelada(oc);
     Get.snackbar('Proceso terminado', responseApi.message ?? '');
     if (responseApi.success == true) {
-      Get.offNamedUntil('/compras/home', (route) => false);
-
     }
     else {
       Get.snackbar('Peticion denegada', 'verifique informacion');
@@ -99,17 +118,12 @@ class ComprasDetallesController extends GetxController {
     if (responseApi.success == true) {
       Get.snackbar('Éxito', responseApi.message ?? 'Producto eliminado correctamente', backgroundColor: Colors.green,
         colorText: Colors.white,);
-      if (responseApi.success!) { // Si la respuesta es exitosa, navegar a la página de roles
-        goToHome();
-      }
     } else {
       Get.snackbar('Error', responseApi.message ?? 'Error al eliminar el producto', backgroundColor: Colors.red,
         colorText: Colors.white,);
     }
   }
-  void goToHome() {
-    Get.offNamedUntil('/compras/home', (route) => false);
-  }
+
   Future<void> generarOc() async {
     // Accede a la imagen desde los activos de tu aplicación
     ByteData imageData = await rootBundle.load('assets/img/logoC.png');

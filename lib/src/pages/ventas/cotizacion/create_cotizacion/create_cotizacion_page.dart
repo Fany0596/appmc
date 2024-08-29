@@ -161,7 +161,7 @@ class CotizacionPage extends StatelessWidget {
             Text(
               '     MAQUINADOS CORREA',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -193,43 +193,38 @@ class CotizacionPage extends StatelessWidget {
 
   }
 
-  // imagenes
-  Widget _cardImage(BuildContext context, File? imageFile, int numberFile){
-    return GestureDetector(
-          onTap: () => con.showAlertDialog(context, numberFile) ,
-          child: Card(
-           child: Container(
-                padding: EdgeInsets.all(10),
-                height: 70,
-                width: MediaQuery.of(context).size.width * 0.18,
-                child: imageFile != null
-                ? Image.file(
-                  imageFile,
-                  fit: BoxFit.cover,
-                )
-                : Image (
-                  image:AssetImage('assets/img/pdf.png'),
-                )
-            ),
-          ),
-    );
-  }
   Widget _textFieldCondiciones() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: TextField(
-        controller: con.condicionesController,
-        keyboardType: TextInputType.text,
-        maxLines: 2,
+      child: DropdownButtonFormField<String>(
+        icon: Icon(Icons.arrow_drop_down_circle,
+          color: Colors.grey,),
         decoration: InputDecoration(
-            hintText: 'Condiciones de pago',
-            prefixIcon: Container(
-                child: Icon(Icons.credit_card)
-            )
+          hintText: 'Condiciones de pago',
+          prefixIcon: Icon(Icons.credit_card),
         ),
+        items: [
+          DropdownMenuItem(
+            child: Text('Crédito'),
+            value: 'Crédito',
+          ),
+          DropdownMenuItem(
+            child: Text('Contado'),
+            value: 'Contado',
+          ),
+          DropdownMenuItem(
+            child: Text('50 % Anticipo y 50% despues de la entrega.'),
+            value: '50 % Anticipo y 50% despues de la entrega.',
+          ),
+        ],
+        onChanged: (value) {
+          con.selectedCondition.value = value!; // Actualizar el valor seleccionado
+          con.condicionesController.text = value;
+        },
       ),
     );
   }
+
   Widget _textFieldReq() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),

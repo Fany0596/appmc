@@ -89,7 +89,7 @@ class ComprasDetallesPage extends StatelessWidget {
   }
   Widget _encabezado(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 1,left: 1),
+      //margin: EdgeInsets.only(top: 1,left: 1),
       child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           //alignment: Alignment.topLeft,
@@ -101,7 +101,7 @@ class ComprasDetallesPage extends StatelessWidget {
             Text(
               '  MAQUINADOS CORREA',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -133,7 +133,7 @@ class ComprasDetallesPage extends StatelessWidget {
     return GestureDetector(
       onTap: () => con.goToProduct(product),
       child: Container(
-        height: 195,
+        height: 235,
         margin: EdgeInsets.only(left: 15, right: 15, top: 10),
         child: Card(
           elevation: 3.0,
@@ -219,6 +219,12 @@ class ComprasDetallesPage extends StatelessWidget {
                       width: double.infinity,
                       alignment: Alignment.center,
                       child: Text('Total: ${formatCurrency(product.total ?? 0.0)}'),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 5),
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: Text('Fecha de recepción: ${product.recep ?? ''}'),
                     ),
                   ],
                 ),

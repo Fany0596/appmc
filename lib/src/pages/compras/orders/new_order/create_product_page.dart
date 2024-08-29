@@ -18,6 +18,7 @@ class ProductPage extends StatelessWidget {
         children: [
             _backGroundCover(context),
             _boxForm(context),
+            _buttonReload(),
             _encabezado(context),
             _textAdd(context)
           ],
@@ -46,26 +47,64 @@ class ProductPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
             _textNewCot() ,
-            _ocList(con.oc),
+            _ocList(con.filteredOc),
             _textFieldDescription(),
             _materialesList(con.materiales),
             _textFielPrecio(),
             _textFielCantidad(),
             _textFieldUnid(),
             _textFielTotal(),
-            _buttonSave(context)
+            _buttonAddProduct(context),
+            _listaPendientes(),
+            _buttonSaveAll(context)
 
           ],
         ),
     );
   }
-
+  Widget _listaPendientes() {
+    return GetBuilder<ProductPageController>(
+      builder: (controller) => Column(
+        children: [
+          Text('Productos pendientes de guardar: ${controller.productosPendientes.length}'),
+          Container(
+            height: 200, // Ajusta este valor según tus necesidades
+            child: ListView.builder(
+              itemCount: controller.productosPendientes.length,
+              itemBuilder: (context, index) {
+                final product = controller.productosPendientes[index];
+                return ListTile(
+                  title: Text(product.descr ?? 'Sin artículo'),
+                  subtitle: Text('Cantidad: ${product.cantidad ?? 0}, Precio: ${product.precio ?? 0.0}'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      controller.removeProducto(index);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buttonAddProduct(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => con.agregarProducto(context),
+      child: Text('AGREGAR PRODUCTO'),
+    );
+  }
+  Widget _buttonSaveAll(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => con.guardarTodosLosProductos(context),
+      child: Text('GUARDAR TODOS LOS PRODUCTOS'),
+    );
+  }
   // Texto ingrese datos
   Widget _textNewCot() {
     return
-      //Container(
-     // margin: EdgeInsets.only(top: 20, bottom: 15),
-      //child:
     Text(
         'INGRESE LOS SIGUIENTES DATOS',
         style: TextStyle(
@@ -124,16 +163,6 @@ class ProductPage extends StatelessWidget {
     );
   }
 
-
-  // boton guardar
-  Widget _buttonSave(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        con.createProduct(context);
-      },
-      child: Text('GUARDAR'),
-    );
-  }
 
   Widget _encabezado(BuildContext context) {
     return Container(
@@ -225,10 +254,9 @@ class ProductPage extends StatelessWidget {
     });
     return list;
   }
-  Widget _ocList (List<Oc> oc){
+  Widget _ocList (List<Oc> filteredOc){
     return Obx(() => Container(
       padding: EdgeInsets.only(top: 13, bottom: 0, left: 15, right: 10),
-      //margin: EdgeInsets.only(top: 10),
       child: DropdownButton(
         underline: Container(
           alignment: Alignment.centerRight,
@@ -245,7 +273,7 @@ class ProductPage extends StatelessWidget {
               fontSize: 16
           ),
         ),
-        items: _dropDownItemsc(oc),
+        items: _dropDownItemsc(filteredOc),
         value: con.idOc.value == '' ? null : con.idOc.value,
         onChanged: (option) {
           print('Opcion seleccionada ${option}');
@@ -310,6 +338,21 @@ class ProductPage extends StatelessWidget {
       ),
     );
   }
-
+  Widget _buttonReload() {
+    return SafeArea( // deja espacio de la barra del telefono
+      child: Container(
+        alignment: Alignment.topRight,
+        margin: EdgeInsets.only(right: 20, top: 120),
+        child: IconButton(
+            onPressed: () => con.reloadPage(),
+            icon: Icon(
+              Icons.refresh,
+              color: Colors.white,
+              size: 30,
+            )
+        ),
+      ),
+    );
+  }
 }
 

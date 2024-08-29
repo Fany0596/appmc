@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:maquinados_correa/src/models/Materiales.dart';
 import 'package:maquinados_correa/src/models/product.dart';
 import 'package:maquinados_correa/src/pages/compras/orders/product/compras_product_controller.dart';
@@ -112,6 +113,7 @@ class ComprasProductPage extends StatelessWidget {
           _textFielArticulo(),
           _materialesList(),
           _textFielCantidad(),
+          _textFielRecep(context),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -129,7 +131,11 @@ class ComprasProductPage extends StatelessWidget {
                   : Container(),
               con.product!.estatus == 'RECIBIDO'
                   ? Container(
-                  child: _buttonCancel(context))
+                  child: _buttonSave(context))
+                  : Container(),
+              con.product!.estatus == 'RECIBIDO'
+                  ? Container(
+                  child:  _buttonCancel(context))
                   : Container(),
             ],
           ),
@@ -250,5 +256,39 @@ class ComprasProductPage extends StatelessWidget {
         ),
       ),
     );
+  }
+  Widget _textFielRecep(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(left: 10, right: 10),
+      //margin: EdgeInsets.all(10),
+      child: GestureDetector(
+        onTap: () {
+          _selectDat(context);
+        },
+        child: AbsorbPointer(
+          child: TextFormField(
+            controller: con.recepController,
+            keyboardType: TextInputType.datetime,
+            decoration: InputDecoration(
+              hintText: 'Selecciona una fecha de recepción',
+              hintStyle: TextStyle(fontSize: 14),
+              prefixIcon: Icon(Icons.calendar_today),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDat(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2035),
+    );
+    if (picked != null) {
+      con.recepController.text = DateFormat('yyyy-MM-dd').format(picked);
+    }
   }
 }

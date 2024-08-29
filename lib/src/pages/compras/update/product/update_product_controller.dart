@@ -87,16 +87,15 @@ class UpdateProductPageController extends GetxController {
       ResponseApi responseApi = await productProvider.edit(myproduct);
 
       progressDialog.close();
-      Get.snackbar('Proceso terminado', responseApi.message ?? '', backgroundColor: Colors.green, colorText: Colors.white);
 
       if (responseApi.success == true) {
-        Get.snackbar('Éxito', responseApi.message ?? 'Producto eliminado correctamente', backgroundColor: Colors.green,
+        Get.snackbar('Éxito', responseApi.message ?? 'Producto editado correctamente', backgroundColor: Colors.green,
           colorText: Colors.white,);
         if (responseApi.success!) { // Si la respuesta es exitosa, navegar a la página de roles
           goToHome();
         }
       } else {
-        Get.snackbar('Error', responseApi.message ?? 'Error al eliminar el producto', backgroundColor: Colors.red,
+        Get.snackbar('Error', responseApi.message ?? 'Error al editar el producto', backgroundColor: Colors.red,
           colorText: Colors.white,);
       }
     }

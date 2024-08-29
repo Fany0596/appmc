@@ -5,6 +5,8 @@ import 'package:maquinados_correa/src/models/user.dart';
 import 'package:maquinados_correa/src/pages/Generico/detalles/generico_detalles_page.dart';
 import 'package:maquinados_correa/src/pages/Generico/genericoHome/generico_home_page.dart';
 import 'package:maquinados_correa/src/pages/Generico/list/list_page.dart';
+import 'package:maquinados_correa/src/pages/calidad/comprasHome/calidad_home_page.dart';
+import 'package:maquinados_correa/src/pages/calidad/orders/liberacion/liberacion_page.dart';
 import 'package:maquinados_correa/src/pages/calidad/orders/list/calidad_ot_list_page.dart';
 import 'package:maquinados_correa/src/pages/compras/comprasHome/compras_home_page.dart';
 import 'package:maquinados_correa/src/pages/compras/list/compras_oc_list_page.dart';
@@ -20,6 +22,7 @@ import 'package:maquinados_correa/src/pages/produccion/produccionHome/produccion
 import 'package:maquinados_correa/src/pages/produccion/tabla/produccion_tab_page.dart';
 import 'package:maquinados_correa/src/pages/profile/info/profile_info_page.dart';
 import 'package:maquinados_correa/src/pages/profile/info/update/profile_update_page.dart';
+import 'package:maquinados_correa/src/pages/tym/list/tiempos/tiempos_page.dart';
 import 'package:maquinados_correa/src/pages/tym/list/tym_ot_list_page.dart';
 import 'package:maquinados_correa/src/pages/tym/newOperador/new_operador_page.dart';
 import 'package:maquinados_correa/src/pages/home/home_page.dart';
@@ -35,6 +38,8 @@ import 'package:maquinados_correa/src/pages/ventas/newVendedor/new_vendedor_page
 import 'package:maquinados_correa/src/pages/ventas/orders/detalles/detalles_page.dart';
 import 'package:maquinados_correa/src/pages/ventas/orders/list/ventas_oc_list_page.dart';
 import 'package:maquinados_correa/src/pages/ventas/tabla/ventas_tab_page.dart';
+import 'package:maquinados_correa/src/pages/ventas/update/price/pricem_producto_page.dart';
+import 'package:maquinados_correa/src/pages/ventas/update/update/update_producto_page.dart';
 import 'package:maquinados_correa/src/pages/ventas/ventasHome/ventas_home_page.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -79,6 +84,7 @@ class _MyAppState extends State<MyApp> {
         GetPage(name: '/compras/list', page:()=> ComprasOcListPage()),
         GetPage(name: '/produccion/orders/list', page:()=> ProduccionOtListPage()),
         GetPage(name: '/tym/list', page:()=> TymOtListPage()),
+        GetPage(name: '/tym/list/tiempos', page:()=> TiemposPage()),
         GetPage(name: '/generico/list', page:()=> ListPage()),
         GetPage(name: '/generico/detalles', page:()=>  GenericoDetallesPage()),
         GetPage(name: '/ventas/orders/list', page:()=> VentasOcListPage()),
@@ -95,11 +101,15 @@ class _MyAppState extends State<MyApp> {
         GetPage(name: '/produccion/home', page:()=> ProduccionHomePage()),
         GetPage(name: '/generico/home', page:()=> GenericoHomePage()),
         GetPage(name: '/compras/home', page:()=> ComprasHomePage()),
+        GetPage(name: '/calidad/home', page:()=> CalidadHomePage()),
         GetPage(name: '/ventas/newClient', page:()=> NewClientPage()),
         GetPage(name: '/compras/newProveedor', page:()=> NewProveedorPage()),
         GetPage(name: '/ventas/newVendedor', page:()=> VendedoresPage()),
+        GetPage(name: '/ventas/update/update', page:()=> UpdateProductoPage()),
+        GetPage(name: '/ventas/update/price', page:()=> PriceProductoPage()),
         GetPage(name: '/tym/newOperador', page:()=> OperadorPage()),
         GetPage(name: '/calidad/orders/list', page:()=> CalidadOtListPage()),
+        GetPage(name: '/calidad/orders/liberacion', page:()=> LiberacionPage()),
         GetPage(name: '/compras/orders/new_order/oc', page:()=> OcPage()),
         GetPage(name: '/compras/orders/new_order', page:()=> ProductPage()),
         GetPage(name: '/compras/update/product', page:()=> UpdateProductPage()),

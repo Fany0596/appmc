@@ -65,8 +65,7 @@ class ProduccionOtController extends GetxController {
     String parte = parteController.text;
 
     // Asegúrate de tener el ID del producto que deseas actualizar
-    String productId = producto?.id ??
-        ''; // Esto asume que el ID está presente en el objeto producto
+    String productId = producto?.id ?? ''; // Esto asume que el ID está presente en el objeto producto
     print('ID del producto a actualizar: $productId');
     // Verifica que todas las propiedades del producto estén definidas
     if (articulo.isEmpty || precio.isEmpty || cantidad.isEmpty ||
@@ -117,7 +116,6 @@ class ProduccionOtController extends GetxController {
           responseApi.success! ? 'Éxito' : 'Error',
           responseApi.message ?? '', backgroundColor: Colors.green,
           colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
         );
       } catch (e) {
         print('Error al actualizar el producto: $e');
@@ -146,9 +144,6 @@ class ProduccionOtController extends GetxController {
     }
   void cancelar(BuildContext context) async {
     String articulo = articuloController.text;
-    String precio = precioController.text;
-    String cantidad = cantidadController.text;
-    String parte = parteController.text;
 
     // Asegúrate de tener el ID del producto que deseas actualizar
     String productId = producto?.id ?? ''; // Esto asume que el ID está presente en el objeto producto
@@ -161,27 +156,15 @@ class ProduccionOtController extends GetxController {
       return;
     }
 
-    // Calcula el total multiplicando precio y cantidad
-    double total = double.parse(precio) * double.parse(cantidad);
-
     print('ARTICULO: ${articulo}');
-    print('PRECIO: ${precio}');
-    print('TOTAL: ${total}');
-    print('CANTIDAD: ${cantidad}');
     print('ID MATERIAL: ${idMateriales}');
     ProgressDialog progressDialog = ProgressDialog(context: context);
 
 
-    if (isValidForm(articulo, precio, total.toString(),
-      cantidad, parte,)) { //valida que no esten vacios los campos
+    if (isValidForms(articulo)) { //valida que no esten vacios los campos
       Producto myproducto = Producto(
           id: producto!.id,
           articulo: articulo,
-          precio: double.parse(precio),
-          total: total,
-          //parte: parte,
-          cantidad: double.parse(cantidad),
-          idMateriales: idMateriales.value,
           estatus: 'CANCELADO'
       );
       //Mostrar mensaje de éxito
@@ -201,7 +184,6 @@ class ProduccionOtController extends GetxController {
           responseApi.message ?? '', backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-
       } catch (e) {
         print('Error al actualizar el producto: $e');
         Get.snackbar('Ocurrió un error al actualizar el producto', 'Verifique los campos', backgroundColor: Colors.red,
@@ -210,6 +192,16 @@ class ProduccionOtController extends GetxController {
       }
     }
   }
+  bool isValidForms(String articulo) {
+    if (articulo.isEmpty) {
+      Get.snackbar('Formulario no valido', 'Llene todos los campos', backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,);
+      return false;
+    }
+    return true;
+  }
+
   }
 
 

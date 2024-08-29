@@ -14,4 +14,7 @@ void goToPageRol(Rol rol){
     GetStorage().remove('user');
     Get.offNamedUntil('/', (route) => false); //Elimina el historial de las pantallas y regresa al login
   }
+  void goToPerfilPage(){
+    Get.toNamed('/profile/info');
+  }
 }

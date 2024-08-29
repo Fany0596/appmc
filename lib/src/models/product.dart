@@ -17,6 +17,7 @@ class Product {
   String? idMateriales;
   String? estatus;
   String? pedido;
+  String? recep;
   String? fecha;
   String? ot;
   String? parte;
@@ -38,6 +39,7 @@ class Product {
     this.idMateriales,
     this.estatus,
     this.pedido,
+    this.recep,
     this.fecha,
     this.ot,
     this.parte,
@@ -60,6 +62,7 @@ class Product {
     idMateriales: json["id_materiales"],
     estatus: json["estatus"],
     pedido: json["pedido"],
+    recep: json["recep"],
     fecha: json["fecha"],
     ot: json["ot"],
     parte: json["parte"],
@@ -90,6 +93,7 @@ class Product {
     "id_materiales": idMateriales,
     "estatus": estatus,
     "pedido": pedido,
+    "recep": recep,
     "fecha": fecha,
     "ot": ot,
     "parte": parte,
