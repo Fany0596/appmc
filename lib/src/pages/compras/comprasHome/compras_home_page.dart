@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maquinados_correa/src/pages/compras/comprasHome/compras_home_controller.dart';
 import 'package:maquinados_correa/src/pages/compras/list/compras_oc_list_page.dart';
+import 'package:maquinados_correa/src/pages/compras/orders/create_oc/create_oc_page.dart';
 import 'package:maquinados_correa/src/pages/compras/orders/list/compras_page.dart';
 import 'package:maquinados_correa/src/pages/compras/orders/new_order/create_product_page.dart';
 import 'package:maquinados_correa/src/pages/compras/orders/new_order/oc/create_oc_page.dart';
@@ -20,8 +21,7 @@ class ComprasHomePage extends StatelessWidget {
         children: [
           ComprasTabPage(),
           ComprasOcListPage(),
-          OcPage(),
-          ProductPage(),
+          CombinedOcProductPage(),
         ],
       )),
     );
@@ -50,14 +50,8 @@ class ComprasHomePage extends StatelessWidget {
           inactiveColor: Colors.black,
         ),
         BottomNavyBarItem(
-          icon: Icon(Icons.create),
-          title: Text('Crear'),
-          activeColor: Colors.white,
-          inactiveColor: Colors.black,
-        ),
-        BottomNavyBarItem(
           icon: Icon(Icons.add),
-          title: Text('Añadir'),
+          title: Text('OC'),
           activeColor: Colors.white,
           inactiveColor: Colors.black,
         ),

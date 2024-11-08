@@ -19,137 +19,78 @@ import 'package:logger/logger.dart';
 
 
 class ProduccionDetallesController extends GetxController {
-   Cotizacion cotizacion = Cotizacion.fromJson(Get.arguments['cotizacion']);
+  // Cotizacion cotizacion = Cotizacion.fromJson(Get.arguments['cotizacion']);
 
   final logger = Logger(
     printer: PrettyPrinter(),
     filter: ProductionFilter(), // Solo registra mensajes de nivel de advertencia o superior en producción
   );
 
+  var cotizacion = Cotizacion().obs;
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   var totalt = 0.0.obs;
   double totalCantidad = 0.0;
 
   CotizacionProvider cotizacionProvider = CotizacionProvider();
   ProductoProvider productoProvider = ProductoProvider();
-  List<String> estatus = <String>['POR ASIGNAR', 'EN ESPERA', 'EN PROCESO','SIG. PROCESO','RETRABAJO', 'RECHAZADO', 'LIBERADO', 'ENTREGADO','CANCELADO'].obs;
+   RxList<String> estatus = <String>['POR ASIGNAR', 'EN ESPERA', 'EN PROCESO', 'SIG. PROCESO', 'RETRABAJO', 'RECHAZADO', 'LIBERADO', 'ENTREGADO', 'CANCELADO'].obs;
 
   TextEditingController pedidoController = TextEditingController();
   TextEditingController entregaController = TextEditingController();
   TextEditingController otController = TextEditingController();
-
-  ProduccionDetallesController() {
-    print('Cotizacion: ${cotizacion.toJson()}');
-    getTotal();
-    getTotalCantidad();
-    if (cotizacion.status == 'GENERADA') {
-      cotizacion.producto?.forEach((producto) {
-        // Establecer los valores de pedido, fecha de entrega y OT con los datos de los productos
-        pedidoController.text = producto.pedido ?? '';
-        entregaController.text = producto.fecha ?? '';
-        otController.text = producto.ot ?? '';
-        print('Datos recibidos del backend:');
-        print('Pedido: ${producto.pedido}');
-        print('Articulo: ${producto.articulo}');
-        print('Fecha de entrega: ${producto.fecha}');
-        print('OT: ${producto.ot}');
-      });
-    }
-  }
+  TextEditingController fechaotController = TextEditingController();
 
   RxList<Producto> productosPorEstatus = <Producto>[].obs;
 
+   @override
+   void onInit() {
+     super.onInit();
+     cotizacion.value = Cotizacion.fromJson(Get.arguments['cotizacion']);
+     loadInitialData();
+   }
 
+   void loadInitialData() {
+     getTotalCantidad();
+     if (cotizacion.value.status == 'GENERADA') {
+       cotizacion.value.producto?.forEach((producto) {
+         pedidoController.text = producto.pedido ?? '';
+         entregaController.text = producto.fecha ?? '';
+         otController.text = producto.ot ?? '';
+         fechaotController.text = producto.fechaot ?? '';
+       });
+     }
+     cargarProductosPorEstatus(estatus[0]); // Load initial products
+   }
+
+   void reloadPage() async {
+     try {
+       Cotizacion? cotizacionActualizada = await cotizacionProvider.getCotizacionById(cotizacion.value.id!);
+       if (cotizacionActualizada != null) {
+         cotizacion.value = cotizacionActualizada;
+         loadInitialData();
+         update();
+       } else {
+         Get.snackbar('Error', 'No se pudo cargar la cotización', backgroundColor: Colors.red, colorText: Colors.white);
+       }
+     } catch (e) {
+       print('Error reloading page: $e');
+       Get.snackbar('Error', 'Ocurrió un error al actualizar la cotización', backgroundColor: Colors.red, colorText: Colors.white);
+     }
+   }
   // Método para cargar los productos de la cotización según el estatus seleccionado
   Future<void> cargarProductosPorEstatus(String estatus) async {
     // Limpiar la lista de productos antes de cargar nuevos productos
     productosPorEstatus.clear();
 
     // Obtener los productos de la cotización por el estatus seleccionado
-    List<Producto> productosCotizacion = cotizacion.producto!;
+    List<Producto> productosCotizacion = cotizacion.value.producto!;
     productosPorEstatus.addAll(
         productosCotizacion.where((producto) => producto.estatus == estatus));
     print('Productos por estado $estatus: $productosPorEstatus');
   }
-   void reloadPage() async {
-     // Llamar al método del provider para obtener la cotización por ID
-     Cotizacion? cotizacionActualizada = await cotizacionProvider.getCotizacionById(cotizacion.id!);
 
-     if (cotizacionActualizada != null) {
-       // Actualizar la cotización con los nuevos datos
-       cotizacion = cotizacionActualizada;
-
-       // Actualizar los productos por cada estado
-       for (String estado in estatus) {
-         await cargarProductosPorEstatus(estado);
-       }
-
-       // Recalcular el total
-       getTotal();
-
-       // Notificar a los widgets que los datos han cambiado
-       update();
-     } else {
-       // Manejo de errores o estado nulo
-       Get.snackbar('Error', 'No se pudo cargar la cotización');
-     }
-   }
-
-
-   void updateCotizacion() async {
-    ResponseApi responseApi = await cotizacionProvider.updateconfirmada(
-        cotizacion);
-    if (responseApi.success == true) {
-      Get.snackbar('Proceso terminado', responseApi.message ?? '',
-        backgroundColor: Colors.green,colorText: Colors.white,);
-    }
-    else {
-      Get.snackbar('Peticion denegada', 'verifique informacion',
-        backgroundColor: Colors.red,colorText: Colors.white,);
-    }
-  }
-
-  void updateCancelada() async {
-    ResponseApi responseApi = await cotizacionProvider.updatecancelada(
-        cotizacion);
-    if (responseApi.success == true) {
-      Get.snackbar('Proceso terminado', responseApi.message ?? '',
-        backgroundColor: Colors.green,colorText: Colors.white,);
-    }
-    else {
-      Get.snackbar('Peticion denegada', 'verifique informacion',
-        backgroundColor: Colors.red,colorText: Colors.white,);
-    }
-  }
-
-  void getTotal() {
-    totalt.value = 0.0;
-    cotizacion.producto!.forEach((producto) {
-      if (producto.estatus == 'EN ESPERA') {
-        totalt.value = totalt.value + producto.total!;
-      }
-      if (producto.estatus == 'SIG. PROCESO') {
-        totalt.value = totalt.value + producto.total!;
-      }
-      if (producto.estatus == 'EN PROCESO') {
-        totalt.value = totalt.value + producto.total!;
-      }
-      if (producto.estatus == 'RETRABAJO') {
-        totalt.value = totalt.value + producto.total!;
-      }
-      if (producto.estatus == 'RECHAZADO') {
-        totalt.value = totalt.value + producto.total!;
-      }
-      if (producto.estatus == 'LIBERADO') {
-        totalt.value = totalt.value + producto.total!;
-      }
-      if (producto.estatus == 'ENTREGADO') {
-        totalt.value = totalt.value + producto.total!;
-      }
-    });
-  }
    void getTotalCantidad() {
-     cotizacion.producto!.forEach((producto) {
+     cotizacion.value.producto!.forEach((producto) {
        if (producto.estatus != 'CANCELADO') {
          totalCantidad = totalCantidad + producto.cantidad!;
          print('Total cantidad  $totalCantidad');
@@ -165,22 +106,23 @@ class ProduccionDetallesController extends GetxController {
 
   void generar() async {
     // Recorrer todos los productos de la cotización y actualizar los campos
-    cotizacion.producto?.forEach((producto) {
+    cotizacion.value.producto?.forEach((producto) {
       producto.pedido = pedidoController.text;
       producto.fecha = entregaController.text;
       producto.ot = otController.text;
+      producto.fechaot = fechaotController.text;
     });
-    await generarPDF();
-    await generarPDFs();
+
 
     if (isValidForm(pedidoController, entregaController,
-        otController)) { //valida que no esten vacios los campos
-      cotizacion.producto?.forEach((producto) async {
+        otController, fechaotController)) { //valida que no esten vacios los campos
+      cotizacion.value.producto?.forEach((producto) async {
         Producto miproducto = Producto(
           id: producto.id,
           pedido: pedidoController.text,
           fecha: entregaController.text,
           ot: otController.text,
+          fechaot: fechaotController.text,
         );
 
 
@@ -193,27 +135,40 @@ class ProduccionDetallesController extends GetxController {
 
         });
       });
-    }
-    ResponseApi responseApi = await cotizacionProvider.updategenerada(
-        cotizacion);
-    if (responseApi.success == true) {
-      Get.snackbar('Proceso terminado', responseApi.message ?? '',
-        backgroundColor: Colors.green,colorText: Colors.white,);
+      await generarPDF();
+      await generarPDFs();
+      ResponseApi responseApi = await cotizacionProvider.updategenerada(
+          cotizacion.value);
+      if (responseApi.success == true) {
+        Get.snackbar('Proceso terminado', responseApi.message ?? '',
+          backgroundColor: Colors.green,colorText: Colors.white,);
+      }
     }
     else {
-      Get.snackbar('Peticion denegada', 'verifique informacion');
+      //Get.snackbar('Peticion denegada', 'verifique informacion', backgroundColor: Colors.red,colorText: Colors.white);
     }
   }
 
   bool isValidForm(TextEditingController pedidoController,
       TextEditingController entregaController,
-      TextEditingController otController) {
+      TextEditingController otController,TextEditingController fechaotController ) {
     // Verificar si el campo de pedido está vacío
     if (pedidoController.text.isEmpty) {
-      Get.snackbar('Formulario no válido', 'Ingresa número de cotización');
+      Get.snackbar('Formulario no válido', 'Ingresa número de pedido', backgroundColor: Colors.red,colorText: Colors.white);
       return false;
     }
-
+    if (fechaotController.text.isEmpty) {
+      Get.snackbar('Formulario no válido', 'Ingresa fecha de ingreso', backgroundColor: Colors.red,colorText: Colors.white);
+      return false;
+    }
+    if (entregaController.text.isEmpty) {
+      Get.snackbar('Formulario no válido', 'Ingresa fecha de entrega', backgroundColor: Colors.red,colorText: Colors.white);
+      return false;
+    }
+    if (otController.text.isEmpty) {
+      Get.snackbar('Formulario no válido', 'Ingresa numero de OT', backgroundColor: Colors.red,colorText: Colors.white);
+      return false;
+    }
     return true;
   }
 
@@ -223,7 +178,7 @@ class ProduccionDetallesController extends GetxController {
     // Convierte los datos de la imagen a un arreglo de bytes
     Uint8List bytess = imageData.buffer.asUint8List();
     // Obtener la lista de productos en espera
-    List<Producto> productosEspera = cotizacion.producto!
+    List<Producto> productosEspera = cotizacion.value.producto!
         .where((producto) => producto.estatus != 'POR ASIGNAR')
         .toList();
     // Crear una lista de listas para almacenar los datos de los productos
@@ -338,7 +293,7 @@ class ProduccionDetallesController extends GetxController {
                               1: pw.FixedColumnWidth(70), // Ancho de la segunda columna
                             },
                             data: [
-                              ['Cliente:', '${cotizacion.clientes!.name}'],
+                              ['Cliente:', '${cotizacion.value.clientes!.name}'],
                             ],
                             cellAlignment: pw.Alignment.center,
                           ),
@@ -444,7 +399,7 @@ class ProduccionDetallesController extends GetxController {
                               1: pw.FixedColumnWidth(50), // Ancho de la segunda columna
                             },
                             data: [
-                              ['Fecha:   ', '$currentDate'],
+                              ['Fecha:   ', '${fechaotController.text}'],
                             ],
                             cellAlignment: pw.Alignment.center,
                           ),
@@ -612,7 +567,7 @@ class ProduccionDetallesController extends GetxController {
   List<pw.Widget> getProductDetails() {
     List<pw.Widget> details = [];
     // Filtrar productos en espera
-    List<Producto> productosEspera = cotizacion.producto!
+    List<Producto> productosEspera = cotizacion.value.producto!
         .where((producto) => producto.estatus == 'EN ESPERA')
         .toList();
     // Construir la lista de detalles de productos en espera
@@ -639,7 +594,7 @@ class ProduccionDetallesController extends GetxController {
       // Convierte los datos de la imagen a un arreglo de bytes
       Uint8List byteess = imageData2.buffer.asUint8List();
 
-    List<Producto> productosEspera = cotizacion.producto!
+    List<Producto> productosEspera = cotizacion.value.producto!
         .where((producto) => producto.estatus != 'POR ASIGNAR')
         .toList();
     productosEspera.forEach((producto) async {
@@ -741,7 +696,7 @@ class ProduccionDetallesController extends GetxController {
                                 // Ancho de la segunda columna
                               },
                               data: [
-                                ['Cliente:', '${cotizacion.clientes!.name}'],
+                                ['Cliente:', '${cotizacion.value.clientes!.name}'],
                               ],
                               cellAlignment: pw.Alignment.center,
                               cellStyle: pw.TextStyle(fontSize: 4),
@@ -1188,8 +1143,6 @@ class ProduccionDetallesController extends GetxController {
         final file = File('${directory!.path}/HI-${producto.articulo}.pdf');
         await file.writeAsBytes(await pdf.save());
         final bytes = await pdf.save();
-         Get.snackbar('DOCUMENTO DESCARGADO EN:', '${file.path}', backgroundColor: Colors.green,
-           colorText: Colors.white,);
          print('PDF guardado en: ${file.path}');
         try {
           await file.writeAsBytes(bytes);

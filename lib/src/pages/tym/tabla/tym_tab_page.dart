@@ -1,9 +1,9 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
 import 'package:get/get.dart';
 import 'package:maquinados_correa/src/pages/tym/tabla/tym_tab_controller.dart';
+import 'package:maquinados_correa/src/widgets/ScrollableTableWrapper.dart';
 
 class TymTabPage extends StatelessWidget {
   final TymTabController con = Get.put(TymTabController());
@@ -85,7 +85,7 @@ class TymTabPage extends StatelessWidget {
                               onPressed: () => con.goToRoles(),
                               icon: Icon(
                                 Icons.supervised_user_circle,
-                                color: Colors.white,
+                                color: Colors.black,
                                 size: 30,
                               )
                           ),
@@ -97,7 +97,7 @@ class TymTabPage extends StatelessWidget {
                               onPressed: () => con.signOut(),
                               icon: Icon(
                                 Icons.power_settings_new,
-                                color: Colors.white,
+                                color: Colors.black,
                                 size: 30,
                               )
                           ),
@@ -112,37 +112,7 @@ class TymTabPage extends StatelessWidget {
           appBar: AppBar(
             title: _encabezado(context),
           ),
-          body: Focus(
-            autofocus: true,
-            onKey: (node, event) {
-              if (event is RawKeyDownEvent) {
-                if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-                  _scrollController.animateTo(
-                    _scrollController.offset + 50,
-                    duration: Duration(milliseconds: 100),
-                    curve: Curves.easeInOut,
-                  );
-                  return KeyEventResult.handled;
-                } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-                  _scrollController.animateTo(
-                    _scrollController.offset - 50,
-                    duration: Duration(milliseconds: 100),
-                    curve: Curves.easeInOut,
-                  );
-                  return KeyEventResult.handled;
-                }
-              }
-              return KeyEventResult.ignored;
-            },
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              controller: _scrollController,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: _table(context),
-              ),
-            ),
-          ),
+          body: ScrollableTableWrapper(child: _table(context))
         ),
     );
   }
@@ -157,14 +127,6 @@ class TymTabPage extends StatelessWidget {
             width: 55, //ancho de imagen
             height: 55, //alto de imagen
           ),
-            Text(
-              '  MAQUINADOS CORREA',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
           ]
       ),
     );
@@ -183,41 +145,61 @@ class TymTabPage extends StatelessWidget {
           if (cotizaciones == null || cotizaciones.isEmpty) {
             return Center(child: Text('No hay cotizaciones generadas'));
           } else {
+            // Listas de estatus en el orden deseado
+            List<String> statusOrder = [
+              'EN PROCESO',
+              'SIG. PROCESO',
+              'SUSPENDIDO',
+              'RETRABAJO',
+              'RECHAZADO',
+              'EN ESPERA'
+            ];
+
+            // Obtener y ordenar los productos
+            var productosOrdenados = cotizaciones.expand((cotizacion) {
+              return cotizacion.producto!.where((producto) =>
+              producto.estatus != 'CANCELADO' &&
+                  producto.estatus != 'POR ASIGNAR' &&
+                  producto.estatus != 'ENTREGADO'
+              ).toList();
+            }).toList();
+
+            // Ordenar los productos por estatus y luego por O.T.
+            productosOrdenados.sort((a, b) {
+              int statusComparison = statusOrder.indexOf(a.estatus ?? '').compareTo(statusOrder.indexOf(b.estatus ?? ''));
+              if (statusComparison != 0) {
+                return statusComparison;
+              }
+              return (a.ot ?? '').compareTo(b.ot ?? '');
+            });
             return DataTable(
+              dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                return Colors.transparent; // Color base transparente para permitir colores personalizados
+              }),
               columns: [
-                DataColumn(label: Text('O.T.', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('O.T.', style: TextStyle(fontSize: 17),)),
                 DataColumn(
                   label: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('No. PARTE/', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5),),
-                      Text('PLANO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
+                      Text('No. PARTE/', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5),),
+                      Text('PLANO', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
                     ],
                   ),
                 ),
-                DataColumn(label: Text('ARTICULO', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('CANTIDAD', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('ESTATUS', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('OPERACIÓN', style: TextStyle(fontSize: 13),)),
-                DataColumn(label: Text('OPERADOR', style: TextStyle(fontSize: 13),)),
+                DataColumn(label: Text('ARTICULO', style: TextStyle(fontSize: 18),)),
+                DataColumn(label: Text('CANTIDAD', style: TextStyle(fontSize: 18),)),
+                DataColumn(label: Text('ESTATUS', style: TextStyle(fontSize: 18),)),
+                DataColumn(label: Text('OPERACIÓN', style: TextStyle(fontSize: 18),)),
+                DataColumn(label: Text('OPERADOR', style: TextStyle(fontSize: 18),)),
                 DataColumn(
                   label: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('TIEMPO EN', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
-                      Text('PROCESO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text('TIEMPO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
-                      Text('ESTIMADO', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5)),
+                      Text('TIEMPO EN', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
+                      Text('PROCESO', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
                     ],
                   ),
                 ),
@@ -226,36 +208,47 @@ class TymTabPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('FECHA', textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
-                      Text('DE ENTREGA', textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
+                      Text('TIEMPO', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
+                      Text('TOTAL', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
                     ],
                   ),
                 ),
-                DataColumn(label: Text('REPORTE', style: TextStyle(fontSize: 13),)),
+                DataColumn(
+                  label: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('FECHA', textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+                      Text('DE ENTREGA', textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+                    ],
+                  ),
+                ),
+                DataColumn(label: Text('REPORTE', style: TextStyle(fontSize: 17),)),
               ],
-              rows: cotizaciones.expand((cotizacion) {
-                return cotizacion.producto!.where((producto) => producto.estatus != 'CANCELADO').map((producto) {
+              rows: productosOrdenados.map((producto) {
+                Color rowColor = _getColorForDeliveryDateRow(producto.fecha);
                   return DataRow(
+                    color: MaterialStateProperty.all(rowColor),
                     cells: [
                       DataCell(GestureDetector(
                         onTap: () => con.goToOt(producto),
                         child: Text(producto.ot ?? '',
-                          style: TextStyle(fontSize: 11),),
+                          style: TextStyle(fontSize: 16),),
                       )),
                       DataCell(GestureDetector(
                         onTap: () => con.goToOt(producto),
                         child: Text(producto.parte ?? '',
-                          style: TextStyle(fontSize: 10),),
+                          style: TextStyle(fontSize: 15),),
                       )),
                       DataCell(GestureDetector(
                         onTap: () => con.goToOt(producto),
                         child: Text(producto.articulo ?? '',
-                          style: TextStyle(fontSize: 10),),
+                          style: TextStyle(fontSize: 15),),
                       )),
                       DataCell(GestureDetector(
                         onTap: () => con.goToOt(producto),
                         child: Text(producto.cantidad.toString(),
-                          style: TextStyle(fontSize: 11),),
+                          style: TextStyle(fontSize: 16),),
                       )),
                       DataCell(
                         GestureDetector(
@@ -263,55 +256,80 @@ class TymTabPage extends StatelessWidget {
                           child: Container(
                             color: _getColorForStatus(producto.estatus),
                             child: Text(producto.estatus ?? '',
-                              style: TextStyle(fontSize: 11),),
+                              style: TextStyle(fontSize: 16)),
                           ),
                         ),
                       ),
                       DataCell(GestureDetector(
                         onTap: () => con.goToOt(producto),
                         child: Text(producto.operacion ?? '',
-                          style: TextStyle(fontSize: 11),),
+                          style: TextStyle(fontSize: 16),),
                       )),
                       DataCell(GestureDetector(
                         onTap: () => con.goToOt(producto),
                         child: Text(producto.operador ?? '',
-                            style: TextStyle(fontSize: 11)),
+                            style: TextStyle(fontSize: 16)),
                       )),
                       DataCell(
                         FutureBuilder<Map<String, String>>(
-                          future: con.calcularTiempoEstimado(producto.id!),
+                          future: con.calcularTiempoTotal(producto.id!, producto.parte ?? ''),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return CircularProgressIndicator();
                             } else if (snapshot.hasError) {
-                              return Text('Error', style: TextStyle(fontSize: 11));
+                              return Text('Error', style: TextStyle(fontSize: 16));
                             } else {
-                              return Text(snapshot.data?['actual'] ?? 'N/A', style: TextStyle(fontSize: 11));
+                              return Text(snapshot.data?['actual'] ?? '', style: TextStyle(fontSize: 16));
                             }
                           },
                         ),
                       ),
                       DataCell(
                         FutureBuilder<Map<String, String>>(
-                          future: con.calcularTiempoEstimado(producto.id!),
+                          future: con.calcularTiempoTotal(producto.id!, producto.parte ?? ''),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return CircularProgressIndicator();
                             } else if (snapshot.hasError) {
-                              return Text('Error', style: TextStyle(fontSize: 11));
+                              return Text('Error', style: TextStyle(fontSize: 16));
                             } else {
-                              return Text(snapshot.data?['total'] ?? 'N/A', style: TextStyle(fontSize: 11));
+                              String tiempoTotal = snapshot.data?['total'] ?? '';
+                              String tiempoEstimado = snapshot.data?['estimado'] ?? '';
+                              Color textColor = Colors.black;
+                              String displayText = tiempoTotal;
+
+                              if (tiempoTotal != 'N/A' && tiempoEstimado.isNotEmpty) {
+                                List<String> totalParts = tiempoTotal.split(':');
+                                List<String> estimadoParts = tiempoEstimado.split(':');
+                                int totalMinutos = int.parse(totalParts[0]) * 60 + int.parse(totalParts[1]);
+                                int estimadoMinutos = int.parse(estimadoParts[0]) * 60 + int.parse(estimadoParts[1]);
+
+                                if (totalMinutos > estimadoMinutos) {
+                                  textColor = Colors.red;
+                                }
+
+                                displayText = ' $tiempoEstimado/$tiempoTotal';
+                              }
+
+                              return Text(
+                                  displayText,
+                                  style: TextStyle(fontSize: 16, color: textColor,fontWeight: FontWeight.bold)
+                              );
                             }
                           },
                         ),
                       ),
-                      _buildFechaEntregaCell(producto.fecha),
+                      DataCell(GestureDetector(
+                        onTap: () => con.goToOt(producto),
+                        child: Text(producto.fecha ?? '',
+                            style: TextStyle(fontSize: 16)),
+                      )),
                       DataCell(GestureDetector(
                         onTap: () => con.goToOt(producto),
                         child: Row(
                           children: [
                             IconButton(
-                              icon: Icon(Icons.picture_as_pdf, size: 18, color: Colors.red),
+                              icon: Icon(Icons.picture_as_pdf, size: 23, color: Colors.red),
                               onPressed: () async {
                                 await con.generarPDF(producto);
                               },
@@ -321,7 +339,6 @@ class TymTabPage extends StatelessWidget {
                       )),
                     ],
                   );
-                }).toList();
               }).toList(),
             );
           }
@@ -333,49 +350,36 @@ class TymTabPage extends StatelessWidget {
   // Función para obtener el color según el estatus
   Color _getColorForStatus(String? estatus) {
     switch (estatus) {
-      case 'EN ESPERA':
-        return Colors.grey;
       case 'RETRABAJO':
-        return Colors.yellow;
-      case 'SUSPENDIDO':
-        return Colors.orange;
+        return Color.fromARGB(250, 250, 110, 0);
       case 'RECHAZADO':
         return Colors.red;
-      case 'EN PROCESO':
-        return Colors.lightGreenAccent;
       case 'LIBERADO':
-        return Colors.green;
-      case 'SIG. PROCESO':
         return Colors.blue;
       default:
-        return Colors.white; // Color por defecto
+        return Colors.transparent; // Color por defecto
     }
   }
-  Color _getColorForDeliveryDate(String? fechaEntrega) {
-    if (fechaEntrega == null) return Colors.transparent; // Si la fecha es nula, no se aplica ningún color
 
-    DateTime fechaEntregaDate = DateTime.parse(fechaEntrega);
-    DateTime ahora = DateTime.now();
-    int diferenciaDias = fechaEntregaDate.difference(ahora).inDays;
+  Color _getColorForDeliveryDateRow(String? fechaEntrega) {
+    if (fechaEntrega == null) return Colors.transparent;
 
-    if (diferenciaDias <= 0) {
-      return Colors.red; // Fecha de entrega es hoy o ya ha pasado
-    } else if (diferenciaDias <= 5) {
-      return Colors.orange; // Faltan 5 días o menos para la fecha de entrega
-    } else {
-      return Colors.transparent; // No se aplica ningún color
+    try {
+      DateTime fechaEntregaDate = DateTime.parse(fechaEntrega);
+      DateTime ahora = DateTime.now();
+      int diferenciaDias = fechaEntregaDate.difference(ahora).inDays;
+
+      if (diferenciaDias <= 0) {
+        return Colors.red.withOpacity(0.5); // Fecha vencida o es hoy
+      } else if (diferenciaDias <= 5) {
+        return Colors.orange.withOpacity(0.5); // 5 días o menos
+      } else if (diferenciaDias <= 10) {
+        return Colors.yellow.withOpacity(0.5); // 10 días o menos
+      } else {
+        return Colors.transparent; // Más de 10 días
+      }
+    } catch (e) {
+      return Colors.transparent; // En caso de error en el parsing de la fecha
     }
-  }
-  DataCell _buildFechaEntregaCell(String? fechaEntrega) {
-    return DataCell(
-      Container(
-        color: _getColorForDeliveryDate(fechaEntrega),
-        padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 6.0),
-        child: Text(
-          fechaEntrega ?? '',
-          style: TextStyle(fontSize: 11),
-        ),
-      ),
-    );
   }
 }

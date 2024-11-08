@@ -98,10 +98,12 @@ class ComprasProductController extends GetxController {
         progressDialog.close();
 
         // Mostrar el resultado de la solicitud
-        Get.snackbar(
-          responseApi.success! ? 'Éxito'   : 'Error',
-          responseApi.message ?? '',
-        );
+        if (responseApi.success == true) {
+          Get.snackbar(
+            'Éxito','Producto recibido correctamente',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,);
+        }
       } catch (e) {
         print('Error al actualizar el producto: $e');
         Get.snackbar('Error', 'Ocurrió un error al actualizar el producto', backgroundColor: Colors.red,

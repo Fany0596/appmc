@@ -19,7 +19,6 @@ class PriceProductoPage extends StatelessWidget {
             _boxForm(context),
             _buttonBack(),
             _encabezado(context),
-            _textAdd(context)
           ],
         ),
       )
@@ -99,9 +98,9 @@ class PriceProductoPage extends StatelessWidget {
           ),
             SizedBox(width: 10),
             Text(
-              '     MAQUINADOS CORREA',
+              '     PRECIO DE MATERIAL',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 25,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -110,32 +109,6 @@ class PriceProductoPage extends StatelessWidget {
       ),
     );
   }
-  // imagen
-  Widget _textAdd(BuildContext context){
-    return SafeArea(
-      child: Container(
-        alignment: Alignment.topCenter,
-        margin: EdgeInsets.only(top:70, bottom: 15),
-        child: Column (
-          children: [
-            Icon(Icons.price_check,
-                size: 105),
-            Text(
-              'PRECIO DE MATERIAL',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontSize: 28
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-  }
-
-  // lista vendedores
 
   Widget _materialesList (List<Materiales> materiales){
       return Container(
@@ -147,7 +120,6 @@ class PriceProductoPage extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: Icon(
               Icons.arrow_drop_down_circle,
-              color: Colors.grey,
             ),
           ),
           elevation: 3,
@@ -155,7 +127,8 @@ class PriceProductoPage extends StatelessWidget {
           hint: Text(
             'Selecciona un material',
             style: TextStyle(
-                fontSize: 20
+                fontSize: 20,
+              color: Colors.black
             ),
           ),
           items: _dropDownItems(materiales),

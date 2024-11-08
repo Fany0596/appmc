@@ -76,9 +76,6 @@ class ComprasOcListController extends GetxController {
     Get.toNamed('/compras/newProveedor');
   }
 
-  void goToNewClientePage() {
-    Get.toNamed('/ventas/newClient');
-  }
 
   void goToPerfilPage() {
     Get.toNamed('/profile/info');

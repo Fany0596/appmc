@@ -46,6 +46,8 @@ class UpdateProductPageController extends GetxController {
     getMateriales();
     descrController.text = product.descr!;
     unidController.text = product.unid!;
+    precioController.text = product.precio.toString();
+    cantidadController.text = product.cantidad.toString();
   }
   void getMateriales() async {
     var result = await materialesProvider.getAll();

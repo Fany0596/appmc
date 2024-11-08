@@ -38,16 +38,6 @@ class VentasDetallesPage extends StatelessWidget {
                     _buttonReload(),
                   ],
                 ),
-                flexibleSpace: Container(
-                  margin: EdgeInsets.only(top: 30, bottom: 10),
-                  alignment: Alignment.center,
-                  child: Wrap(
-                    direction: Axis.horizontal,
-                    children: [
-                      _textCot(context),
-                    ],
-                  ),
-                ),
                 bottom: TabBar(
                   isScrollable: true,
                   indicatorColor: Colors.grey,
@@ -100,9 +90,9 @@ class VentasDetallesPage extends StatelessWidget {
             height: 55, // alto de imagen
           ),
           Text(
-            '  MAQUINADOS CORREA',
+            '  Cotización #${con.cotizacion.number}',
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 25,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -112,26 +102,9 @@ class VentasDetallesPage extends StatelessWidget {
     );
   }
 
-  Widget _textCot(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.95,
-        child: Text(
-          'Cotización #${con.cotizacion.number}',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 20,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-
-
   Widget _cardProducto(Producto producto) {
     return Container(
-      height: 160,
+      height: 200,
       margin: EdgeInsets.only(left: 15, right: 15, top: 10),
       child: Card(
         elevation: 3.0,
@@ -192,6 +165,12 @@ class VentasDetallesPage extends StatelessWidget {
                     margin: EdgeInsets.only(top: 5),
                     width: double.infinity,
                     alignment: Alignment.center,
+                    child: Text('Descripción: ${producto.descr ?? ''}'),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 5),
+                    width: double.infinity,
+                    alignment: Alignment.center,
                     child: Text('Material: ${producto.name ?? ''}'),
                   ),
                   Container(
@@ -227,7 +206,7 @@ class VentasDetallesPage extends StatelessWidget {
     Get.defaultDialog(
       title: 'Confirmación',
       content:
-      Text('¿Estás seguro de eliminar el producto ${producto.articulo}?'),
+      Text('¿Estás seguro de eliminar el producto ${producto.descr}?'),
       actions: [
         ElevatedButton(
           onPressed: () {
@@ -278,47 +257,6 @@ class VentasDetallesPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          switch (value) {
-                            case 'Certificado tratamiento':
-                              con.toggleReportetratAgregadas();
-                              break;
-                            case 'Certificado de material':
-                              con.toggleReportematAgregadas();
-                              break;
-                            case 'Reporte dimensional':
-                              con.toggleReportedimAgregadas();
-                              break;
-                            case 'Reporte de rugosidad':
-                              con.toggleReporterugAgregadas();
-                              break;
-                            case 'Agregar Garantías':
-                              con.toggleGarantiasAgregadas();
-                              break;
-                            case 'Agregar Datos Bancarios':
-                              con.toggleBancariosAgregadas();
-                              break;
-                          }
-                        },
-                        itemBuilder: (BuildContext context) {
-                          return [
-                            PopupMenuItem(value: 'Certificado tratamiento', child: Text('Certificado tratamiento')),
-                            PopupMenuItem(value: 'Certificado de material', child: Text('Certificado de material')),
-                            PopupMenuItem(value: 'Reporte dimensional', child: Text('Reporte dimensional')),
-                            PopupMenuItem(value: 'Reporte de rugosidad', child: Text('Reporte de rugosidad')),
-                            PopupMenuItem(value: 'Agregar Garantías', child: Text('Agregar Garantías')),
-                            PopupMenuItem(value: 'Agregar Datos Bancarios', child: Text('Agregar Datos Bancarios')),
-                          ];
-                        },
-                        child: Row(
-                          children: [
-                            Icon(Icons.menu, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text('Opciones', style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                      ),
                       ElevatedButton(
                         onPressed: () => con.updateCancelada(),
                         style: ElevatedButton.styleFrom(
@@ -349,47 +287,6 @@ class VentasDetallesPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          switch (value) {
-                            case 'Certificado tratamiento':
-                              con.toggleReportetratAgregadas();
-                              break;
-                            case 'Certificado de material':
-                              con.toggleReportematAgregadas();
-                              break;
-                            case 'Reporte dimensional':
-                              con.toggleReportedimAgregadas();
-                              break;
-                            case 'Reporte de rugosidad':
-                              con.toggleReporterugAgregadas();
-                              break;
-                            case 'Agregar Garantías':
-                              con.toggleGarantiasAgregadas();
-                              break;
-                            case 'Agregar Datos Bancarios':
-                              con.toggleBancariosAgregadas();
-                              break;
-                          }
-                        },
-                        itemBuilder: (BuildContext context) {
-                          return [
-                            PopupMenuItem(value: 'Certificado tratamiento', child: Text('Certificado tratamiento')),
-                            PopupMenuItem(value: 'Certificado de material', child: Text('Certificado de material')),
-                            PopupMenuItem(value: 'Reporte dimensional', child: Text('Reporte dimensional')),
-                            PopupMenuItem(value: 'Reporte de rugosidad', child: Text('Reporte de rugosidad')),
-                            PopupMenuItem(value: 'Agregar Garantías', child: Text('Agregar Garantías')),
-                            PopupMenuItem(value: 'Agregar Datos Bancarios', child: Text('Agregar Datos Bancarios')),
-                          ];
-                        },
-                        child: Row(
-                          children: [
-                            Icon(Icons.menu, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text('Opciones', style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                      ),
                       ElevatedButton(
                         onPressed: () => con.updateCerrada(),
                         style: ElevatedButton.styleFrom(
@@ -412,47 +309,6 @@ class VentasDetallesPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          switch (value) {
-                            case 'Certificado tratamiento':
-                              con.toggleReportetratAgregadas();
-                              break;
-                            case 'Certificado de material':
-                              con.toggleReportematAgregadas();
-                              break;
-                            case 'Reporte dimensional':
-                              con.toggleReportedimAgregadas();
-                              break;
-                            case 'Reporte de rugosidad':
-                              con.toggleReporterugAgregadas();
-                              break;
-                            case 'Agregar Garantías':
-                              con.toggleGarantiasAgregadas();
-                              break;
-                            case 'Agregar Datos Bancarios':
-                              con.toggleBancariosAgregadas();
-                              break;
-                          }
-                        },
-                        itemBuilder: (BuildContext context) {
-                          return [
-                            PopupMenuItem(value: 'Certificado tratamiento', child: Text('Certificado tratamiento')),
-                            PopupMenuItem(value: 'Certificado de material', child: Text('Certificado de material')),
-                            PopupMenuItem(value: 'Reporte dimensional', child: Text('Reporte dimensional')),
-                            PopupMenuItem(value: 'Reporte de rugosidad', child: Text('Reporte de rugosidad')),
-                            PopupMenuItem(value: 'Agregar Garantías', child: Text('Agregar Garantías')),
-                            PopupMenuItem(value: 'Agregar Datos Bancarios', child: Text('Agregar Datos Bancarios')),
-                          ];
-                        },
-                        child: Row(
-                          children: [
-                            Icon(Icons.menu, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text('Opciones', style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                      ),
                       ElevatedButton(
                         onPressed: () => con.generarCot(),
                         style: ElevatedButton.styleFrom(
@@ -489,165 +345,4 @@ class VentasDetallesPage extends StatelessWidget {
     ),
   );
 }
-
-Widget _agregados(BuildContext context) {
-  return Row(
-    children: [
-      Column(
-        children: [
-          Container(
-            child: Row(
-              children: [
-                Text(
-                  'VALORES AGREGADOS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            child: Row(
-              children: [
-                Checkbox(
-                  value: con.reportetratAgregadas.value,
-                  onChanged: (value) {
-                    con
-                        .toggleReportetratAgregadas(); // Cambia el estado llamando al método en el controlador
-                  },
-                ),
-                Text(
-                  'Certificado tratamiento',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(right: 5),
-            child: Row(
-              children: [
-                Checkbox(
-                  value: con.reportematAgregadas.value,
-                  onChanged: (value) {
-                    con
-                        .toggleReportematAgregadas(); // Cambia el estado llamando al método en el controlador
-                  },
-                ),
-                Text(
-                  'Certificado de material',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      Column(
-        children: [
-          Container(
-            child: Row(
-              children: [
-                Checkbox(
-                  value: con.reportedimAgregadas.value,
-                  onChanged: (value) {
-                    con
-                        .toggleReportedimAgregadas(); // Cambia el estado llamando al método en el controlador
-                  },
-                ),
-                Text(
-                  'Reporte dimensional',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(left: 7),
-            child: Row(
-              children: [
-                Checkbox(
-                  value: con.reporterugAgregadas.value,
-                  onChanged: (value) {
-                    con
-                        .toggleReporterugAgregadas(); // Cambia el estado llamando al método en el controlador
-                  },
-                ),
-                Text(
-                  'Reporte de rugosidad',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ],
-  );
 }
-
-Widget _datos(BuildContext context) {
-  return Column(
-    children: [
-      Container(
-        // Botón de verificación para agregar garantías
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Checkbox(
-              value: con.garantiasAgregadas.value,
-              onChanged: (value) {
-                con
-                    .toggleGarantiasAgregadas(); // Cambia el estado llamando al método en el controlador
-              },
-            ),
-            Text(
-              'Agregar Garantías',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-      Container(
-        // Botón de verificación para agregar bancarios
-        margin: EdgeInsets.only(left: 45),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Checkbox(
-              value: con.bancariosAgregadas.value,
-              onChanged: (value) {
-                con
-                    .toggleBancariosAgregadas(); // Cambia el estado llamando al método en el controlador
-              },
-            ),
-            Text(
-              'Agregar Datos Bancarios',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-}}

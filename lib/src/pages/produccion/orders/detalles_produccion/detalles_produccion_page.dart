@@ -20,12 +20,21 @@ class ProduccionDetallesPage extends StatelessWidget {
         child: Scaffold(
             bottomNavigationBar: Container(
               color: Color.fromRGBO(176, 160, 117, 1),
-              height: 255,
+              height: 240,
               child: Column(
                 children: [
-                  _textFielPedido(context),
-                  _entrega(context),
-                  _textOT(),
+                  Row(
+                    children: [
+                      Expanded(flex: 2, child: _ingreso(context)),
+                      SizedBox(width: 10),
+                      Expanded(flex: 2, child: _textFielPedido(context)),
+                      SizedBox(width: 10),
+                      Expanded(flex: 2, child: _entrega(context)),
+                      SizedBox(width: 10),
+                      Expanded(flex: 2, child:  _textOT()),
+                      SizedBox(width: 10),
+                    ],
+                  ),
                   _totalToPay(context)
                 ],
               ),
@@ -40,17 +49,6 @@ class ProduccionDetallesPage extends StatelessWidget {
                     _buttonReload(),
                   ],
                 ),
-                flexibleSpace: Container(
-                  margin: EdgeInsets.only(top: 30, bottom: 10),
-                  alignment: Alignment.center,
-                  child: Wrap(
-                    direction: Axis.horizontal,
-                    children: [
-                      //_textFieldSearch(context)
-                      _textCot(context)
-                    ],
-                  ),
-                ),
                 bottom: TabBar(
                   isScrollable: true,
                   indicatorColor: Colors.grey,
@@ -63,27 +61,27 @@ class ProduccionDetallesPage extends StatelessWidget {
                   }),
                   onTap: (index) {
                     con.cargarProductosPorEstatus(con.estatus[
-                        index]); // Cargar productos al cambiar de pestaña
+                    index]); // Cargar productos al cambiar de pestaña
                   },
                 ),
               ),
             ),
             body: TabBarView(
               children: con.estatus.map((estado) {
-                List<Producto> productosPorEstado = con.cotizacion.producto!
+                List<Producto> productosPorEstado = con.cotizacion.value.producto!
                     .where((Producto producto) => producto.estatus == estado)
                     .toList();
                 return productosPorEstado.isNotEmpty
                     ? ListView(
-                        children: productosPorEstado.map((producto) {
-                          return _cardProducto(context, producto);
-                        }).toList(),
-                      )
+                  children: productosPorEstado.map((producto) {
+                    return _cardProducto(context, producto);
+                  }).toList(),
+                )
                     : Center(
-                        child: NoDataWidget(
-                          text: 'No hay ningún producto en estado $estado',
-                        ),
-                      );
+                  child: NoDataWidget(
+                    text: 'No hay ningún producto en estado $estado',
+                  ),
+                );
               }).toList(),
             ))));
   }
@@ -98,9 +96,9 @@ class ProduccionDetallesPage extends StatelessWidget {
           height: 55, //alto de imagen
         ),
         Text(
-          '  MAQUINADOS CORREA',
+          '  Cotización #${con.cotizacion.value.number}',
           style: TextStyle(
-            fontSize: 15,
+            fontSize: 25,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -109,28 +107,11 @@ class ProduccionDetallesPage extends StatelessWidget {
     );
   }
 
-  Widget _textCot(BuildContext context) {
-    return Container(
-      // return SafeArea(
-      //child: Container(
-      width: MediaQuery.of(context).size.width * 0.45,
-      margin: EdgeInsets.only(bottom: 40, top: 22),
-      child: TextField(
-          textAlign: TextAlign.center,
-          decoration: InputDecoration(
-            hintText: 'Cotización #${con.cotizacion.number}',
-            enabled: false,
-            hintStyle: TextStyle(fontSize: 20, color: Colors.white),
-          )),
-      //)
-    );
-  }
-
   Widget _cardProducto(BuildContext context, Producto producto) {
     return GestureDetector(
         onTap: () => con.goToOt(producto),
         child: Container(
-          height: 180,
+          height: 200,
           margin: EdgeInsets.only(left: 15, right: 15, top: 10),
           child: Card(
             elevation: 3.0,
@@ -152,10 +133,10 @@ class ProduccionDetallesPage extends StatelessWidget {
                   child: Container(
                     margin: EdgeInsets.only(top: 5),
                     child: Text(
-                      'Producto: ${producto.articulo}',
+                      'Producto: ${producto.articulo ?? ''}',
                       textAlign: TextAlign.center,
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                   ),
                 ),
@@ -163,6 +144,12 @@ class ProduccionDetallesPage extends StatelessWidget {
                   margin: EdgeInsets.only(top: 30),
                   child: Column(
                     children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 5),
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: Text('Descripción: ${producto.descr ?? ''}'),
+                      ),
                       Container(
                         margin: EdgeInsets.only(top: 5),
                         width: double.infinity,
@@ -200,22 +187,24 @@ class ProduccionDetallesPage extends StatelessWidget {
 
   Widget _textFielPedido(BuildContext context) {
     return Container(
-      //margin: EdgeInsets.all(10),
-      margin: EdgeInsets.only(left: 30, right: 30),
+      margin: EdgeInsets.only(left: 30, right: 30, top: 10),
       child: TextField(
         controller: con.pedidoController,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-          hintText: 'Pedido',
+          labelText: 'Pedido',
+          labelStyle: TextStyle(fontSize: 20),// Texto que aparecerá arriba del recuadro
           prefixIcon: Icon(Icons.list_outlined),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black, width: 2.0), // Color y ancho del borde cuando no está enfocado
+          ),
         ),
       ),
     );
   }
-
   Widget _entrega(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(left: 30, right: 30),
+      margin: EdgeInsets.only(left: 30, right: 30, top: 10),
       //margin: EdgeInsets.all(10),
       child: GestureDetector(
         onTap: () {
@@ -226,9 +215,12 @@ class ProduccionDetallesPage extends StatelessWidget {
             controller: con.entregaController,
             keyboardType: TextInputType.datetime,
             decoration: InputDecoration(
-              hintText: 'Selecciona una fecha de entrega',
-              hintStyle: TextStyle(fontSize: 14),
+              labelText: 'Fecha de entrega',
+              labelStyle: TextStyle(fontSize: 20),
               prefixIcon: Icon(Icons.calendar_today),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.black, width: 2.0), // Color y ancho del borde cuando no está enfocado
+              ),
             ),
           ),
         ),
@@ -250,53 +242,86 @@ class ProduccionDetallesPage extends StatelessWidget {
 
   Widget _textOT() {
     return Container(
-      margin: EdgeInsets.only(left: 30, right: 30),
+      margin: EdgeInsets.only(left: 30, right: 30, top: 10),
       //margin: EdgeInsets.all(10),
       child: TextField(
         // enabled: false,
         controller: con.otController,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-          hintText: ('Ot '),
+          labelText: ('O.T. '),
+          labelStyle: TextStyle(fontSize: 20),
           prefixIcon: Icon(Icons.engineering),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black, width: 2.0), // Color y ancho del borde cuando no está enfocado
+          ),
+        ),
+      ),
+    );
+  }
+  Widget _ingreso(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(left: 30, right: 30, top: 10),
+      //margin: EdgeInsets.all(10),
+      child: GestureDetector(
+        onTap: () {
+          _selectData(context);
+        },
+        child: AbsorbPointer(
+          child: TextFormField(
+            controller: con.fechaotController,
+            keyboardType: TextInputType.datetime,
+            decoration: InputDecoration(
+              labelText: 'Fecha de ingreso',
+              labelStyle: TextStyle(fontSize: 20),
+              prefixIcon: Icon(Icons.calendar_today),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.black, width: 2.0), // Color y ancho del borde cuando no está enfocado
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
+  Future<void> _selectData(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2035),
+    );
+    if (picked != null) {
+      con.fechaotController.text = DateFormat('yyyy-MM-dd').format(picked);
+    }
+  }
+
   Widget _totalToPay(BuildContext context) {
     return Column(
       children: [
-        Divider(height: 1, color: Colors.white),
-        Container(
-          margin: EdgeInsets.only(left: 10, top: 10),
-          child: Text(
-            'TOTAL: ${formatCurrency(con.totalt.value)}',
-            style: TextStyle(
-                fontWeight: FontWeight.bold, color: Colors.white, fontSize: 19),
-          ),
-        ),
-        con.cotizacion.status == 'CONFIRMADA'
+
+        con.cotizacion.value.status == 'CONFIRMADA'
             ? Container(
-                //margin: EdgeInsets.only(to),
-                child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(left: 15),
-                    child: ElevatedButton(
-                      onPressed: () => con.generar(),
-                      style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.all(25),
-                          backgroundColor: Colors.green),
-                      child: Text(
-                        'GENERAR',
-                        style: TextStyle(color: Colors.white),
-                      ),
+            margin: EdgeInsets.only(top: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: 15),
+                  child: ElevatedButton(
+                    onPressed: () => con.generar(),
+                    style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.all(25),
+                        backgroundColor: Colors.green),
+                    child: Text(
+                      'GENERAR',
+                      style: TextStyle(color: Colors.white),
                     ),
-                  )
-                ],
-              ))
+                  ),
+                )
+              ],
+            ))
             : Container()
       ],
     );

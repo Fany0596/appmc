@@ -57,7 +57,6 @@ class OcProvider extends GetConnect {
       'Content-Type': 'application/json',
       'Authorization': userSession.sessionToken ?? ''
     });
-    print('Respuesta del backend para status $status: ${response.body}');
     if (response.statusCode == 401) {
       Get.snackbar(
           'Petición denegada', 'Tu usuario no puede leer esta informacion');
@@ -65,7 +64,6 @@ class OcProvider extends GetConnect {
     }
 
     List<Oc> oc = Oc.fromJsonList(response.body);
-    print('OCs deserializadas:');
     for (var oc in oc) {
       print('OC ${oc.number}: status = ${oc.status}, rawJson = ${oc.toJson()}');
     }
@@ -178,5 +176,23 @@ class OcProvider extends GetConnect {
       Get.snackbar('Error', 'No se pudo obtener la oc');
       return null;
     }
+  }
+  Future<List<Oc>> getExcel() async {
+    Response response = await get(
+        '$url/getExcel',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization' : userSession.sessionToken ?? ''
+        }
+    );
+
+    if (response.statusCode == 401){
+      Get.snackbar('Petición denegada', 'Tu usuario no puede leer esta informacion');
+      return[];
+    }
+
+    List<Oc> oc= Oc.fromJsonList(response.body);
+
+    return oc;
   }
 }

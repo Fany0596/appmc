@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:maquinados_correa/src/pages/ventas/cotizacion/Cotizacion/create_cot_page.dart';
 import 'package:maquinados_correa/src/pages/ventas/cotizacion/create_producto/create_producto_page.dart';
 import 'package:maquinados_correa/src/pages/ventas/orders/list/ventas_oc_list_page.dart';
 import 'package:maquinados_correa/src/pages/ventas/tabla/ventas_tab_page.dart';
@@ -20,8 +21,8 @@ class VentasHomePage extends StatelessWidget {
           children:[
             VentasTabPage(),
             VentasOcListPage(),
-            CotizacionPage(),
-            ProductoPage(),
+            CombinedCotizacionProductoPage(),
+            //ProductoPage(),
             //ProfileInfoPage(),
             //NewClientPage(),
            // VendedoresPage()
@@ -53,14 +54,8 @@ class VentasHomePage extends StatelessWidget {
             inactiveColor: Colors.black
         ),
         BottomNavyBarItem(
-            icon: Icon(Icons.create),
-            title:Text( 'Cotización'),
-            activeColor: Colors.white,
-            inactiveColor: Colors.black
-        ),
-        BottomNavyBarItem(
             icon: Icon(Icons.add),
-            title:Text( 'Producto'),
+            title:Text( 'Cotización'),
             activeColor: Colors.white,
             inactiveColor: Colors.black
         ),

@@ -1,12 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:maquinados_correa/src/models/Materiales.dart';
-import 'package:maquinados_correa/src/models/cotizacion.dart';
 import 'package:maquinados_correa/src/models/producto.dart';
-import 'package:maquinados_correa/src/models/user.dart';
 import 'package:maquinados_correa/src/providers/cotizacion_provider.dart';
 import 'package:maquinados_correa/src/models/response_api.dart';
 import 'package:maquinados_correa/src/providers/material_provider.dart';
@@ -34,19 +29,16 @@ class UpdateProductoPageController extends GetxController {
 
   MaterialesProvider materialesProvider = MaterialesProvider();
 
-  var idMateriales = ''.obs;
-  List<Materiales> materiales = <Materiales>[].obs;
   ProductoProvider productoProvider = ProductoProvider();
-
 
   UpdateProductoPageController() {
     precioController.addListener(updateTotal);
     cantidadController.addListener(updateTotal);
     Producto producto = Producto.fromJson(Get.arguments['producto']);
     print('Producto recibido: $producto');
-    getMateriales();
     descrController.text = producto.descr!;
-    articuloController.text = producto.articulo!;
+    cantidadController.text = producto.cantidad!.toStringAsFixed(2);
+    precioController.text = producto.precio!.toStringAsFixed(2);
   }
 
   void updateTotal() {
@@ -58,15 +50,8 @@ class UpdateProductoPageController extends GetxController {
     totalController.text = total.toStringAsFixed(2);
   }
 
-  void getMateriales() async {
-    var result = await materialesProvider.getAll();
-    materiales.clear();
-    materiales.addAll(result);
-  }
-
   void createProducto(BuildContext context) async {
 
-    String articulo = articuloController.text;
     String descr = descrController.text;
     String precio = precioController.text;
     String cantidad = cantidadController.text;
@@ -84,24 +69,20 @@ class UpdateProductoPageController extends GetxController {
     // Calcula el total multiplicando precio y cantidad
     double total = double.parse(precio) * double.parse(cantidad);
 
-    print('ARTICULO: ${articulo}');
     print('PRECIO: ${precio}');
     print('TOTAL: ${total}');
     print('CANTIDAD: ${cantidad}');
-    print('ID MATERIAL: ${idMateriales}');
     ProgressDialog progressDialog = ProgressDialog(context: context);
 
 
 
-    if (isValidForm(articulo, precio, total.toString(), cantidad, descr)){ //valida que no esten vacios los campos
+    if (isValidForm(precio, total.toString(), cantidad, descr)){ //valida que no esten vacios los campos
       Producto myproducto = Producto(
           id: productoId,
-        articulo: articulo,
         descr: descr,
         precio: double.parse(precio),
         total: total,
         cantidad: double.parse(cantidad),
-        idMateriales: idMateriales.value
       );
       progressDialog.show(max: 100, msg:'Espere un momento...');
 
@@ -121,13 +102,8 @@ class UpdateProductoPageController extends GetxController {
       }
     }
   }
-  bool isValidForm(String articulo, String precio, String total, String cantidad, String descr) {
-    if (articulo.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa número de cotización',  backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
-      return false;
-    }
+  bool isValidForm(String precio, String total, String cantidad, String descr) {
+
     if (precio.isEmpty) {
       Get.snackbar('Formulario no valido', 'Ingresa precio',  backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -146,12 +122,6 @@ class UpdateProductoPageController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,);
       return false;
     }
-    if (idMateriales == null) {
-      Get.snackbar('Formulario no valido', 'Selecciona un cliente',  backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
-      return false;
-    }
 
     return true;
   }
@@ -162,7 +132,6 @@ class UpdateProductoPageController extends GetxController {
        precioController.text = '';
        cantidadController.text = '';
        totalController.text = '';
-       idMateriales.value = '';
        update();
      }
   void goToHome() {

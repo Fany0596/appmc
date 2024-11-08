@@ -149,14 +149,6 @@ class VendedoresPage extends StatelessWidget {
             width: 100, //ancho de imagen
             height: 100, //alto de imagen
           ),
-            Text(
-              '     MAQUINADOS CORREA',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
           ]
       ),
     );

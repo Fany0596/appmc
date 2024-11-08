@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:maquinados_correa/src/models/cotizacion.dart';
 import 'package:maquinados_correa/src/models/producto.dart';
 import 'package:maquinados_correa/src/pages/calidad/orders/list/calidad_ot_list_controller.dart';
-import 'package:maquinados_correa/src/pages/produccion/orders/list/produccion_ot_list_controller.dart';
 import 'package:get/get.dart';
-import 'package:maquinados_correa/src/utils/relative_time_util.dart';
 import 'package:maquinados_correa/src/widgets/no_data_widget.dart';
 
 
@@ -89,14 +86,6 @@ class CalidadOtListPage extends StatelessWidget {
             'assets/img/LOGO1.png',
             width: 55, // ancho de imagen
             height: 55, // alto de imagen
-          ),
-          Text(
-            '  MAQUINADOS CORREA',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
           ),
         ],
       ),
@@ -206,7 +195,7 @@ class CalidadOtListPage extends StatelessWidget {
                       onPressed: () => con.goToRoles(),
                       icon: Icon(
                         Icons.supervised_user_circle,
-                        color: Colors.white,
+                        color: Colors.black,
                         size: 30,
                       ),
                     ),
@@ -218,7 +207,7 @@ class CalidadOtListPage extends StatelessWidget {
                       onPressed: () => con.signOut(),
                       icon: Icon(
                         Icons.power_settings_new,
-                        color: Colors.white,
+                        color: Colors.black,
                         size: 30,
                       ),
                     ),

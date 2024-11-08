@@ -68,14 +68,6 @@ class ComprasProductPage extends StatelessWidget {
           height: 55,
         ),
         const SizedBox(width: 10),
-        Text(
-          'MAQUINADOS CORREA',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
       ],
     );
   }
@@ -170,6 +162,7 @@ class ComprasProductPage extends StatelessWidget {
           hintText: 'Articulo',
           prefixIcon: Icon(Icons.add_circle),
         ),
+        enabled: false,
       ),
     );
   }

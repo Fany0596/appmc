@@ -34,38 +34,6 @@ class VentasDetallesController extends GetxController {
   VendedoresProvider vendedoresProvider = VendedoresProvider();
   List<String> estatus = <String>['POR ASIGNAR','EN ESPERA', 'EN PROCESO', 'SUSPENDIDO', 'SIG. PROCESO','RETRABAJO','RECHAZADO', 'LIBERADO','ENTREGADO', 'CANCELADO'].obs;
 
-  var garantiasAgregadas = false.obs;
-  var reportedimAgregadas = false.obs;
-  var reporterugAgregadas = false.obs;
-  var reportematAgregadas = false.obs;
-  var reportetratAgregadas = false.obs;
-  var bancariosAgregadas = false.obs;
-
-  // Método para cambiar el estado de garantías agregadas
-  void toggleGarantiasAgregadas() {
-    garantiasAgregadas.value = !garantiasAgregadas.value;
-    print('valor Garantias: ${garantiasAgregadas.value}');
-  }
-  void toggleBancariosAgregadas() {
-    bancariosAgregadas.value = !bancariosAgregadas.value;
-    print('valor Bancarios: ${bancariosAgregadas.value}');
-  }
-  void toggleReportedimAgregadas() {
-    reportedimAgregadas.value = !reportedimAgregadas.value;
-    print('valor reporte dim: ${reportedimAgregadas.value}');
-  }
-  void toggleReportematAgregadas() {
-    reportematAgregadas.value = !reportematAgregadas.value;
-    print('valor reporte mat: ${reportematAgregadas.value}');
-  }
-  void toggleReporterugAgregadas() {
-    reporterugAgregadas.value = !reporterugAgregadas.value;
-    print('valor reporte rug: ${reporterugAgregadas.value}');
-  }
-  void toggleReportetratAgregadas() {
-    reportetratAgregadas.value = !reportetratAgregadas.value;
-    print('valor reporte trat: ${reportetratAgregadas.value}');
-  }
 VentasDetallesController(){
   print('Cotizacion: ${cotizacion.toJson()}');
   getTotal();
@@ -188,7 +156,12 @@ VentasDetallesController(){
   List<pw.Widget> reportetratWidget = [];
   List<pw.Widget> reportematWidget = [];
   List<pw.Widget> reporterugWidget = [];
+  List<pw.Widget> coment1Widget = [];
+  List<pw.Widget> coment2Widget = [];
+  List<pw.Widget> coment3Widget = [];
   List<pw.Widget> bancariosWidget = [];
+  List<pw.Widget> valWidget = [];
+  List<pw.Widget> comentWidget = [];
 
   Future<void> generarCot() async {
     // Accede a la imagen desde los activos de tu aplicación
@@ -438,7 +411,8 @@ VentasDetallesController(){
           pw.SizedBox(height: 2),
           // Espacio entre la tabla y otro contenido
         ],
-      ),pw.Row(
+      ),
+      pw.Row(
         children: [
           pw.Expanded(
             child: pw.Column(
@@ -576,38 +550,6 @@ VentasDetallesController(){
       ),
       pw.SizedBox(height: 10), // Espacio de 3 cm
       pw.Row(
-          children: [
-            pw.Expanded(
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  // Agregar la tabla vertical en la esquina superior derecha
-                  pw.Table.fromTextArray(
-                    //context: context,
-                    columnWidths: {
-                      0: pw.FixedColumnWidth(40),
-                      // Ancho de la primera columna
-                      1: pw.FixedColumnWidth(190),
-                      // Ancho de la segunda columna
-                    },
-                    data: [
-                      [
-                        'Comentarios:',
-                        '- La vigencia de esta cotización será de 15 dias a partir de esta fecha.\n- Los precios son en moneda nacional.\n- La entrega es hasta el almacén del cliente sin costo adicional, así como las visitas técnicas que se requieran.'
-                      ],
-                    ],
-                    border: null,
-                    cellAlignment: pw.Alignment.center,
-                    headerAlignment: pw.Alignment.topLeft,
-                    headerStyle: dataTextStyle,
-                  ),
-                ],
-              ),
-            ),
-          ]
-      ),
-      pw.SizedBox(height: 10), // Espacio de 3 cm
-      pw.Row(
         children: [
           pw.Expanded(
             child: pw.Column(
@@ -633,7 +575,6 @@ VentasDetallesController(){
           ),
         ],
       ),
-      pw.SizedBox(height: 20), // Espacio de 2 cm
       pw.Row(
         children: [
           pw.Expanded(
@@ -650,7 +591,7 @@ VentasDetallesController(){
                   data: [
                     [
                       'Condiciones de pago:',
-                      '- ${cotizacion.condiciones ?? ''}\n- ${cotizacion
+                      '${cotizacion.condiciones ?? ''}\n${cotizacion
                           .descuento ?? ''}'
                     ],
                   ],
@@ -664,59 +605,77 @@ VentasDetallesController(){
           ),
         ],
       ),
-      pw.SizedBox(height: 5), // Espacio de 2 cm
-      pw.Divider(color: PdfColors.red),
-      pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.center,
-          children: [
-            pw.Expanded(
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.center,
-                children: [
-                  // Agregar la tabla vertical en la esquina superior derecha
-                  pw.Table.fromTextArray(
-                    //context: context,
-                    columnWidths: {
-                      0: pw.FixedColumnWidth(30), // Ancho de la primera columna
-                    },
-                    data: [
-                      [
-                        '                                                                                          VALORES AGREGADOS'
-                      ],
-                    ],
-                    border: null,
-                    cellAlignment: pw.Alignment.center,
-                    headerAlignment: pw.Alignment.topLeft,
-                    headerStyle: blue2TextStyle,
-                  ),
-
-                ],
-              ),
-            ),
-          ]
-      ),
-      pw.Row(
-          children: [
-            pw.Expanded(
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  if (reportedimAgregadas.value)
-                    ...reportedimWidget,
-                  if (reporterugAgregadas.value)
-                    ...reporterugWidget,
-                  if (reportetratAgregadas.value)
-                    ...reportetratWidget,
-                  if (reportematAgregadas.value)
-                    ...reportematWidget,
-
-                ],
-              ),
-            ),
-          ]
-      ),
     ];
-    if (bancariosAgregadas == true) {
+    if (cotizacion.coment1 == 'si' || cotizacion.coment2 == 'si' ||
+        cotizacion.coment3 == 'si') {
+      comentWidget = [
+        pw.Row(
+            children: [
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    // Agregar la tabla vertical en la esquina superior derecha
+                    pw.Table.fromTextArray(
+                      //context: context,
+                      columnWidths: {
+                        0: pw.FixedColumnWidth(40),
+                        // Ancho de la primera columna
+                      },
+                      data: [
+                        [
+                          'Comentarios:',
+                        ],
+                      ],
+                      border: null,
+                      cellAlignment: pw.Alignment.center,
+                      headerAlignment: pw.Alignment.topLeft,
+                      headerStyle: dataTextStyle,
+                    ),
+                  ],
+                ),
+              ),
+            ]
+        ),
+      ];
+    }
+    if (cotizacion.agreg1 == 'si' || cotizacion.agreg2 == 'si' ||
+        cotizacion.agreg3 == 'si' || cotizacion.agreg4 == 'si') {
+      valWidget = [
+        pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    // Aquí verificamos si al menos uno de los agregados es 'si'
+                    if (cotizacion.agreg1 == 'si' || cotizacion.agreg2 == 'si' ||
+                        cotizacion.agreg3 == 'si' || cotizacion.agreg4 == 'si')
+                      pw.Table.fromTextArray(
+                        //context: context,
+                        columnWidths: {
+                          0: pw.FixedColumnWidth(30), // Ancho de la primera columna
+                        },
+                        data: [
+                          [
+                            '                                                                                          VALORES AGREGADOS'
+                          ],
+                        ],
+                        border: null,
+                        cellAlignment: pw.Alignment.center,
+                        headerAlignment: pw.Alignment.topLeft,
+                        headerStyle: blue2TextStyle,
+                      ),
+
+                  ],
+                ),
+              ),
+            ]
+        ),
+      ];
+    }
+    if (cotizacion.banc == 'si') {
     bancariosWidget = [
       pw.Row(
           children: [
@@ -993,7 +952,7 @@ VentasDetallesController(){
       pw.SizedBox(height: 10), // Espacio de 3 cm
     ];
   }
-    if (reportedimAgregadas == true) {
+    if (cotizacion.agreg1 == 'si') {
       reportedimWidget = [
         pw.Row(
           children: [
@@ -1023,7 +982,7 @@ VentasDetallesController(){
         ),
       ];
     }
-    if (reporterugAgregadas == true) {
+    if (cotizacion.agreg2 == 'si') {
       reporterugWidget = [
         pw.Row(
           children: [
@@ -1053,7 +1012,7 @@ VentasDetallesController(){
         ),
       ];
     }
-    if (reportetratAgregadas == true) {
+    if (cotizacion.agreg3 == 'si') {
       reportetratWidget = [
         pw.Row(
           children: [
@@ -1083,7 +1042,7 @@ VentasDetallesController(){
         ),
       ];
     }
-    if (reportematAgregadas == true) {
+    if (cotizacion.agreg4 == 'si') {
       reportematWidget = [
         pw.Row(
           children: [
@@ -1113,7 +1072,97 @@ VentasDetallesController(){
         ),
       ];
     }
-    if (garantiasAgregadas == true) {
+    if (cotizacion.coment1 == 'si') {
+      coment1Widget = [
+        pw.Row(
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Table.fromTextArray(
+                    //context: context,
+                    columnWidths: {
+                      0: pw.FixedColumnWidth(30), // Ancho de la primera columna
+                    },
+                    data: [
+                      [
+                        'La vigencia de esta cotización será de 15 dias a partir de esta fecha.'
+                      ],
+                    ],
+                    border: null,
+                    cellAlignment: pw.Alignment.center,
+                    headerAlignment: pw.Alignment.topLeft,
+                    headerStyle: dataTextStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+    if (cotizacion.coment2 == 'si') {
+      coment2Widget = [
+        pw.Row(
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Table.fromTextArray(
+                    //context: context,
+                    columnWidths: {
+                      0: pw.FixedColumnWidth(30), // Ancho de la primera columna
+                    },
+                    data: [
+                      [
+                        'Los precios son en moneda nacional.'
+                      ],
+                    ],
+                    border: null,
+                    cellAlignment: pw.Alignment.center,
+                    headerAlignment: pw.Alignment.topLeft,
+                    headerStyle: dataTextStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+    if (cotizacion.coment3 == 'si') {
+      coment3Widget = [
+        pw.Row(
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Table.fromTextArray(
+                    //context: context,
+                    columnWidths: {
+                      0: pw.FixedColumnWidth(30), // Ancho de la primera columna
+                    },
+                    data: [
+                      [
+                        'La entrega es hasta el almacén del cliente sin costo adicional, así como las visitas técnicas que se requieran.'
+                      ],
+                    ],
+                    border: null,
+                    cellAlignment: pw.Alignment.center,
+                    headerAlignment: pw.Alignment.topLeft,
+                    headerStyle: dataTextStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+    if (cotizacion.garant == 'si') {
       garantiasWidget = [
         pw.Row(
           children: [
@@ -1146,6 +1195,7 @@ VentasDetallesController(){
 
     // Define el encabezado que se agregará a todas las páginas
     final pw.Widget header =  pw.Container(
+      margin: pw.EdgeInsets.only(bottom: 20),
         child: pw.Row(
             children: [
               // Logo en la esquina superior izquierda
@@ -1272,9 +1322,33 @@ VentasDetallesController(){
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               ...contenidoPDF,
-              if (bancariosAgregadas.value)
+              if (cotizacion.coment1 == 'si' || cotizacion.coment2 == 'si' ||
+                  cotizacion.coment3 == 'si')
+                ...comentWidget,
+              if (cotizacion.coment1 == 'si')
+                ...coment1Widget,
+              if (cotizacion.coment2 == 'si')
+                ...coment2Widget,
+              if (cotizacion.coment3 == 'si')
+                ...coment3Widget,
+              if (cotizacion.agreg1 == 'si' || cotizacion.agreg2 == 'si' ||
+                  cotizacion.agreg3 == 'si' || cotizacion.agreg4 == 'si' || cotizacion.coment1 == 'si' || cotizacion.coment2 == 'si' ||
+              cotizacion.coment3 == 'si' || cotizacion.garant == 'si' || cotizacion.banc == 'si')
+              pw.Divider(color: PdfColors.red),
+              if (cotizacion.agreg1 == 'si' || cotizacion.agreg2 == 'si' ||
+                  cotizacion.agreg3 == 'si' || cotizacion.agreg4 == 'si')
+                ...valWidget,
+              if (cotizacion.agreg1 == 'si')
+                ...reportedimWidget,
+              if (cotizacion.agreg2 == 'si')
+                ...reporterugWidget,
+              if (cotizacion.agreg3 == 'si')
+                ...reportetratWidget,
+              if (cotizacion.agreg4 == 'si')
+                ...reportematWidget,
+              if (cotizacion.banc == 'si')
                 ...bancariosWidget,
-              if (garantiasAgregadas.value)
+              if (cotizacion.garant == 'si')
                 ...garantiasWidget,
 
 

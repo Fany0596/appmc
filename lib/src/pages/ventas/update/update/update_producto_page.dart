@@ -14,18 +14,18 @@ class UpdateProductoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Obx (() => SingleChildScrollView(
+      body: //Obx (() =>
+          SingleChildScrollView(
         child: Stack( // posiciona elementos uno sobre otro
         children: [
             _backGroundCover(context),
             _boxForm(context),
             _buttonBack(),
-            _encabezado(context),
-            _textAdd(context)
+            _encabezado(context)
           ],
         ),
       )
-    ),
+   // ),
     );
   }
 
@@ -48,9 +48,7 @@ class UpdateProductoPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
             _textNewCot() ,
-            _textFielArticulo(),
             _textFieldDescription(),
-            _materialesList(con.materiales),
             _textFielPrecio(),
             _textFielCantidad(),
             _textFielTotal(),
@@ -77,20 +75,7 @@ class UpdateProductoPage extends StatelessWidget {
       //),
     );
   }
-  // Texto numero
-  Widget _textFielArticulo() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: TextField(
-          controller: con.articuloController,
-          keyboardType: TextInputType.text,
-          decoration: InputDecoration(
-            hintText: 'Articulo', //texto fondo
-            prefixIcon: Icon(Icons.add_circle), //icono
-          )
-      ),
-    );
-  }
+
   Widget _textFieldDescription() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -151,9 +136,9 @@ class UpdateProductoPage extends StatelessWidget {
           ),
             SizedBox(width: 10),
             Text(
-              '     MAQUINADOS CORREA',
+              '     EDITAR PRODUCTO',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 25,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -161,70 +146,6 @@ class UpdateProductoPage extends StatelessWidget {
           ]
       ),
     );
-  }
-  // imagen
-  Widget _textAdd(BuildContext context){
-    return SafeArea(
-      child: Container(
-        alignment: Alignment.topCenter,
-        margin: EdgeInsets.only(top:70, bottom: 15),
-        child: Column (
-          children: [
-            Icon(Icons.auto_awesome_motion, size: 105),
-            Text(
-              'EDITAR PRODUCTO',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontSize: 26
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-  }
-
-  Widget _materialesList (List<Materiales> materiales){
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        //margin: EdgeInsets.only(top: 10),
-        child: DropdownButton(
-          underline: Container(
-            alignment: Alignment.centerRight,
-            child: Icon(
-              Icons.arrow_drop_down_circle,
-              color: Colors.grey,
-            ),
-          ),
-          elevation: 3,
-          isExpanded: true,
-          hint: Text(
-            'Selecciona un material',
-            style: TextStyle(
-                fontSize: 16
-            ),
-          ),
-          items: _dropDownItems(materiales),
-          value: con.idMateriales.value == '' ? null : con.idMateriales.value,
-          onChanged: (option) {
-            print('Opcion seleccionada ${option}');
-            con.idMateriales.value = option.toString();
-          },
-        ),
-      );
-    }
-  List<DropdownMenuItem<String>> _dropDownItems (List<Materiales> materiales){
-
-    List<DropdownMenuItem<String>> list =[];
-    materiales.forEach((materiales) {
-      list.add(DropdownMenuItem(
-        child: Text(materiales.name ?? ''),
-        value: materiales.id,
-      ));
-    });
-    return list;
   }
 
   Widget _textFielPrecio() {

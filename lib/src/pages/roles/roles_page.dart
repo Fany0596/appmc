@@ -57,7 +57,7 @@ class RolesPage extends StatelessWidget {
                       onPressed: () => con.signOut(),
                       icon: Icon(
                         Icons.power_settings_new,
-                        color: Colors.white,
+                        color: Colors.black,
                         size: 30,
                       )),
                 ),
@@ -141,17 +141,6 @@ class RolesPage extends StatelessWidget {
             height: 100,
           ),
           SizedBox(width: 10),
-          Flexible(
-            child: Text(
-              'MAQUINADOS CORREA',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-              overflow: TextOverflow.ellipsis, // Para manejar textos largos
-            ),
-          ),
         ],
       ),
     );

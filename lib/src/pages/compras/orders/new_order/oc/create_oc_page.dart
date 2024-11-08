@@ -243,14 +243,6 @@ class OcPage extends StatelessWidget {
             height: 100, //alto de imagen
           ),
             SizedBox(width: 10),
-            Text(
-              '     MAQUINADOS CORREA',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
           ]
       ),
     );

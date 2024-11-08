@@ -11,21 +11,6 @@ import 'package:sn_progress_dialog/progress_dialog.dart';
 
 class TiemposController extends GetxController {
   Producto? producto;
-  @override
-  void onInit() {
-    super.onInit();
-    print('Argumentos recibidos: ${Get.arguments}');
-    producto = Producto.fromJson(Get.arguments['producto']);
-    print('Producto recibido: ${producto?.articulo}');
-    checkInitialRecord();
-  }
-
-  void onProcesoSelected(String? value) {
-    selectedOperacion.value = value ?? '';
-    procesoController.text = value ?? '';
-    checkInitialRecord();
-    getLastState();
-  }
 
   TextEditingController procesoController = TextEditingController();
   TextEditingController timeController = TextEditingController();
@@ -37,6 +22,9 @@ class TiemposController extends GetxController {
   RxBool hasInitialRecord = false.obs;
   RxString lastState = RxString('');
   RxBool hasRecords = RxBool(false);
+  RxString lastRecordState = ''.obs;
+  RxString lastRecordProcess = ''.obs;
+  RxString lastRecordOperator = ''.obs;
 
   var idOperador = ''.obs;
   List<Operador> operador = <Operador>[].obs;
@@ -44,6 +32,20 @@ class TiemposController extends GetxController {
   ProductoProvider productoProvider = ProductoProvider();
   TiempoProvider tiempoProvider = TiempoProvider();
   OperadorProvider operadorprovider = OperadorProvider();
+
+  @override
+  void onInit() {
+    super.onInit();
+    producto = Producto.fromJson(Get.arguments['producto']);
+    //checkInitialRecord();
+    getLastRecordData().then((_) {
+      if (lastRecordProcess.value.isNotEmpty) {
+        checkInitialRecord();
+        getLastState();
+      }
+    });
+    checkApiResponse();
+  }
 
   TiemposController() {
     getOperador();}
@@ -69,6 +71,73 @@ class TiemposController extends GetxController {
     } else {
       lastState.value = '';
       hasRecords.value = false;
+    }
+  }
+  Future<void> getLastRecordData() async {
+    if (producto != null && producto!.id != null) {
+      try {
+        Map<String, dynamic> lastRecord = await tiempoProvider.getLastRecord(producto!.id!);
+        if (lastRecord['success']) {
+          lastRecordState.value = lastRecord['estado'] ?? '';
+          lastRecordProcess.value = lastRecord['proceso'] ?? '';
+          lastRecordOperator.value = lastRecord['idOperador'] ?? '';
+
+          // Si el último estado no es "TERMINÓ", establecer los valores
+          if (lastRecordState.value != 'TERMINÓ') {
+            selectedOperacion.value = lastRecordProcess.value;
+            idOperador.value = lastRecordOperator.value;
+            procesoController.text = lastRecordProcess.value;
+
+            print('Estableciendo proceso: ${lastRecordProcess.value}');
+            print('Estableciendo operador: ${lastRecordOperator.value}');
+          } else {
+            // Limpiar valores si el estado es "TERMINÓ"
+            selectedOperacion.value = '';
+            idOperador.value = '';
+            procesoController.text = '';
+          }
+        }
+      } catch (e) {
+        print('Error al obtener el último registro: $e');
+        lastRecordState.value = '';
+        lastRecordProcess.value = '';
+        lastRecordOperator.value = '';
+      }
+    }
+  }
+  void checkApiResponse() async {
+    if (producto != null && producto!.id != null) {
+      Map<String, dynamic> response = await tiempoProvider.getLastRecord(producto!.id!);
+      print('Respuesta del API: $response');
+    }
+  }
+  /*void onProcesoSelected(String? value) {
+    selectedOperacion.value = value ?? '';
+    procesoController.text = value ?? '';
+    checkInitialRecord();
+    getLastState();
+  }*/
+  /*void onProcesoSelected(String? value) {
+    if (value != null) {
+      selectedOperacion.value = value;
+      procesoController.text = value;
+      checkInitialRecord();
+      getLastState();
+    }
+  }*/
+  Future<void> onProcesoSelected(String? value) async {
+    if (value != null) {
+      selectedOperacion.value = value;
+      procesoController.text = value;
+      await checkInitialRecord();
+      await getLastState();
+
+      // Actualizar el estado seleccionado basado en el último estado
+      if (!hasRecords.value) {
+        selectedStatus.value = 'INICIO';
+      } else if (lastState.value == 'SUSPENDIDO') {
+        selectedStatus.value = 'REANUDAR';
+      }
     }
   }
   void createTiempo(BuildContext context) async {
@@ -125,9 +194,13 @@ class TiemposController extends GetxController {
       );
 
       String nuevoEstatus;
-      if (estado == 'INICIO' || estado == 'REANUDAR') {
+      if (estado == 'INICIO') {
         nuevoEstatus = 'EN PROCESO';
-      } else {
+      }else if (estado == 'REANUDAR') {
+        nuevoEstatus = 'EN PROCESO';
+      }else if (estado == 'TERMINÓ') {
+        nuevoEstatus = 'SIG. PROCESO';
+      }else {
         nuevoEstatus = estado;
       }
 

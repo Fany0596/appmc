@@ -86,14 +86,6 @@ class TymOtListPage extends StatelessWidget {
             width: 55, // ancho de imagen
             height: 55, // alto de imagen
           ),
-          Text(
-            '  MAQUINADOS CORREA',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
         ],
       ),
     );
@@ -218,7 +210,7 @@ class TymOtListPage extends StatelessWidget {
                       onPressed: () => con.goToRoles(),
                       icon: Icon(
                         Icons.supervised_user_circle,
-                        color: Colors.white,
+                        color: Colors.black,
                         size: 30,
                       ),
                     ),
@@ -230,7 +222,7 @@ class TymOtListPage extends StatelessWidget {
                       onPressed: () => con.signOut(),
                       icon: Icon(
                         Icons.power_settings_new,
-                        color: Colors.white,
+                        color: Colors.black,
                         size: 30,
                       ),
                     ),

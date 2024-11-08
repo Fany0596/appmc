@@ -23,8 +23,16 @@ class Producto {
   String? desc;
   String? ot;
   String? parte;
+  String? entrega;
   String? name;
   String? number;
+  String? planopdf;
+  String? fechaot;
+  String? fechalib;
+  String? rechazo;
+  String? retrabajo;
+  String? fecharcrt;
+  String? efectividad;
   String? pdfFile;
   String? pmaterial;
   int? quantity;
@@ -48,9 +56,17 @@ class Producto {
     this.desc,
     this.ot,
     this.parte,
+    this.entrega,
     this.name,
     this.number,
     this.quantity,
+    this.planopdf,
+    this.fechaot,
+    this.fechalib,
+    this.rechazo,
+    this.retrabajo,
+    this.fecharcrt,
+    this.efectividad,
     this.pdfFile,
     this.pmaterial,
     this.procesos,
@@ -74,9 +90,17 @@ class Producto {
     desc: json["desc"],
     ot: json["ot"],
     parte: json["parte"],
+    entrega: json["entrega"],
     name: json["name"],
     number: json["number"],
     quantity: json["quantity"],
+    planopdf: json["planopdf"],
+    fechaot: json["fechaot"],
+    fechalib: json["fechalib"],
+    rechazo: json["rechazo"],
+    retrabajo: json["retrabajo"],
+    fecharcrt: json["fecharcrt"],
+    efectividad: json["efectividad"],
     pdfFile: json["pdfFile"],
     pmaterial: json["pmaterial"],
     procesos: json["procesos"] != null ? List<Proceso>.from(json["procesos"].map((x) => Proceso.fromJson(x))) : null,
@@ -108,9 +132,17 @@ class Producto {
     "desc": desc,
     "ot": ot,
     "parte": parte,
+    "entrega": entrega,
     "name": name,
     "number": number,
     "quantity": quantity,
+    "planopdf": planopdf,
+    "fechaot": fechaot,
+    "fechalib": fechalib,
+    "rechazo": rechazo,
+    "retrabajo": retrabajo,
+    "fecharcrt": fecharcrt,
+    "efectividad": efectividad,
     "pdfFile": pdfFile,
     "pmaterial": pmaterial,
     "procesos": procesos != null ? List<dynamic>.from(procesos!.map((x) => x.toJson())) : null,

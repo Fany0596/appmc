@@ -102,14 +102,6 @@ class GenericoDetallesPage extends StatelessWidget {
             width: 55, //ancho de imagen
             height: 55, //alto de imagen
           ),
-            Text(
-              '  MAQUINADOS CORREA',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
           ]
       ),
     );
@@ -118,23 +110,21 @@ class GenericoDetallesPage extends StatelessWidget {
      return SafeArea(
       child: Container(
          width: MediaQuery.of(context).size.width * 0.95,
-    //margin: EdgeInsets.only(left: 100),
-    child: TextField(
-        textAlign: TextAlign.center,
-        decoration: InputDecoration(
-          hintText: 'Cotización #${con.cotizacion.number}',
-          hintStyle: TextStyle(
-              fontSize: 20,
-              color: Colors.white
+        child: TextField(
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              hintText: 'Cotización #${con.cotizacion.number}',
+              hintStyle: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white
+              ),
+           enabled: false,
+          )
           ),
-
-      )
-      ),
-      )
-    );
-  }
+          )
+        );
+      }
   Widget _cardProducto(Producto producto) {
-    print('material del producto: ${producto.name}');
     return Container(
         height: 190,
         margin: EdgeInsets.only(left: 15, right: 15, top: 10),
@@ -216,6 +206,13 @@ class GenericoDetallesPage extends StatelessWidget {
                             child: ElevatedButton(
                               onPressed: () => con.descargarPDF(producto.pdfFile ?? ''),
                               child: Text('Reporte Dim.'),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            child: ElevatedButton(
+                              onPressed: () => con.descargarPDF(producto.planopdf ?? ''),
+                              child: Text('Plano'),
                             ),
                           ),
                           Container(

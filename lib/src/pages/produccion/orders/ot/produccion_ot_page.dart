@@ -69,14 +69,6 @@ class ProduccionOtPage extends StatelessWidget {
           height: 55,
         ),
         const SizedBox(width: 10),
-        Text(
-          'MAQUINADOS CORREA',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
       ],
     );
   }
@@ -111,15 +103,35 @@ class ProduccionOtPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _textNewCot(),
-          _textFielArticulo(),
-          _parte(),
-          //_textFielPedido(),
-          _textFielCantidad(),
-          _materialesList(con.materiales),
-          _textFielPrecio(),
-          _textFielTotal(),
-          //_getDatePickerEnabled(context),
-          //_entrega(context),
+          Row(
+            children: [
+              Expanded(flex: 2, child: _textFielArticulo1()),
+              SizedBox(width: 10),
+              Expanded(flex: 4, child: _textFielDescr1()),
+              SizedBox(width: 10),
+              Expanded(flex: 1, child: _parte1()),
+              SizedBox(width: 10),
+              Expanded(flex: 1, child: _textFielCantidad1()),
+              SizedBox(width: 10),
+              Expanded(flex: 1, child: _materialesList1()),
+              SizedBox(width: 10),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(flex: 2, child: _textFielArticulo()),
+              SizedBox(width: 10),
+              Expanded(flex: 4, child: _textFielDescr()),
+              SizedBox(width: 10),
+              Expanded(flex: 1, child: _parte()),
+              SizedBox(width: 10),
+              Expanded(flex: 1, child: _textFielCantidad()),
+              SizedBox(width: 10),
+              Expanded(flex: 1, child: _materialesList(con.materiales)),
+              SizedBox(width: 10),
+            ],
+          ),
+          _buttonSelectPDF(),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -162,20 +174,54 @@ class ProduccionOtPage extends StatelessWidget {
   }
 
   Widget _textFielArticulo() {
-    //con.articuloController.text = producto?.articulo ?? '';
-    return Container(
-      margin: EdgeInsets.all(10),
-      child:TextField(
+    return TextField(
         controller: con.articuloController,
         keyboardType: TextInputType.text,
         decoration: InputDecoration(
           hintText: 'Articulo',
-          prefixIcon: Icon(Icons.add_circle),
+          border: OutlineInputBorder(),
         ),
+    );
+  }
+  Widget _textFielArticulo1() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 5),
+      child: Text('Articulo',
+        style: TextStyle(fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
       ),
     );
   }
+  Widget _textFielDescr1() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10),
+      child: Text('Descripción',
+        style: TextStyle(fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+  Widget _textFielDescr() {
+    return TextField(
+        controller: con.descrController,
+        keyboardType: TextInputType.text,
+        decoration: InputDecoration(
+          hintText: 'Descripción',
+          border: OutlineInputBorder(),
+        ),
+      enabled: false,
+    );
+  }
+  Widget _materialesList1() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10),
+      child: Text('Material',
+        style: TextStyle(fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
 
+      ),
+    );
+  }
   Widget _materialesList(List<Materiales> materiales) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -184,15 +230,16 @@ class ProduccionOtPage extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: Icon(
             Icons.arrow_drop_down_circle,
-            color: Colors.grey,
+            color: Colors.black,
           ),
         ),
         elevation: 3,
         isExpanded: true,
         hint: Text(
-          'Selecciona un material',
+          'Material',
           style: TextStyle(
             fontSize: 16,
+            color: Colors.black
           ),
         ),
         items: _dropDownItems(materiales),
@@ -217,7 +264,15 @@ class ProduccionOtPage extends StatelessWidget {
     });
     return list;
   }
-
+  Widget _textFielCantidad1() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10),
+      child: Text('Cantidad',
+        style: TextStyle(fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
   Widget _textFielCantidad() {
     return Container(
       margin: EdgeInsets.all(10),
@@ -226,12 +281,20 @@ class ProduccionOtPage extends StatelessWidget {
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
           hintText: 'Cantidad',
-          prefixIcon: Icon(Icons.numbers),
+          border: OutlineInputBorder(),
         ),
       ),
     );
   }
-
+  Widget _parte1() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10),
+      child: Text('No. Parte/Plano',
+        style: TextStyle(fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
   Widget _parte() {
     return Container(
       margin: EdgeInsets.all(10),
@@ -240,45 +303,28 @@ class ProduccionOtPage extends StatelessWidget {
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
           hintText: 'No. Parte',
-          prefixIcon: Icon(Icons.list_outlined),
+          border: OutlineInputBorder(),
         ),
       ),
     );
   }
 
-  Widget _textFielTotal() {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: TextField(
-        controller: con.totalController,
-        keyboardType: TextInputType.number,
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(
-            RegExp(r'^\d*\.?\d{0,2}'),
+  Widget _buttonSelectPDF() {
+    return Column(
+      children: [
+        ElevatedButton(
+          onPressed: () => con.selectPDF(),
+          child: Text('Seleccionar PDF'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueGrey
           ),
-        ],
-        decoration: InputDecoration(
-          hintText: 'Total',
-          prefixIcon: Icon(Icons.attach_money_rounded),
         ),
-      ),
+        Obx(() => con.planopdfName.value.isNotEmpty
+            ? Text('PDF seleccionado: ${con.planopdfName.value}')
+            : SizedBox.shrink()),
+      ],
     );
   }
-
-  Widget _textFielPrecio() {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: TextField(
-        controller: con.precioController,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          hintText: 'Precio Unitario',
-          prefixIcon: Icon(Icons.attach_money),
-        ),
-      ),
-    );
-  }
-
   Widget _buttonSave(BuildContext context) {
     return Container(
       //width: double.infinity,

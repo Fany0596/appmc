@@ -8,10 +8,12 @@ import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
 import 'package:maquinados_correa/src/models/producto.dart';
+import 'package:maquinados_correa/src/models/promedio.dart';
 import 'package:maquinados_correa/src/models/tiempo.dart';
 import 'package:maquinados_correa/src/models/user.dart';
 import 'package:maquinados_correa/src/providers/cotizacion_provider.dart';
 import 'package:maquinados_correa/src/providers/producto_provider.dart';
+import 'package:maquinados_correa/src/providers/promedio_provider.dart';
 import 'package:maquinados_correa/src/providers/tiempo_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -21,12 +23,15 @@ import 'package:pdf/pdf.dart';
 class TymTabController extends GetxController{
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   var cotizaciones = Future.value(<Cotizacion>[]).obs; // Usamos Future.value para inicializar la lista de cotizaciones
+  var tiemposEstimados = <Promedio>[].obs;
 
   TextEditingController clienteController = TextEditingController();
 
   CotizacionProvider cotizacionProvider = CotizacionProvider();
   ProductoProvider productoProvider = ProductoProvider();
   TiempoProvider tiempoProvider = TiempoProvider();
+  PromedioProvider promedioProvider = PromedioProvider();
+
 
   List<String> status = <String>['GENERADA'].obs;
 
@@ -86,7 +91,23 @@ class TymTabController extends GetxController{
     print('Producto seleccionado: $producto');
     Get.toNamed('/tym/list/tiempos', arguments: {'producto': producto.toJson()});
   }
-  int calcularTiempoTrabajado(List<Tiempo> tiempos) {
+
+  Future<List<Map<String, String>>> obtenerTiemposEstimados(String parte) async {
+    try {
+      List<Promedio> promedios = await promedioProvider.findByStatus(parte);
+
+      return promedios.map((promedio) => {
+        'proceso': promedio.proceso ?? '',
+        'tiempo': promedio.tiempo ?? '00:00'
+      }).toList();
+
+    } catch (e) {
+      print('Error al obtener tiempos estimados: $e');
+      return [];
+    }
+  }
+
+  /*int calcularTiempoTrabajado(List<Tiempo> tiempos) {
     int tiempoTotal = 0;
     DateTime? inicioProceso;
     DateTime ahora = DateTime.now();
@@ -114,7 +135,7 @@ class TymTabController extends GetxController{
           tiempoTotal -= tiempoSuspendido;
           inicioSuspension = null;
         }
-      } else if (tiempo.estado == 'SIG. PROCESO') {
+      } else if (tiempo.estado == 'TERMINÓ') {
         if (inicioProceso != null) {
           int tiempoParcial = calcularTiempoEntreFechas(inicioProceso, fechaTiempo);
           tiempoTotal += tiempoParcial;
@@ -132,6 +153,66 @@ class TymTabController extends GetxController{
     }
 
     print('Tiempo total calculado: $tiempoTotal minutos');
+    return tiempoTotal;
+  }*/
+  int calcularTiempoTrabajado(List<Tiempo> tiempos) {
+    int tiempoTotal = 0;
+    DateTime? inicioProceso;
+    DateTime? inicioSuspension;
+
+    // Ordenar los tiempos cronológicamente
+    tiempos.sort((a, b) => DateTime.parse(a.time!).compareTo(DateTime.parse(b.time!)));
+
+    for (var i = 0; i < tiempos.length; i++) {
+      var tiempo = tiempos[i];
+      if (tiempo.time == null) continue;
+      DateTime fechaTiempo = DateTime.parse(tiempo.time!);
+
+      print('Procesando tiempo: ${tiempo.time}, Estado: ${tiempo.estado}');
+
+      switch (tiempo.estado) {
+        case 'INICIO':
+          inicioProceso = fechaTiempo;
+          inicioSuspension = null;
+          print('Inicio de proceso: $inicioProceso');
+          break;
+
+        case 'SUSPENDIDO':
+          if (inicioProceso != null) {
+            tiempoTotal += calcularTiempoEfectivo(inicioProceso, fechaTiempo);
+            inicioSuspension = fechaTiempo;
+            print('Proceso suspendido en: $inicioSuspension. Tiempo acumulado: $tiempoTotal');
+            inicioProceso = null;
+          }
+          break;
+
+        case 'REANUDAR':
+          if (inicioSuspension != null) {
+            inicioProceso = fechaTiempo;
+            inicioSuspension = null;
+            print('Proceso reanudado en: $fechaTiempo');
+          }
+          break;
+
+        case 'TERMINÓ':
+          if (inicioProceso != null) {
+            int tiempoParcial = calcularTiempoEfectivo(inicioProceso, fechaTiempo);
+            tiempoTotal += tiempoParcial;
+            print('Proceso terminado en: $fechaTiempo. Tiempo parcial: $tiempoParcial, Total: $tiempoTotal');
+            inicioProceso = null;
+          }
+          break;
+      }
+    }
+
+    // Si hay un proceso en curso
+    if (inicioProceso != null && inicioSuspension == null) {
+      DateTime ahora = DateTime.now();
+      int tiempoFinal = calcularTiempoEfectivo(inicioProceso, ahora);
+      tiempoTotal += tiempoFinal;
+      print('Proceso en curso hasta: $ahora. Tiempo final: $tiempoFinal, Total: $tiempoTotal');
+    }
+
     return tiempoTotal;
   }
 
@@ -157,17 +238,15 @@ class TymTabController extends GetxController{
     return hora >= 13 && hora < 14; // Excluye el tiempo entre 1 pm y 2 pm
   }
 
-  Future<Map<String, String>> calcularTiempoEstimado(String productoId) async {
+  Future<Map<String, String>> calcularTiempoTotal(String productoId, String parte) async {
     try {
       List<Tiempo> tiempos = await tiempoProvider.getTiemposByProductId(productoId);
-      print('Tiempos obtenidos para el producto $productoId: ${tiempos.length}');
       if (tiempos.isEmpty) {
-        return {'total': 'N/A', 'actual': 'N/A'};
+        return {'total': '','estimado' : '', 'actual': ''};
       }
       int tiempoTotalTrabajado = calcularTiempoTrabajado(tiempos);
       int tiempoProcesoActual = calcularTiempoProcesoActual(tiempos);
-      print('Tiempo total trabajado: $tiempoTotalTrabajado minutos');
-      print('Tiempo del proceso actual: $tiempoProcesoActual minutos');
+      List<Map<String, String>> tiemposEstimados = await obtenerTiemposEstimados(parte);
 
       String formatTiempo(int minutos) {
         int horas = minutos ~/ 60;
@@ -175,18 +254,26 @@ class TymTabController extends GetxController{
         return '${horas.toString().padLeft(2, '0')}:${minutosRestantes.toString().padLeft(2, '0')}';
       }
 
-      String tiempoActualFormatted = formatTiempo(tiempoProcesoActual);
-      print('Tiempo actual formateado: $tiempoActualFormatted');
+      String tiempoEstimado = '';
+      if (tiemposEstimados.isNotEmpty) {
+        int tiempoTotalEstimado = tiemposEstimados.fold(0, (sum, tiempo) {
+          List<String> partes = tiempo['tiempo']!.split(':');
+          return sum + int.parse(partes[0]) * 60 + int.parse(partes[1]);
+        });
+        tiempoEstimado = formatTiempo(tiempoTotalEstimado);
+      }
 
       return {
         'total': formatTiempo(tiempoTotalTrabajado),
-        'actual': tiempoActualFormatted
+        'actual': formatTiempo(tiempoProcesoActual),
+        'estimado': tiempoEstimado
       };
     } catch (e) {
-      print('Error al calcular tiempo estimado: $e');
-      return {'total': 'Error', 'actual': 'Error'};
+      print('Error al calcular tiempo: $e');
+      return {'total': 'Error', 'actual': 'Error', 'estimado': ''};
     }
   }
+
   int calcularTiempoProcesoActual(List<Tiempo> tiempos) {
     int tiempoTotal = 0;
     DateTime? inicioProceso;
@@ -212,7 +299,7 @@ class TymTabController extends GetxController{
           inicioProceso = fechaTiempo;
           inicioSuspension = null;
         }
-      } else if (tiempo.estado == 'SIG. PROCESO') {
+      } else if (tiempo.estado == 'TERMINÓ') {
         if (inicioProceso != null) {
           tiempoTotal += calcularTiempoEfectivo(inicioProceso, fechaTiempo);
           inicioProceso = null;
@@ -227,7 +314,7 @@ class TymTabController extends GetxController{
 
     return tiempoTotal;
   }
-  int calcularTiempoEfectivo(DateTime inicio, DateTime fin) {
+  /*int calcularTiempoEfectivo(DateTime inicio, DateTime fin) {
     int minutos = 0;
     DateTime temp = inicio;
 
@@ -246,7 +333,39 @@ class TymTabController extends GetxController{
     }
 
     return minutos;
+  }*/
+  int calcularTiempoEfectivo(DateTime inicio, DateTime fin) {
+    int minutos = 0;
+    DateTime actual = inicio;
+
+    while (actual.isBefore(fin)) {
+      // Si estamos en la hora de comida (13:00 - 14:00), saltamos a las 14:00
+      if (actual.hour == 13 && actual.minute == 0) {
+        actual = DateTime(actual.year, actual.month, actual.day, 14, 0);
+        continue;
+      }
+
+      // Calculamos el siguiente minuto
+      DateTime siguiente = actual.add(Duration(minutes: 1));
+
+      // Si el siguiente minuto está después del fin, usamos el fin
+      if (siguiente.isAfter(fin)) {
+        siguiente = fin;
+      }
+
+      // Si no estamos en la hora de comida, sumamos el tiempo
+      if (actual.hour != 13) {
+        minutos += siguiente
+            .difference(actual)
+            .inMinutes;
+      }
+
+      actual = siguiente;
+    }
+
+    return minutos;
   }
+
   Future<void> generarPDF(Producto producto) async {
 
     ByteData imageData = await rootBundle.load('assets/img/LOGO1.png');
@@ -490,7 +609,7 @@ class TymTabController extends GetxController{
   }
   // Guardar el archivo PDF en la memoria del dispositivo
   final directory = await getDownloadsDirectory();
-  final file = File('${directory!.path}/${producto.articulo}_reporte.pdf');
+  final file = File('${directory!.path}/${producto.parte}_reporte.pdf');
   await file.writeAsBytes(await pdf.save());
     Get.snackbar('DOCUMENTO DESCARGADO EN:', '${file.path}', backgroundColor: Colors.green,
       colorText: Colors.white,);

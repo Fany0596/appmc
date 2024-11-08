@@ -35,6 +35,8 @@ class LiberacionController extends GetxController {
           estatus: 'RECHAZADO',
           operador: '',
           operacion: '',
+          rechazo: 'si',
+          fecharcrt: DateTime.now().toString(),
       );
       //Mostrar mensaje de éxito
 
@@ -48,17 +50,17 @@ class LiberacionController extends GetxController {
         progressDialog.close();
 
         // Mostrar el resultado de la solicitud
-        Get.snackbar(
-          responseApi.success! ? 'Éxito' : 'Error',
-          responseApi.message ?? '', backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
+        if (responseApi.success == true) {
+          Get.snackbar(
+            'Éxito','Producto actualizado correctamente',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,);
+        }
       } catch (e) {
         print('Error al actualizar el producto: $e');
         Get.snackbar('Ocurrió un error al actualizar el producto', 'Verifique los campos', backgroundColor: Colors.red,
           colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,);
+          );
       }
     }
   }
@@ -85,6 +87,8 @@ class LiberacionController extends GetxController {
           estatus: 'RETRABAJO',
           operador: '',
           operacion: '',
+          retrabajo: 'si',
+          fecharcrt: DateTime.now().toString(),
       );
       //Mostrar mensaje de éxito
 
@@ -98,12 +102,12 @@ class LiberacionController extends GetxController {
         progressDialog.close();
 
         // Mostrar el resultado de la solicitud
-        Get.snackbar(
-          responseApi.success! ? 'Éxito' : 'Error',
-          responseApi.message ?? '', backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
+        if (responseApi.success == true) {
+          Get.snackbar(
+            'Éxito','Producto actualizado correctamente',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,);
+        }
       } catch (e) {
         print('Error al actualizar el producto: $e');
         Get.snackbar('Ocurrió un error al actualizar el producto', 'Verifique los campos', backgroundColor: Colors.red,
@@ -122,8 +126,7 @@ class LiberacionController extends GetxController {
     return true;
   }
   void liberar(BuildContext context) async {
-    String productId = producto?.id ??
-        ''; // Esto asume que el ID está presente en el objeto producto
+    String productId = producto?.id ?? ''; // Esto asume que el ID está presente en el objeto producto
     print('ID del producto a actualizar: $productId');
     // Verifica que todas las propiedades del producto estén definida
     ProgressDialog progressDialog = ProgressDialog(context: context);
@@ -135,6 +138,7 @@ class LiberacionController extends GetxController {
         estatus: 'LIBERADO',
         operador: '',
         operacion: '',
+        fechalib: DateTime.now().toString(),
       );
       if (pdfFile == null) {
         Get.snackbar('Error', 'Por favor, selecciona un archivo PDF');

@@ -20,6 +20,15 @@ class Cotizacion {
   String? status;
   String? condiciones;
   String? descuento;
+  String? garant;
+  String? banc;
+  String? agreg1;
+  String? agreg2;
+  String? agreg3;
+  String? agreg4;
+  String? coment1;
+  String? coment2;
+  String? coment3;
   int? timestamp;
   String? idVendedores;
   String? idClientes;
@@ -42,6 +51,15 @@ class Cotizacion {
     this.status,
     this.condiciones,
     this.descuento,
+    this.garant,
+    this.banc,
+    this.agreg1,
+    this.agreg2,
+    this.agreg3,
+    this.agreg4,
+    this.coment1,
+    this.coment2,
+    this.coment3,
     this.producto,
     this.oc,
     this.timestamp,
@@ -64,6 +82,15 @@ class Cotizacion {
     status: json["status"],
     condiciones: json["condiciones"],
     descuento: json["descuento"],
+    garant: json["garant"],
+    banc: json["banc"],
+    agreg1: json["agreg1"],
+    agreg2: json["agreg2"],
+    agreg3: json["agreg3"],
+    agreg4: json["agreg4"],
+    coment1: json["coment1"],
+    coment2: json["coment2"],
+    coment3: json["coment3"],
     producto: json["producto"] != null ? List<Producto>.from(json["producto"].map((model) => model is Producto ? model : Producto.fromJson(model))) : [],
     oc: json["oc"] != null ? List<Oc>.from(json["oc"].map((model) => model is Oc ? model : Oc.fromJson(model))) : [],
     timestamp: json["timestamp"],
@@ -95,6 +122,15 @@ class Cotizacion {
     "status": status,
     "condiciones": condiciones,
     "descuento": descuento,
+    "garant": garant,
+    "banc": banc,
+    "agreg1": agreg1,
+    "agreg2": agreg2,
+    "agreg3": agreg3,
+    "agreg4": agreg4,
+    "coment1": coment1,
+    "coment2": coment2,
+    "coment3": coment3,
     "producto": producto,
     "oc": oc,
     "timestamp": timestamp,

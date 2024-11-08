@@ -25,7 +25,7 @@ class ProduccionOtListController extends GetxController {
     cotizaciones.clear();
     filteredCotizaciones.clear();
     for (var status in this.status) {
-      var cotizacionesList = await cotizacionProvider.findByStatus(status);
+      var cotizacionesList = await cotizacionProvider.findByStatusP(status);
       cotizaciones.addAll(cotizacionesList);
       filteredCotizaciones.addAll(cotizacionesList);
     }

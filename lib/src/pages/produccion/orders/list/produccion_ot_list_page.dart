@@ -85,7 +85,7 @@ class ProduccionOtListPage extends StatelessWidget {
                               onPressed: () => con.goToRoles(),
                               icon: Icon(
                                 Icons.supervised_user_circle,
-                                color: Colors.white,
+                                color: Colors.black,
                                 size: 30,
                               ),
                             ),
@@ -97,7 +97,7 @@ class ProduccionOtListPage extends StatelessWidget {
                               onPressed: () => con.signOut(),
                               icon: Icon(
                                 Icons.power_settings_new,
-                                color: Colors.white,
+                                color: Colors.black,
                                 size: 30,
                               ),
                             ),
@@ -194,14 +194,6 @@ class ProduccionOtListPage extends StatelessWidget {
             'assets/img/LOGO1.png',
             width: 55,
             height: 55,
-          ),
-          Text(
-            ' MAQUINADOS CORREA',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
           ),
         ],
       ),

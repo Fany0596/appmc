@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:maquinados_correa/src/models/operador.dart';
 import 'package:maquinados_correa/src/models/producto.dart';
 import 'package:maquinados_correa/src/pages/tym/list/tiempos/tiempos_controller.dart';
-
 class TiemposPage extends StatelessWidget {
   Producto? producto;
   final TiemposController con = Get.put(TiemposController());
@@ -15,26 +14,27 @@ class TiemposPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx (() => Scaffold(
-       body: SingleChildScrollView(
-      child: Stack(
-        children: [
-        Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // posiciona elementos uno sobre otro
-        children: [
-          _backGroundCover(context),
-        ]),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // posiciona elementos uno sobre otro
-             children: [
+    return //Obx (() =>
+        Scaffold(
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Column(
+                crossAxisAlignment: CrossAxisAlignment.start, // posiciona elementos uno sobre otro
+                children: [
+                  _backGroundCover(context),
+                ]),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start, // posiciona elementos uno sobre otro
+              children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                   child: _encabezado(),
                 ),
-               Padding(
-                 padding: const EdgeInsets.symmetric(horizontal: 1),
-                 child: _buttonBack(),
-               ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
+                  child: _buttonBack(),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 120),
                   child: _textArticulo(),
@@ -45,10 +45,10 @@ class TiemposPage extends StatelessWidget {
                 ),
               ],
             ),
-        ],
+          ],
+        ),
       ),
-      ),
-       ),
+  //  ),
     );
   }
 
@@ -69,30 +69,22 @@ class TiemposPage extends StatelessWidget {
           height: 55,
         ),
         const SizedBox(width: 10),
-        Text(
-          'MAQUINADOS CORREA',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
       ],
     );
   }
 
   Widget _textArticulo() {
     return
-        Text(
-          'TIEMPOS Y MOVIMIENTOS',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            color: Colors.black,
-          ),
+      Text(
+        'TIEMPOS Y MOVIMIENTOS',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 30,
+          color: Colors.black,
+        ),
 
-    );
+      );
   }
 
   Widget _boxForm(BuildContext context) {
@@ -166,7 +158,7 @@ class TiemposPage extends StatelessWidget {
     );
   }
 
-  Widget _textFielProceso() {
+  /*Widget _textFielProceso() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: DropdownButtonFormField<String>(
@@ -201,31 +193,70 @@ class TiemposPage extends StatelessWidget {
             child: Text('Cuñero'),
             value: 'Cuñero',
           ),
+          DropdownMenuItem(
+            child: Text('Torneado CNC'),
+            value: 'Torneado CNC',
+          ),
+          DropdownMenuItem(
+            child: Text('Fresado CNC'),
+            value: 'Fresado CNC',
+          ),
         ],
         onChanged: (value) {
           con.onProcesoSelected(value);
         },
       ),
     );
+  }*/
+  Widget _textFielProceso() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Obx(() {
+        print('Estado actual: ${con.lastRecordState.value}');
+        print('Último proceso: ${con.lastRecordProcess.value}');
+
+        return DropdownButtonFormField<String>(
+          icon: Icon(Icons.arrow_drop_down_circle, color: Colors.grey),
+          decoration: InputDecoration(
+            hintText: 'Proceso',
+            prefixIcon: Icon(Icons.handyman_outlined),
+          ),
+          value: con.selectedOperacion.value.isEmpty ? null : con.selectedOperacion.value,
+          items: [
+            DropdownMenuItem(child: Text('Torneado'), value: 'Torneado'),
+            DropdownMenuItem(child: Text('Fresado'), value: 'Fresado'),
+            DropdownMenuItem(child: Text('Barrenado'), value: 'Barrenado'),
+            DropdownMenuItem(child: Text('Machueleado'), value: 'Machueleado'),
+            DropdownMenuItem(child: Text('Soldadura'), value: 'Soldadura'),
+            DropdownMenuItem(child: Text('Cuñero'), value: 'Cuñero'),
+            DropdownMenuItem(child: Text('Torneado CNC'), value: 'Torneado CNC'),
+            DropdownMenuItem(child: Text('Fresado CNC'), value: 'Fresado CNC'),
+          ],
+          onChanged: (value) {
+            con.onProcesoSelected(value);
+          },
+        );
+      }),
+    );
   }
 
-  Widget _operadorList(List<Operador> operador) {
+ /* Widget _operadorList(List<Operador> operador) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: DropdownButton(
-        underline: Container(
-          alignment: Alignment.centerRight,
-          child: Icon(
-            Icons.arrow_drop_down_circle,
-            color: Colors.grey,
-          ),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child:  DropdownButtonFormField<String>(
+        icon: Icon(Icons.arrow_drop_down_circle,
+          color: Colors.grey,),
+        decoration: InputDecoration(
+          hintText: 'Proceso',
+          prefixIcon: Icon(Icons.engineering),
         ),
         elevation: 3,
         isExpanded: true,
         hint: Text(
           'Selecciona un operador',
           style: TextStyle(
-            fontSize: 16,
+              fontSize: 16,
+              color: Colors.black
           ),
         ),
         items: _dropDownItems(operador),
@@ -249,11 +280,54 @@ class TiemposPage extends StatelessWidget {
       );
     });
     return list;
+  }*/
+  Widget _operadorList(List<Operador> operador) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Obx(() {
+        print('Estado actual: ${con.lastRecordState.value}');
+        print('Último operador: ${con.lastRecordOperator.value}');
+
+        return DropdownButtonFormField<String>(
+          icon: Icon(Icons.arrow_drop_down_circle, color: Colors.grey),
+          decoration: InputDecoration(
+            hintText: 'Operador',
+            prefixIcon: Icon(Icons.engineering),
+          ),
+          elevation: 3,
+          isExpanded: true,
+          hint: Text(
+            'Selecciona un operador',
+            style: TextStyle(fontSize: 16, color: Colors.black),
+          ),
+          value: con.idOperador.value.isEmpty ? null : con.idOperador.value,
+          items: _dropDownItems(operador),
+          onChanged: (option) {
+            print('Opcion seleccionada ${option}');
+            con.idOperador.value = option.toString();
+          },
+        );
+      }),
+    );
   }
+
+  List<DropdownMenuItem<String>> _dropDownItems(List<Operador> operador) {
+    List<DropdownMenuItem<String>> list = [];
+    operador.forEach((operador) {
+      list.add(
+        DropdownMenuItem(
+          child: Text(operador.name ?? ''),
+          value: operador.id,
+        ),
+      );
+    });
+    return list;
+  }
+
 
   Widget _textFielEnt(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(left: 10, right: 10),
+      margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
       child: GestureDetector(
         onTap: () {
           _selectDateTime(context);
@@ -264,7 +338,7 @@ class TiemposPage extends StatelessWidget {
             keyboardType: TextInputType.datetime,
             decoration: InputDecoration(
               hintText: 'Selecciona una fecha y hora',
-              hintStyle: TextStyle(fontSize: 14),
+              hintStyle: TextStyle(fontSize: 16),
               prefixIcon: Icon(Icons.av_timer_rounded),
             ),
           ),
@@ -300,50 +374,69 @@ class TiemposPage extends StatelessWidget {
   Widget _textFielStatus() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: Obx(() {
-        List<DropdownMenuItem<String>> items = [];
+      child: FutureBuilder(
+        future: con.getLastState(),
+        builder: (context, snapshot) {
+          List<DropdownMenuItem<String>> items = [];
 
-        // Si no hay registros, solo mostrar 'INICIO'
-        if (!con.hasRecords.value) {
-          items.add(DropdownMenuItem(
-            child: Text('INICIO'),
-            value: 'INICIO',
-          ));
-        } else {
-          // Si hay registros, aplicar la lógica anterior
-          if (con.lastState.value != 'SUSPENDIDO') {
-            items.add(DropdownMenuItem(
-              child: Text('SUSPENDIDO'),
-              value: 'SUSPENDIDO',
-            ));
+          // Si hay un error o está cargando, mostrar un indicador de carga
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
           }
 
-          if (con.lastState.value == 'SUSPENDIDO') {
-            items.add(DropdownMenuItem(
-              child: Text('REANUDAR'),
-              value: 'REANUDAR',
-            ));
-          }
+          // Usar GetX específicamente para los items del dropdown
+          return GetX<TiemposController>(
+            builder: (_) {
+              // Si no hay registros, solo mostrar 'INICIO'
+              if (!_.hasRecords.value) {
+                items = [
+                  DropdownMenuItem(
+                    child: Text('INICIO'),
+                    value: 'INICIO',
+                  ),
+                ];
+              } else {
+                items = [];
+                // Si hay registros, aplicar la lógica existente
+                if (_.lastState.value != 'SUSPENDIDO') {
+                  items.add(DropdownMenuItem(
+                    child: Text('SUSPENDIDO'),
+                    value: 'SUSPENDIDO',
+                  ));
+                }
 
-          items.add(DropdownMenuItem(
-            child: Text('SIG. PROCESO'),
-            value: 'SIG. PROCESO',
-          ));
-        }
+                if (_.lastState.value == 'SUSPENDIDO') {
+                  items.add(DropdownMenuItem(
+                    child: Text('REANUDAR'),
+                    value: 'REANUDAR',
+                  ));
+                }
 
-        return DropdownButtonFormField<String>(
-          icon: Icon(Icons.arrow_drop_down_circle, color: Colors.grey),
-          decoration: InputDecoration(
-            hintText: 'Selecciona el status',
-            prefixIcon: Icon(Icons.handyman_outlined),
-          ),
-          items: items,
-          onChanged: (value) {
-            con.selectedStatus.value = value!;
-            con.estadoController.text = value;
-          },
-        );
-      }),
+                items.add(DropdownMenuItem(
+                  child: Text('TERMINÓ'),
+                  value: 'TERMINÓ',
+                ));
+              }
+
+              return DropdownButtonFormField<String>(
+                icon: Icon(Icons.arrow_drop_down_circle, color: Colors.grey),
+                decoration: InputDecoration(
+                  hintText: 'Selecciona el status',
+                  prefixIcon: Icon(Icons.handyman_outlined),
+                ),
+                items: items,
+                value: _.selectedStatus.value.isEmpty ? null : _.selectedStatus.value,
+                onChanged: (value) {
+                  if (value != null) {
+                    _.selectedStatus.value = value;
+                    _.estadoController.text = value;
+                  }
+                },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 

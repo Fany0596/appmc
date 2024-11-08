@@ -30,7 +30,6 @@ class ProductoPageController extends GetxController {
   List<Materiales> materiales = <Materiales>[].obs;
   ProductoProvider productoProvider = ProductoProvider();
 
-
   ProductoPageController() {
     precioController.addListener(updateTotal);
     cantidadController.addListener(updateTotal);
@@ -46,127 +45,29 @@ class ProductoPageController extends GetxController {
     // Actualiza el valor del controlador de "Total"
     totalController.text = total.toStringAsFixed(2);
   }
+
   void getCotizacion() async {
     var result = await cotizacionProvider.getAll();
     cotizacion.clear();
     cotizacion.addAll(result);
   }
+
   void getMateriales() async {
     var result = await materialesProvider.getAll();
     materiales.clear();
     materiales.addAll(result);
   }
 
-  void createProducto(BuildContext context) async {
-
-    String articulo = articuloController.text;
-    String descr = descrController.text;
-    String precio = precioController.text;
-    String cantidad = cantidadController.text;
-
-    if (precio.isEmpty || cantidad.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa el precio y la cantidad');
-      return;
-    }
-    if (descr.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa la descripción');
-      return;
-    }
-
-    // Calcula el total multiplicando precio y cantidad
-    double total = double.parse(precio) * double.parse(cantidad);
-
-    print('ARTICULO: ${articulo}');
-    print('PRECIO: ${precio}');
-    print('TOTAL: ${total}');
-    print('CANTIDAD: ${cantidad}');
-    print('ID COTIZACION: ${idCotizaciones}');
-    print('ID MATERIAL: ${idMateriales}');
-    ProgressDialog progressDialog = ProgressDialog(context: context);
-
-
-
-    if (isValidForm(articulo, precio, total.toString(), cantidad, descr)){ //valida que no esten vacios los campos
-      Producto producto = Producto(
-        articulo: articulo,
-        descr: descr,
-        precio: double.parse(precio),
-        total: total,
-        cantidad: double.parse(cantidad),
-        idCotizaciones: idCotizaciones.value,
-        idMateriales: idMateriales.value
-      );
-      progressDialog.show(max: 100, msg:'Espere un momento...');
-
-
-       List<File> images =[];
-      // images.add(planopdf!);
-      //images.add(imageFile2!);
-      //images.add(imageFile3!);
-
-       Stream stream = await productoProvider.create(producto, images);
-       stream.listen((res) {
-
-         ResponseApi responseApi = ResponseApi.fromJson(json.decode(res));
-        progressDialog.close();
-       Get.snackbar('Proceso terminado', responseApi.message ?? '',backgroundColor: Colors.green,
-         colorText: Colors.white,);
-       if (responseApi.success == true) {
-         clearForm();
-       }
-       });
-    }
-  }
-  bool isValidForm(String articulo, String precio, String total, String cantidad, String descr) {
-    if (articulo.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa número de cotización',  backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
-      return false;
-    }
-    if (precio.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa precio',  backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
-      return false;
-    }
-    if (cantidad.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa cantidad',  backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
-      return false;
-    }
-    if (descr.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa la descripción',  backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
-      return false;
-    }
-    if (idCotizaciones == null) {
-      Get.snackbar('Formulario no valido', 'Selecciona un vendedor',  backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
-      return false;
-    }
-    if (idMateriales == null) {
-      Get.snackbar('Formulario no valido', 'Selecciona un cliente',  backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
-      return false;
-    }
-
-    return true;
+  void clearForm() {
+    articuloController.text = '';
+    descrController.text = '';
+    precioController.text = '';
+    cantidadController.text = '';
+    totalController.text = '';
+    idMateriales.value = '';
+    update();
   }
 
-     void clearForm() {
-       articuloController.text = '';
-       descrController.text = '';
-       precioController.text = '';
-       cantidadController.text = '';
-       totalController.text = '';
-       idMateriales.value = '';
-       update();
-     }
   void clearForm2() {
     articuloController.text = '';
     descrController.text = '';
@@ -177,11 +78,13 @@ class ProductoPageController extends GetxController {
     idCotizaciones.value = '';
     update();
   }
+
   void reloadPage() {
-    getCotizacion();  // Recargar cotizaciones
-    getMateriales();  // Recargar materiales
-    update();         // Actualizar el controlador
+    getCotizacion(); // Recargar cotizaciones
+    getMateriales(); // Recargar materiales
+    update(); // Actualizar el controlador
   }
+
   void agregarProducto(BuildContext context) {
     String articulo = articuloController.text;
     String descr = descrController.text;
@@ -201,8 +104,7 @@ class ProductoPageController extends GetxController {
           total: total,
           cantidad: double.parse(cantidad),
           idCotizaciones: idCotizaciones.value,
-          idMateriales: idMateriales.value
-      );
+          idMateriales: idMateriales.value);
 
       productosPendientes.add(producto);
       clearForm();
@@ -211,6 +113,7 @@ class ProductoPageController extends GetxController {
           backgroundColor: Colors.green, colorText: Colors.white);
     }
   }
+
   void guardarTodosLosProductos(BuildContext context) async {
     if (productosPendientes.isEmpty) {
       Get.snackbar('Error', 'No hay productos para guardar',
@@ -228,7 +131,8 @@ class ProductoPageController extends GetxController {
         ResponseApi responseApi = ResponseApi.fromJson(json.decode(res));
         if (responseApi.success != true) {
           progressDialog.close();
-          Get.snackbar('Error', 'No se pudo guardar el producto: ${producto.articulo}',
+          Get.snackbar(
+              'Error', 'No se pudo guardar el producto: ${producto.articulo}',
               backgroundColor: Colors.red, colorText: Colors.white);
           return;
         }
@@ -241,6 +145,72 @@ class ProductoPageController extends GetxController {
     productosPendientes.clear();
     clearForm2();
   }
+  bool isValidForm(String articulo, String precio, String total,
+      String cantidad, String descr) {
+    if (articulo.isEmpty) {
+      Get.snackbar(
+        'Formulario no valido',
+        'Ingresa número de cotización',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+    if (precio.isEmpty) {
+      Get.snackbar(
+        'Formulario no valido',
+        'Ingresa precio',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+    if (cantidad.isEmpty) {
+      Get.snackbar(
+        'Formulario no valido',
+        'Ingresa cantidad',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+    if (descr.isEmpty) {
+      Get.snackbar(
+        'Formulario no valido',
+        'Ingresa la descripción',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+    if (idCotizaciones == null) {
+      Get.snackbar(
+        'Formulario no valido',
+        'Selecciona un vendedor',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+    if (idMateriales == null) {
+      Get.snackbar(
+        'Formulario no valido',
+        'Selecciona un cliente',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
   void removeProducto(int index) {
     productosPendientes.removeAt(index);
     update(); // Esto actualizará la UI

@@ -19,6 +19,7 @@ import 'package:maquinados_correa/src/pages/compras/update/product/update_produc
 import 'package:maquinados_correa/src/pages/produccion/orders/detalles_produccion/detalles_produccion_page.dart';
 import 'package:maquinados_correa/src/pages/produccion/orders/ot/produccion_ot_page.dart';
 import 'package:maquinados_correa/src/pages/produccion/produccionHome/produccion_home_page.dart';
+import 'package:maquinados_correa/src/pages/produccion/tabla/entregado/entrega_page.dart';
 import 'package:maquinados_correa/src/pages/produccion/tabla/produccion_tab_page.dart';
 import 'package:maquinados_correa/src/pages/profile/info/profile_info_page.dart';
 import 'package:maquinados_correa/src/pages/profile/info/update/profile_update_page.dart';
@@ -92,6 +93,7 @@ class _MyAppState extends State<MyApp> {
         GetPage(name: '/compras/orders/product', page:()=> ComprasProductPage()),
         GetPage(name: '/produccion/orders/detalles_produccion', page:()=> ProduccionDetallesPage()),
         GetPage(name: '/produccion/tabla', page:()=> ProduccionTabPage()),
+        GetPage(name: '/produccion/tabla/entrega', page:()=> EntregaPage()),
         GetPage(name: '/compras/tabla', page:()=> ComprasTabPage()),
         GetPage(name: '/ventas/tabla', page:()=> VentasTabPage()),
         GetPage(name: '/tym/tabla', page:()=> TymTabPage()),

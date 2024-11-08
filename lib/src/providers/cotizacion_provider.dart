@@ -74,6 +74,24 @@ class CotizacionProvider extends GetConnect {
 
     return cotizacion;
   }
+   Future<List<Cotizacion>> findByStatusP(String status) async {
+    Response response = await get(
+        '$url/findByStatusP/$status',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization' : userSession.sessionToken ?? ''
+        }
+    );
+
+    if (response.statusCode == 401){
+      Get.snackbar('Petición denegada', 'Tu usuario no puede leer esta informacion');
+      return[];
+    }
+
+    List<Cotizacion> cotizacion= Cotizacion.fromJsonList(response.body);
+
+    return cotizacion;
+  }
 
   Future<ResponseApi> updateconfirmada(Cotizacion cotizacion) async {
     Response response = await put(
@@ -190,6 +208,48 @@ class CotizacionProvider extends GetConnect {
       Get.snackbar('Error', 'No se pudo obtener la cotización');
       return null;
     }
+  }
+  Future<ResponseApi> getCotCount() async {
+    Response response = await get('$url/countCotizacionesAnual', headers: {
+      'Authorization': userSession.sessionToken ?? ''
+    });
+    if (response.body == null) {
+      return ResponseApi();
+    }
+    ResponseApi responseApi = ResponseApi.fromJson(response.body);
+    return responseApi;
+  }
+
+  Future<ResponseApi> getCotIng() async {
+    Response response = await get('$url/countCotizacionesIngreso', headers: {
+      'Authorization': userSession.sessionToken ?? ''
+    });
+    if (response.body == null) {
+      return ResponseApi();
+    }
+    ResponseApi responseApi = ResponseApi.fromJson(response.body);
+    return responseApi;
+  }
+
+  Future<ResponseApi> getIngresosClientes() async {
+    Response response = await get('$url/cotizacionesClienteIngreso', headers: {
+      'Authorization': userSession.sessionToken ?? ''
+    });
+    if (response.body == null) {
+      return ResponseApi();
+    }
+    ResponseApi responseApi = ResponseApi.fromJson(response.body);
+    return responseApi;
+  }
+  Future<ResponseApi> getCotClientes() async {
+    Response response = await get('$url/countCotizacionesCliente', headers: {
+      'Authorization': userSession.sessionToken ?? ''
+    });
+    if (response.body == null) {
+      return ResponseApi();
+    }
+    ResponseApi responseApi = ResponseApi.fromJson(response.body);
+    return responseApi;
   }
 
 }

@@ -13,8 +13,6 @@ import 'package:maquinados_correa/src/providers/vendedor_provider.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
 
 class CotizacionPageController extends GetxController {
-
-
   TextEditingController numberController = TextEditingController();
   TextEditingController entController = TextEditingController();
   TextEditingController nombreController = TextEditingController();
@@ -50,19 +48,29 @@ class CotizacionPageController extends GetxController {
     List<Cotizacion> cotizaciones = await cotizacionProvider.getAll();
     if (cotizaciones.isNotEmpty) {
       // Si hay cotizaciones registradas, obtén el último número de la última cotización
-      String lastQuoteNumber = cotizaciones.last.number ?? ""; // Obtén el número de cotización
-      int lastIndex = lastQuoteNumber.lastIndexOf(RegExp(r'\d')); // Encuentra el índice del último dígito en el número
-      String prevNumber = lastQuoteNumber.substring(lastIndex); // Extrae el número final
-      String prevLetters = lastQuoteNumber.substring(0, lastIndex); // Extrae las letras iniciales
+      String lastQuoteNumber =
+          cotizaciones.last.number ?? ""; // Obtén el número de cotización
+      int lastIndex = lastQuoteNumber.lastIndexOf(
+          RegExp(r'\d')); // Encuentra el índice del último dígito en el número
+      String prevNumber =
+          lastQuoteNumber.substring(lastIndex); // Extrae el número final
+      String prevLetters = lastQuoteNumber.substring(
+          0, lastIndex); // Extrae las letras iniciales
 
-      int prevNumbInt = int.parse(prevNumber); // Convierte el número de cotización a entero
-      prevNumb = prevLetters + (prevNumbInt.toString()); // Almacena el número de cotización como una cadena
+      int prevNumbInt =
+          int.parse(prevNumber); // Convierte el número de cotización a entero
+      prevNumb = prevLetters +
+          (prevNumbInt
+              .toString()); // Almacena el número de cotización como una cadena
 
       int newNumbInt = prevNumbInt + 1; // Suma uno al número de cotización
-      newNumb = prevLetters + newNumbInt.toString(); // Almacena el nuevo número de cotización como una cadena
+      newNumb = prevLetters +
+          newNumbInt
+              .toString(); // Almacena el nuevo número de cotización como una cadena
     } else {
       prevNumb = null; // Si no hay cotizaciones registradas, prevNumb es null
-      newNumb = "COT-1"; // Si no hay cotizaciones registradas, el nuevo número de cotización es A1
+      newNumb =
+          "COT-1"; // Si no hay cotizaciones registradas, el nuevo número de cotización es A1
     }
     numberController.text = newNumb!;
     update(); // Actualiza para que la UI muestre los nuevos números
@@ -78,6 +86,7 @@ class CotizacionPageController extends GetxController {
     vendedores.clear();
     vendedores.addAll(result);
   }
+
   void getClientes() async {
     var result = await clientesProvider.getAll();
     clientes.clear();
@@ -85,7 +94,6 @@ class CotizacionPageController extends GetxController {
   }
 
   void createCotizacion(BuildContext context) async {
-
     String number = numberController.text;
     String ent = entController.text;
     String nombre = nombreController.text;
@@ -103,28 +111,25 @@ class CotizacionPageController extends GetxController {
     print('ID CLIENTE: ${idClientes}');
     ProgressDialog progressDialog = ProgressDialog(context: context);
 
-
-
-    if (isValidForm(idClientes.value, ent, condiciones)){ //valida que no esten vacios los campos
+    if (isValidForm(idClientes.value, ent, condiciones)) {
+      //valida que no esten vacios los campos
       Cotizacion cotizacion = Cotizacion(
-        number: number,
-        ent: ent,
+          number: number,
+          ent: ent,
           fecha: fecha,
-        nombre: nombre,
-        correo: correo,
+          nombre: nombre,
+          correo: correo,
           req: req,
           condiciones: condiciones,
-        descuento:descuento,
-        telefono: telefono,
-        idVendedores: idVendedores.value,
-        idClientes: idClientes.value
-      );
-      progressDialog.show(max: 100, msg:'Espere un momento...');
+          descuento: descuento,
+          telefono: telefono,
+          idVendedores: idVendedores.value,
+          idClientes: idClientes.value);
+      progressDialog.show(max: 100, msg: 'Espere un momento...');
 
-      List<File> images =[];
+      List<File> images = [];
       Stream stream = await cotizacionProvider.create(cotizacion, images);
       stream.listen((res) {
-
         ResponseApi responseApi = ResponseApi.fromJson(json.decode(res));
         progressDialog.close();
         if (responseApi.success != true) {
@@ -134,90 +139,73 @@ class CotizacionPageController extends GetxController {
           return;
         }
         progressDialog.close();
-        Get.snackbar('Éxito', responseApi.message ?? '',backgroundColor: Colors.green,
-          colorText: Colors.white,);
+        Get.snackbar(
+          'Éxito',
+          responseApi.message ?? '',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
         clearForm();
       });
     }
   }
+
   bool isValidForm(String number, String ent, String condiciones) {
     if (number.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa número de cotización',  backgroundColor: Colors.red,
+      Get.snackbar(
+        'Formulario no valido',
+        'Ingresa número de cotización',
+        backgroundColor: Colors.red,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return false;
     }
     if (ent.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa tiempo de entrega',  backgroundColor: Colors.red,
+      Get.snackbar(
+        'Formulario no valido',
+        'Ingresa tiempo de entrega',
+        backgroundColor: Colors.red,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return false;
     }
     if (condiciones.isEmpty) {
-      Get.snackbar('Formulario no valido', 'Ingresa las condiciones de pago',  backgroundColor: Colors.red,
+      Get.snackbar(
+        'Formulario no valido',
+        'Ingresa las condiciones de pago',
+        backgroundColor: Colors.red,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return false;
     }
     if (idVendedores == null) {
-      Get.snackbar('Formulario no valido', 'Selecciona un vendedor',  backgroundColor: Colors.red,
+      Get.snackbar(
+        'Formulario no valido',
+        'Selecciona un vendedor',
+        backgroundColor: Colors.red,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return false;
     }
     if (idClientes == null) {
-      Get.snackbar('Formulario no valido', 'Selecciona un cliente',  backgroundColor: Colors.red,
+      Get.snackbar(
+        'Formulario no valido',
+        'Selecciona un cliente',
+        backgroundColor: Colors.red,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,);
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return false;
     }
-
 
     return true;
   }
 
-  void showAlertDialog(BuildContext context, int numberFile){
-    Widget galleryButton = ElevatedButton(
-        onPressed: (){
-          Get.back();//cierra la ventana de alerta
-          //selectImage(ImageSource.gallery, numberFile);
-        },
-        child: Text(
-          'GALERIA',
-          style: TextStyle(
-              color: Colors.white
-          ),
-        )
-    );
-
-    Widget cameraButton = ElevatedButton(
-        onPressed: (){
-          Get.back();//cierra la ventana de alerta
-          //selectImage(ImageSource.camera, numberFile);
-        },
-        child: Text(
-          'CAMARA',
-          style: TextStyle(
-              color: Colors.white
-          ),
-        )
-    );
-
-    AlertDialog alertDialog = AlertDialog(// ventana emergente
-      title: Text('Selecciona una opcion'),
-      actions: [
-        galleryButton,
-        cameraButton
-      ],
-    );
-
-    showDialog(context: context, builder:(BuildContext context){
-      return alertDialog;
-    });
-
-  }
-
-  void clearForm(){
+  void clearForm() {
     numberController.text = '';
     fechaController.text = '';
     entController.text = '';
@@ -231,8 +219,8 @@ class CotizacionPageController extends GetxController {
     idVendedores.value = '';
     getNextQuoteNumber();
   }
+
   void goToRoles() {
     Get.offNamedUntil('/roles', (route) => false);
   }
-
 }

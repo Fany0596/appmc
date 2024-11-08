@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:maquinados_correa/src/pages/Generico/genericoHome/generico_home_controller.dart';
 import 'package:maquinados_correa/src/pages/Generico/list/list_page.dart';
+import 'package:maquinados_correa/src/pages/Generico/tab_compras/compras_tab_page.dart';
+import 'package:maquinados_correa/src/pages/Generico/tab_tiempos/tab_tym_page.dart';
 import 'package:maquinados_correa/src/utils/custom_animated_bottom_bar.dart';
-import '../../produccion/orders/list/produccion_ot_list_page.dart';
-import '../../profile/info/profile_info_page.dart';
-
 
 class GenericoHomePage extends StatelessWidget {
   GenericoHomeController con = Get.put(GenericoHomeController());
@@ -17,9 +16,9 @@ class GenericoHomePage extends StatelessWidget {
         body:Obx(() => IndexedStack(
           index: con.indexTab.value,
           children:[
+            ComprasTabPage2(),
+            TabTymPage(),
             ListPage(),
-            ProduccionOtListPage(),
-            ProfileInfoPage()
           ],
         ))
     );
@@ -36,20 +35,20 @@ class GenericoHomePage extends StatelessWidget {
       onItemSelected: (index) => con.changeTab(index), //cambia e valor segun el boton presionado en la barra
       items: [
         BottomNavyBarItem(
+            icon: Icon(Icons.shopping_bag_outlined),
+            title:Text( 'Compras'),
+            activeColor: Colors.white,
+            inactiveColor: Colors.black
+        ),
+        BottomNavyBarItem(
             icon: Icon(Icons.home),
             title:Text( 'Home'),
             activeColor: Colors.white,
             inactiveColor: Colors.black
         ),
         BottomNavyBarItem(
-            icon: Icon(Icons.create),
-            title:Text( 'Crear'),
-            activeColor: Colors.white,
-            inactiveColor: Colors.black
-        ),
-        BottomNavyBarItem(
-            icon: Icon(Icons.add),
-            title:Text( 'Añadir'),
+            icon: Icon(Icons.list),
+            title:Text( 'Lista'),
             activeColor: Colors.white,
             inactiveColor: Colors.black
         ),

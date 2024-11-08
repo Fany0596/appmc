@@ -82,7 +82,8 @@ class GenericoDetallesController extends GetxController {
         ocList.value = ocRelacionadas;
       } else {
         Get.snackbar(
-            'Error', 'No se encontraron OCs relacionadas con esta cotización');
+            'Error', 'No se encontraron OCs relacionadas con esta cotización', backgroundColor: Colors.red,
+          colorText: Colors.white,);
       }
     } catch (e) {
       print('Error al cargar OCs: $e');
@@ -91,7 +92,8 @@ class GenericoDetallesController extends GetxController {
   }
   Future<void> descargarPDF(String url) async {
     if (url.isEmpty) {
-      Get.snackbar('Error', 'No hay URL de PDF para este producto');
+      Get.snackbar('Error', 'No hay archivo para este producto', backgroundColor: Colors.red,
+        colorText: Colors.white,);
       return;
     }
 
@@ -129,9 +131,11 @@ class GenericoDetallesController extends GetxController {
       }
     } catch (e) {
       print('Error al descargar el PDF: $e');
-      Get.snackbar('Error', 'No se pudo descargar el PDF');
+      Get.snackbar('Error', 'No se pudo descargar el PDF', backgroundColor: Colors.red,
+        colorText: Colors.white,);
     }
   }
+
   Future<void> generarOc() async {
     try {
       for (Oc oc in ocList) {
@@ -773,8 +777,9 @@ class GenericoDetallesController extends GetxController {
         await file.writeAsBytes(bytes);
         logger.i('Se pudo escribir el archivo correctamente');
       }} catch (e) {
-        logger.e('Error al escribir el archivo: $e');
-      }
+          print('Error al descargar el PDF: $e');
+          Get.snackbar('Error', 'No se pudo descargar el PDF');
+    }
   }
   Future<void> generarPDFs(producto) async {
     ByteData imageData = await rootBundle.load('assets/img/LOGO1.png');

@@ -73,7 +73,7 @@ class CalidadTabController extends GetxController{
           tiempoTotal -= tiempoSuspendido;
           inicioSuspension = null;
         }
-      } else if (tiempo.estado == 'SIG. PROCESO') {
+      } else if (tiempo.estado == 'TERMINÓ') {
         if (inicioProceso != null) {
           int tiempoParcial = calcularTiempoEntreFechas(inicioProceso, fechaTiempo);
           tiempoTotal += tiempoParcial;
@@ -121,7 +121,7 @@ class CalidadTabController extends GetxController{
       List<Tiempo> tiempos = await tiempoProvider.getTiemposByProductId(productoId);
       print('Tiempos obtenidos para el producto $productoId: ${tiempos.length}');
       if (tiempos.isEmpty) {
-        return {'total': 'N/A', 'actual': 'N/A'};
+        return {'total': '', 'actual': ''};
       }
       int tiempoTotalTrabajado = calcularTiempoTrabajado(tiempos);
       int tiempoProcesoActual = calcularTiempoProcesoActual(tiempos);

@@ -14,25 +14,28 @@ class LiberacionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       body: SingleChildScrollView(
-      child: Stack(
-        children: [
-        Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // posiciona elementos uno sobre otro
-        children: [
-          _backGroundCover(context),
-        ]),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // posiciona elementos uno sobre otro
-             children: [
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                // posiciona elementos uno sobre otro
+                children: [
+                  _backGroundCover(context),
+                ]),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              // posiciona elementos uno sobre otro
+              children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                   child: _encabezado(),
                 ),
-               Padding(
-                 padding: const EdgeInsets.symmetric(horizontal: 1),
-                 child: _buttonBack(),
-               ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
+                  child: _buttonBack(),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 120),
                   child: _textArticulo(),
@@ -43,10 +46,10 @@ class LiberacionPage extends StatelessWidget {
                 ),
               ],
             ),
-        ],
+          ],
+        ),
       ),
-      ),
-       );
+    );
   }
 
   Widget _backGroundCover(BuildContext context) {
@@ -66,29 +69,19 @@ class LiberacionPage extends StatelessWidget {
           height: 55,
         ),
         const SizedBox(width: 10),
-        Text(
-          'MAQUINADOS CORREA',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
       ],
     );
   }
 
   Widget _textArticulo() {
-    return
-        Text(
-          'DETERMINACIÓN DEL PRODUCTO',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            color: Colors.black,
-          ),
-
+    return Text(
+      'DETERMINACIÓN DEL PRODUCTO',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 30,
+        color: Colors.black,
+      ),
     );
   }
 
@@ -108,28 +101,20 @@ class LiberacionPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _textNewCot(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              con.producto!.estatus == 'EN ESPERA'
-                  ? Container(
-                  child: _buttonRechazo(context))
-                  : Container(),
-              con.producto!.estatus == 'EN PROCESO'
-                  ? Container(
-                  child: _buttonRechazo(context))
-                  : Container(),
-              con.producto!.estatus == 'SUSPENDIDO'
-                  ? Container(
-                  child: _buttonRechazo(context))
-                  : Container(),
-              con.producto!.estatus == 'SIG. PROCESO'
-                  ? Container(
-                  child: _buttons(context))
-                  : Container(),
-    ]
-          ),
-
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            con.producto!.estatus == 'EN ESPERA'
+                ? Container(child: _buttonRechazo(context))
+                : Container(),
+            con.producto!.estatus == 'EN PROCESO'
+                ? Container(child: _buttonRechazo(context))
+                : Container(),
+            con.producto!.estatus == 'SUSPENDIDO'
+                ? Container(child: _buttonRechazo(context))
+                : Container(),
+            con.producto!.estatus == 'SIG. PROCESO'
+                ? Container(child: _buttons(context))
+                : Container(),
+          ]),
         ],
       ),
     );
@@ -148,10 +133,11 @@ class LiberacionPage extends StatelessWidget {
       ),
     );
   }
+
   Widget _buttonRechazo(BuildContext context) {
     return Container(
       //width: double.infinity,
-      margin: EdgeInsets.only(top: 5, right:30, bottom: 10 ),
+      margin: EdgeInsets.only(top: 5, right: 30, bottom: 10),
       child: ElevatedButton(
         onPressed: () => con.rechazado(context),
         style: ElevatedButton.styleFrom(
@@ -168,8 +154,10 @@ class LiberacionPage extends StatelessWidget {
       ),
     );
   }
+
   Widget _buttonBack() {
-    return SafeArea( // deja espacio de la barra del telefono
+    return SafeArea(
+      // deja espacio de la barra del telefono
       child: Container(
         margin: EdgeInsets.only(left: 20),
         child: IconButton(
@@ -178,77 +166,62 @@ class LiberacionPage extends StatelessWidget {
               Icons.arrow_back_ios,
               color: Colors.white,
               size: 30,
-            )
-        ),
+            )),
       ),
     );
   }
-  Widget _buttons(BuildContext context){
-    return Column(
-        children: [
-          Divider(height: 1, color: Colors.white),
-          Column(
-            children: [
-                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buttonSelectPDF(),
-                      Container(
-                        margin: EdgeInsets.only(left: 45, top: 20, bottom: 30),
-                        child: ElevatedButton(
-                          onPressed: () => con.liberar(context),
-                          style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.all(15),
-                              backgroundColor: Colors.green
-                          ),
-                          child: Text(
-                            'LIBERAR',
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white
-                            ),
-                          ),
-                        ),
-                      ),
-                            Container(
-                            margin: EdgeInsets.only(left: 45, top: 20, bottom: 30),
-                            child: ElevatedButton(
-                            onPressed: () =>  con.retrabajo(context),
-                            style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.all(15),
-                            backgroundColor: Colors.orange
-                            ),
-                            child: Text(
-                            'RETRABAJO',
-                            style: TextStyle(
-                                fontSize: 20,
-                            color: Colors.white
-                            ),
-                            ),
-                            ),
-                            ),
-                            Container(
-    margin: EdgeInsets.only(left: 45, top: 20, bottom: 30),
-    child: ElevatedButton(
-    onPressed: () => con.rechazado(context),
-    style: ElevatedButton.styleFrom(
-    padding: EdgeInsets.all(15),
-    backgroundColor: Colors.red
-    ),
-    child: Text(
-    'RECHAZAR',
-    style: TextStyle(
-        fontSize: 20,
-    color: Colors.white
-    ),
-    ),
-    ),
-    ),
-                    ],
-                  )
-        ])
-        ]);
+
+  Widget _buttons(BuildContext context) {
+    return Column(children: [
+      Divider(height: 1, color: Colors.white),
+      Column(children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buttonSelectPDF(),
+            Container(
+              margin: EdgeInsets.only(left: 45, top: 20, bottom: 30),
+              child: ElevatedButton(
+                onPressed: () => con.liberar(context),
+                style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.all(15), backgroundColor: Colors.green),
+                child: Text(
+                  'LIBERAR',
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 45, top: 20, bottom: 30),
+              child: ElevatedButton(
+                onPressed: () => con.retrabajo(context),
+                style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.all(15),
+                    backgroundColor: Colors.orange),
+                child: Text(
+                  'RETRABAJO',
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 45, top: 20, bottom: 30),
+              child: ElevatedButton(
+                onPressed: () => con.rechazado(context),
+                style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.all(15), backgroundColor: Colors.red),
+                child: Text(
+                  'RECHAZAR',
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        )
+      ])
+    ]);
   }
+
   Widget _buttonSelectPDF() {
     return Column(
       children: [
@@ -258,8 +231,7 @@ class LiberacionPage extends StatelessWidget {
         ),
         Obx(() => con.pdfFileName.value.isNotEmpty
             ? Text('PDF seleccionado: ${con.pdfFileName.value}')
-            : SizedBox.shrink()
-        ),
+            : SizedBox.shrink()),
       ],
     );
   }
