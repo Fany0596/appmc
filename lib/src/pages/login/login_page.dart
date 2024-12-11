@@ -2,26 +2,19 @@ import 'package:flutter/material.dart'; // Importa los widgets de Flutter para l
 import 'package:get/get.dart'; // Importa GetX para gestión de estado y controladores
 import 'package:maquinados_correa/src/pages/login/login_controler.dart'; // Importa el controlador de login
 
-class LoginPage extends StatelessWidget {
-  // Declara una clase de tipo StatelessWidget para la página de inicio de sesión
+class LoginPage extends StatelessWidget { // Declara una clase de tipo StatelessWidget para la página de inicio de sesión
 
   LoginController con = Get.put(
       LoginController()); // Llama al controlador de login y lo pone en memoria para su uso en la página
 
   @override
-  Widget build(BuildContext context) {
-    // Método build que construye la UI
-    return Scaffold(
-      // Retorna un Scaffold, que estructura la página
-      body: Stack(
-        // Usa un Stack para superponer elementos uno sobre otro
+  Widget build(BuildContext context) { // Método build que construye la UI
+    return Scaffold( // Retorna un Scaffold, que estructura la página
+      body: Stack( // Usa un Stack para superponer elementos uno sobre otro
         children: [
-          _backGroundCover(context),
-          // Llama a la función que muestra el fondo de pantalla
-          _boxForm(context),
-          // Llama a la función que muestra el formulario
-          Column(
-            // Organiza elementos en columna, apilándolos en sentido vertical
+          _backGroundCover(context), // Llama a la función que muestra el fondo de pantalla
+          _boxForm(context), // Llama a la función que muestra el formulario
+          Column( // Organiza elementos en columna, apilándolos en sentido vertical
             children: [
               _imageCover(), // Llama a la función que muestra la imagen de logo
             ],
@@ -33,12 +26,9 @@ class LoginPage extends StatelessWidget {
 
   // Widget para mostrar el fondo de pantalla
   Widget _backGroundCover(BuildContext context) {
-    return SafeArea(
-      // Evita que el contenido se solape con la barra de estado
-      child: Container(
-        // Contenedor para el fondo de pantalla
-        child: Image.asset(
-          // Muestra una imagen de fondo desde los assets
+    return SafeArea( // Evita que el contenido se solape con la barra de estado
+      child: Container( // Contenedor para el fondo de pantalla
+        child: Image.asset( // Muestra una imagen de fondo desde los assets
           'assets/img/fondo1.jpg', // Ruta de la imagen en los assets
           width: MediaQuery.of(context)
               .size
@@ -56,30 +46,22 @@ class LoginPage extends StatelessWidget {
   // caja de formulario de inicio
   Widget _boxForm(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.38,
-      // Ajusta la altura del formulario
-      margin: EdgeInsets.only(top: 320, left: 50, right: 50),
-      // Márgenes superiores y laterales del formulario
-      decoration: BoxDecoration(// Decoración de la caja
-          boxShadow: <BoxShadow>[
-        // Sombra de la caja
+      height: MediaQuery.of(context).size.height * 0.38, // Ajusta la altura del formulario
+      margin: EdgeInsets.only(top: 320, left: 50, right: 50), // Márgenes superiores y laterales del formulario
+      decoration: BoxDecoration( // Decoración de la caja
+          boxShadow: <BoxShadow>[ // Sombra de la caja
         BoxShadow(
             color: Colors.white60, // Color de la sombra
             blurRadius: 15, // Radio de desenfoque de la sombra
             offset: Offset(0, 0.075) // Desplazamiento de la sombra
             )
       ]),
-      child: SingleChildScrollView(
-        // Permite desplazar la vista si el contenido es demasiado grande
-        child: Column(
-          // Column para organizar los widgets del formulario
+      child: SingleChildScrollView( // Permite desplazar la vista si el contenido es demasiado grande
+        child: Column( // Column para organizar los widgets del formulario
           children: [
-            _textFielUser(),
-            // Llama a la función para el campo de usuario
-            _textFielPassword(),
-            // Llama a la función para el campo de contraseña
-            _buttonLogin(),
-            // Llama a la función para el botón de login
+            _textFielUser(), // Llama a la función para el campo de usuario
+            _textFielPassword(), // Llama a la función para el campo de contraseña
+            _buttonLogin(), // Llama a la función para el botón de login
           ],
         ),
       ),
@@ -89,18 +71,12 @@ class LoginPage extends StatelessWidget {
   // Widget para el campo de usuario
   Widget _textFielUser() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      // Márgenes del campo
-      child: TextField(
-          // Campo de texto para ingresar el usuario
-          controller: con.emailController,
-          // Controlador para capturar el texto ingresado
-          keyboardType: TextInputType.emailAddress,
-          // Establece el tipo de teclado con el símbolo "@"
-          decoration: InputDecoration(
-            // Decoración del campo
-            hintText: 'Usuario',
-            // Texto que se muestra cuando el campo está vacío
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20), // Márgenes del campo
+      child: TextField( // Campo de texto para ingresar el usuario
+          controller: con.emailController, // Controlador para capturar el texto ingresado
+          keyboardType: TextInputType.emailAddress, // Establece el tipo de teclado con el símbolo "@"
+          decoration: InputDecoration( // Decoración del campo
+            hintText: 'Usuario', // Texto que se muestra cuando el campo está vacío
             prefixIcon: Icon(Icons
                 .perm_identity_outlined), // Icono que representa al usuario
           )),
@@ -110,8 +86,7 @@ class LoginPage extends StatelessWidget {
   // Widget para el campo de contraseña
   Widget _textFielPassword() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      // Márgenes del campo
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20), // Márgenes del campo
       child: TextField(// Campo de texto para ingresar la contraseña
         controller: con.passwordController, // Controlador para capturar el texto ingresado
         keyboardType: TextInputType.text, // Tipo de entrada de texto

@@ -229,8 +229,6 @@ class TiemposPage extends StatelessWidget {
             DropdownMenuItem(child: Text('Machueleado'), value: 'Machueleado'),
             DropdownMenuItem(child: Text('Soldadura'), value: 'Soldadura'),
             DropdownMenuItem(child: Text('Cuñero'), value: 'Cuñero'),
-            DropdownMenuItem(child: Text('Torneado CNC'), value: 'Torneado CNC'),
-            DropdownMenuItem(child: Text('Fresado CNC'), value: 'Fresado CNC'),
           ],
           onChanged: (value) {
             con.onProcesoSelected(value);
@@ -353,11 +351,42 @@ class TiemposPage extends StatelessWidget {
       initialDate: DateTime.now(),
       firstDate: DateTime(2024),
       lastDate: DateTime(2035),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.blue, // Color principal del calendario (header)
+            colorScheme: ColorScheme.light(
+              primary: Colors.blue, // Color del día seleccionado
+              onPrimary: Colors.white, // Color del texto en el día seleccionado
+              onSurface: Colors.black, // Color de los días no seleccionados
+            ),
+            dialogBackgroundColor: Colors.white, // Fondo del cuadro de diálogo
+          ),
+          child: child!,
+        );
+      },
     );
     if (pickedDate != null) {
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
+        builder: (BuildContext context, Widget? child) {
+          return Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: ColorScheme.light(
+                primary: Colors.blue, // Color de la hora seleccionada
+                onSurface: Colors.black, // Color del texto no seleccionado
+              ),
+              timePickerTheme: TimePickerThemeData(
+                hourMinuteTextColor: Colors.black, // Color del texto de hora y minuto
+                dialBackgroundColor: Colors.blue, // Fondo del reloj
+                dialHandColor: Colors.black, // Color de la manecilla del reloj
+                dialTextColor: Colors.white, // Color del texto en el reloj
+              ),
+            ),
+            child: child!,
+          );
+        },
       );
       if (pickedTime != null) {
         final DateTime pickedDateTime = DateTime(

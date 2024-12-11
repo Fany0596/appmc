@@ -1,75 +1,75 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';  // Importa el paquete de widgets básicos de flutter
+import 'package:flutter/widgets.dart';  // Importa widgets adicionales de flutter
 
-class CustomAnimatedBottomBar extends StatelessWidget {
+class CustomAnimatedBottomBar extends StatelessWidget {  // Define un widget personalizado de barra de navegación inferior animada
 
-  CustomAnimatedBottomBar({
+  CustomAnimatedBottomBar({  // Constructor del widget, acepta varios parámetros con valores predeterminados
     Key? key,
-    this.selectedIndex = 0,
-    this.showElevation = true,
-    this.iconSize = 24,
-    this.backgroundColor,
-    this.itemCornerRadius = 50,
-    this.containerHeight = 56,
-    this.animationDuration = const Duration(milliseconds: 270),
-    this.mainAxisAlignment = MainAxisAlignment.spaceBetween,
-    required this.items,
-    required this.onItemSelected,
-    this.curve = Curves.linear,
-  }) : assert(items.length >= 2 && items.length <= 6),
+    this.selectedIndex = 0,  //Ïndice predeterminado de la pestaña seleccionada
+    this.showElevation = true, // Si muestra una sombra de elevación o no
+    this.iconSize = 20, // Tamaño de los íconos
+    this.backgroundColor,  // Color de fondo de la barra
+    this.itemCornerRadius = 50, // Radio de los bordes de cada elemto
+    this.containerHeight = 56, // Altura del contenedor de la barra
+    this.animationDuration = const Duration(milliseconds: 270),  // Duración de la animación
+    this.mainAxisAlignment = MainAxisAlignment.spaceBetween, // Alineación de los elementos
+    required this.items,  // Lista de elementos de la barra (requiere al menos 2)
+    required this.onItemSelected,  // Callback cuando se selecciona un elemento
+    this.curve = Curves.linear,  // Curva de animación
+  }) : assert(items.length >= 2 && items.length <= 6),  // Asegura que haya entre 2 y 6 elementos
         super(key: key);
 
-  final int selectedIndex;
-  final double iconSize;
-  final Color? backgroundColor;
-  final bool showElevation;
-  final Duration animationDuration;
-  final List<BottomNavyBarItem> items;
-  final ValueChanged<int> onItemSelected;
-  final MainAxisAlignment mainAxisAlignment;
-  final double itemCornerRadius;
-  final double containerHeight;
-  final Curve curve;
+  final int selectedIndex;  //Índice del elemento seleccionado
+  final double iconSize; // Tamaño del ícono
+  final Color? backgroundColor; // Color de fondo
+  final bool showElevation;  // Indica si hay sombra de elevación
+  final Duration animationDuration;  // Duración de la animación de selección
+  final List<BottomNavyBarItem> items;  // Lista de elementos de la barra
+  final ValueChanged<int> onItemSelected;  // Calback al seleccionar un elemento
+  final MainAxisAlignment mainAxisAlignment; // Alineación de los elementos
+  final double itemCornerRadius; // Radio de los bordes de cada elemento
+  final double containerHeight;  // Altura del contenedor de la barra
+  final Curve curve; // Curva de la animación
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = backgroundColor ?? Theme.of(context).bottomAppBarColor;
+    final bgColor = backgroundColor ?? Theme.of(context).bottomAppBarColor;  // Asigan el color de fondo de la barra o usa el color predeterminado del tema
 
     return Container(
-      margin: EdgeInsets.all(20),
+      margin: EdgeInsets.all(20),  // Margen alrededor del contenedor
       decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(50),
+        color: bgColor,  //Color de fondo
+        borderRadius: BorderRadius.circular(1),  // Radio de borde de 50
         boxShadow: [
-          if (showElevation)
+          if (showElevation)  // Agrega sombra solo si showElevation es verdadero
             const BoxShadow(
-              color: Colors.black12,
-              blurRadius: 2,
+              color: Colors.black, // Color de la sombra
+              blurRadius: 3,  // Difuminado de la sombra
             ),
         ],
       ),
       child: SafeArea(
         child: Container(
-          width: double.infinity,
-          height: containerHeight,
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+          width: double.infinity,  // Ancho completo del contenedor
+          height: containerHeight,  // Altura del contenedor
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),  // Relleno
           child: Row(
-            mainAxisAlignment: mainAxisAlignment,
-            children: items.map((item) {
-              var index = items.indexOf(item);
+            mainAxisAlignment: mainAxisAlignment,  // Alineación de los elementos
+            children: items.map((item) {  // Mapea cada elemento en la lista de items
+              var index = items.indexOf(item);  // Índice del elemento actual
               return GestureDetector(
-                onTap: () => onItemSelected(index),
+                onTap: () => onItemSelected(index),  // Llama al callback con el índice seleccionado
                 child: _ItemWidget(
-                  item: item,
-                  iconSize: iconSize,
-                  isSelected: index == selectedIndex,
-                  backgroundColor: bgColor,
-                  itemCornerRadius: itemCornerRadius,
-                  animationDuration: animationDuration,
-                  curve: curve,
+                  item: item,  // Elemento actual
+                  iconSize: iconSize,  // Tamaño del ícono
+                  isSelected: index == selectedIndex,  // Determina si esta seleccionado
+                  backgroundColor: bgColor,  // Color de fondo
+                  itemCornerRadius: itemCornerRadius, // Radio de los bordes del elemento
+                  animationDuration: animationDuration,  // Duración de la animación
+                  curve: curve,  // Curva de la animación
                 ),
               );
-            }).toList(),
+            }).toList(),  // Convierte los elementos en nuna lista de widgets
           ),
         ),
       ),
@@ -77,75 +77,75 @@ class CustomAnimatedBottomBar extends StatelessWidget {
   }
 }
 
-class _ItemWidget extends StatelessWidget {
-  final double iconSize;
-  final bool isSelected;
-  final BottomNavyBarItem item;
-  final Color backgroundColor;
-  final double itemCornerRadius;
-  final Duration animationDuration;
-  final Curve curve;
+class _ItemWidget extends StatelessWidget {  // Wiget que representa un elemento individual en la barra de navegación
+  final double iconSize;  // Tamaño del ícono
+  final bool isSelected;  // Indica si el elemento está seleccionado
+  final BottomNavyBarItem item; // Elemento de la barra
+  final Color backgroundColor;  // Color de fondo del elemento
+  final double itemCornerRadius;  // Radio de lo bordes del elemento
+  final Duration animationDuration;  // Duración de la animación
+  final Curve curve;  // Curva de la animación
 
   const _ItemWidget({
     Key? key,
-    required this.item,
-    required this.isSelected,
-    required this.backgroundColor,
-    required this.animationDuration,
-    required this.itemCornerRadius,
-    required this.iconSize,
-    this.curve = Curves.linear,
+    required this.item,  // El elemento de la barra de navegacion
+    required this.isSelected,  // Si esta seleccionado
+    required this.backgroundColor, // Color de fondo del contenedor
+    required this.animationDuration,  // Duración de la animación
+    required this.itemCornerRadius, // Radio de los bordes
+    required this.iconSize,  // Tamaño del ícono
+    this.curve = Curves.linear,  // Curva de la animación por defecto lineal
   })  : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      container: true,
-      selected: isSelected,
+      container: true, // Define el widget como contenedor
+      selected: isSelected,  // Indica si el elemento está seleccionado
       child: AnimatedContainer(
-        width: isSelected ? 130 : 50,
-        height: double.maxFinite,
-        duration: animationDuration,
-        curve: curve,
+        width: isSelected ? 130 : 50,  // Ancho segun selleción
+        height: double.maxFinite,  // Altura completa
+        duration: animationDuration,  // Duración de la animación de ancho
+        curve: curve,  // Curva de la animación
         decoration: BoxDecoration(
           color:
-          isSelected ? item.activeColor.withOpacity(0.2) : backgroundColor,
-          borderRadius: BorderRadius.circular(itemCornerRadius),
+          isSelected ? item.activeColor.withOpacity(0.2) : backgroundColor,  // Fondo segun selección
+          borderRadius: BorderRadius.circular(itemCornerRadius), // Bordes redondeados
         ),
         child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: NeverScrollableScrollPhysics(),
+          scrollDirection: Axis.horizontal, // Permite desplazamiento horizontal
+          physics: NeverScrollableScrollPhysics(), // Evita que se desplace
           child: Container(
-            width: isSelected ? 130 : 50,
-            padding: EdgeInsets.symmetric(horizontal: 8),
+            width: isSelected ? 130 : 50,  // Ancho segun selección
+            padding: EdgeInsets.symmetric(horizontal: 8),  // Relleno horizontal
             child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,  // Tamaño maximo en el eje principal
+              mainAxisAlignment: MainAxisAlignment.start, // Alineación al inicio
+              crossAxisAlignment: CrossAxisAlignment.center,  // Alineación al centro vertical
               children: <Widget>[
                 IconTheme(
                   data: IconThemeData(
-                    size: iconSize,
-                    color: isSelected
+                    size: iconSize, // Tamaño del ícono
+                    color: isSelected  // Color segun selección
                         ? item.activeColor.withOpacity(1)
-                        : item.inactiveColor == null
+                        : item.inactiveColor == null // Color inactivo si no esta seleccionado
                         ? item.activeColor
                         : item.inactiveColor,
                   ),
-                  child: item.icon,
+                  child: item.icon, // Ícono del elemento
                 ),
-                if (isSelected)
+                if (isSelected)  // Muestra el texto solo si está seleccionado
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      padding: EdgeInsets.symmetric(horizontal: 4), // Relleno del texto
                       child: DefaultTextStyle.merge(
                         style: TextStyle(
-                          color: item.activeColor,
-                          fontWeight: FontWeight.bold,
+                          color: item.activeColor, // Color del texto activo
+                          fontWeight: FontWeight.bold, // Estilo de texto en negrita
                         ),
-                        maxLines: 1,
-                        textAlign: item.textAlign,
-                        child: item.title,
+                        maxLines: 1, // Máximo 1 línea de texto
+                        textAlign: item.textAlign,  // Alineción del texto
+                        child: item.title,  // Título del elemento
                       ),
                     ),
                   ),
@@ -157,20 +157,20 @@ class _ItemWidget extends StatelessWidget {
     );
   }
 }
-class BottomNavyBarItem {
+class BottomNavyBarItem {  // Clase que define un elemento individual en la barra de navegación
 
   BottomNavyBarItem({
-    required this.icon,
-    required this.title,
-    this.activeColor = Colors.grey,
-    this.textAlign,
-    this.inactiveColor,
+    required this.icon,  // Ícono del elemento
+    required this.title,  // Título del elemento
+    this.activeColor = Colors.grey,  // Color activo predeterminado
+    this.textAlign,  // Alineación del texto
+    this.inactiveColor,  // Color inactivo
   });
 
-  final Widget icon;
-  final Widget title;
-  final Color activeColor;
-  final Color? inactiveColor;
-  final TextAlign? textAlign;
+  final Widget icon;  // Widget ícon
+  final Widget title; // Widget título
+  final Color activeColor;  // Color cuando está seleccionado
+  final Color? inactiveColor;  // Color cuando no está seleccionado
+  final TextAlign? textAlign;  //Alineación del texto
 
 }

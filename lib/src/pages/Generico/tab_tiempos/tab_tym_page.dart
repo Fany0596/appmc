@@ -59,23 +59,6 @@ class TabTymPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => con.goToRegisterPage(), // funcion de boton
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10, left: 1),
-                        padding: EdgeInsets.all(20),
-                        width: double.infinity,
-                        color: Colors.white,
-                        child: Text(
-                          'Registro de nuevo operador',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
                     Row(
                       children: [
                         Container(
@@ -112,10 +95,16 @@ class TabTymPage extends StatelessWidget {
           appBar: AppBar(
             title: _encabezado(context),
           ),
-          body: _buildResponsiveTable(context),
-        ),
-    );
+          body: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+              child: _table(context),
+            ),
+          ),
+        ));
   }
+
   Widget _buildResponsiveTable(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -199,46 +188,36 @@ class TabTymPage extends StatelessWidget {
             return Theme(
                 data: Theme.of(context).copyWith(
               dataTableTheme: DataTableThemeData(
-                headingRowHeight: 60,
-                dataRowHeight: 60,
-                columnSpacing: 20,
+                headingRowHeight: 70,
+                dataRowHeight: 70,
+                columnSpacing: 30,
               ),
             ),
-           child: DataTable(
-              columns: [
-                DataColumn(label: Text('O.T.', style: TextStyle(fontSize: 17),)),
+        child: DataTable(
+        columns: [
+                DataColumn(label: Text('O.T.', style: TextStyle(fontSize: 20),)),
                 DataColumn(
                   label: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('No. PARTE/', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5),),
-                      Text('PLANO', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
+                      Text('No. PARTE/', textAlign: TextAlign.center, style: TextStyle(fontSize: 20.5),),
+                      Text('PLANO', textAlign: TextAlign.center, style: TextStyle(fontSize: 20.5)),
                     ],
                   ),
                 ),
-                DataColumn(label: Text('ARTICULO', style: TextStyle(fontSize: 18),)),
-                DataColumn(label: Text('CANTIDAD', style: TextStyle(fontSize: 18),)),
-                DataColumn(label: Text('ESTATUS', style: TextStyle(fontSize: 18),)),
-                DataColumn(label: Text('OPERACIÓN', style: TextStyle(fontSize: 18),)),
-                DataColumn(label: Text('OPERADOR', style: TextStyle(fontSize: 18),)),
+                DataColumn(label: Text('ARTICULO', style: TextStyle(fontSize: 21),)),
+                DataColumn(label: Text('CANTIDAD', style: TextStyle(fontSize: 21),)),
+                DataColumn(label: Text('ESTATUS', style: TextStyle(fontSize: 21),)),
+                DataColumn(label: Text('OPERACIÓN', style: TextStyle(fontSize: 21),)),
+                DataColumn(label: Text('OPERADOR', style: TextStyle(fontSize: 21),)),
                 DataColumn(
                   label: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('TIEMPO EN', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
-                      Text('PROCESO', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text('TIEMPO', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
-                      Text('TOTAL', textAlign: TextAlign.center, style: TextStyle(fontSize: 17.5)),
+                      Text('TIEMPO EN', textAlign: TextAlign.center, style: TextStyle(fontSize: 20.5)),
+                      Text('PROCESO', textAlign: TextAlign.center, style: TextStyle(fontSize: 20.5)),
                     ],
                   ),
                 ),
@@ -247,8 +226,18 @@ class TabTymPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('FECHA', textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
-                      Text('DE ENTREGA', textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+                      Text('TIEMPO', textAlign: TextAlign.center, style: TextStyle(fontSize: 20.5)),
+                      Text('TOTAL', textAlign: TextAlign.center, style: TextStyle(fontSize: 20.5)),
+                    ],
+                  ),
+                ),
+                DataColumn(
+                  label: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('FECHA', textAlign: TextAlign.center, style: TextStyle(fontSize: 21)),
+                      Text('DE ENTREGA', textAlign: TextAlign.center, style: TextStyle(fontSize: 21)),
                     ],
                   ),
                 ),
@@ -259,24 +248,24 @@ class TabTymPage extends StatelessWidget {
                   color: MaterialStateProperty.all(rowColor),
                     cells: [
                       DataCell(Text(producto.ot ?? '',
-                        style: TextStyle(fontSize: 16),)),
+                        style: TextStyle(fontSize: 19),)),
                       DataCell(Text(producto.parte ?? '',
-                        style: TextStyle(fontSize: 15),)),
+                        style: TextStyle(fontSize: 18),)),
                       DataCell(Text(producto.articulo ?? '',
-                        style: TextStyle(fontSize: 15),)),
+                        style: TextStyle(fontSize: 18),)),
                       DataCell(Text(producto.cantidad.toString(),
-                        style: TextStyle(fontSize: 16),)),
+                        style: TextStyle(fontSize: 19),)),
                       DataCell(
                         Container(
                           color: _getColorForStatus(producto.estatus),
                           child: Text(producto.estatus ?? '',
-                            style: TextStyle(fontSize: 16),),
+                            style: TextStyle(fontSize: 19),),
                         ),
                       ),
                       DataCell(Text(producto.operacion ?? '',
-                        style: TextStyle(fontSize: 16),)),
+                        style: TextStyle(fontSize: 19),)),
                       DataCell(Text(producto.operador ?? '',
-                          style: TextStyle(fontSize: 16))),
+                          style: TextStyle(fontSize: 19))),
                       DataCell(
                         FutureBuilder<Map<String, String>>(
                           future: con.calcularTiempoTotal(producto.id!, producto.parte ?? ''),
@@ -284,9 +273,9 @@ class TabTymPage extends StatelessWidget {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return CircularProgressIndicator();
                             } else if (snapshot.hasError) {
-                              return Text('Error', style: TextStyle(fontSize: 16));
+                              return Text('Error', style: TextStyle(fontSize: 19));
                             } else {
-                              return Text(snapshot.data?['actual'] ?? '', style: TextStyle(fontSize: 16));
+                              return Text(snapshot.data?['actual'] ?? '', style: TextStyle(fontSize: 19));
                             }
                           },
                         ),
@@ -298,7 +287,7 @@ class TabTymPage extends StatelessWidget {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return CircularProgressIndicator();
                             } else if (snapshot.hasError) {
-                              return Text('Error', style: TextStyle(fontSize: 16));
+                              return Text('Error', style: TextStyle(fontSize: 19));
                             } else {
                               String tiempoTotal = snapshot.data?['total'] ?? '';
                               String tiempoEstimado = snapshot.data?['estimado'] ?? '';
@@ -320,18 +309,19 @@ class TabTymPage extends StatelessWidget {
 
                               return Text(
                                   displayText,
-                                  style: TextStyle(fontSize: 16, color: textColor, fontWeight: FontWeight.bold)
+                                  style: TextStyle(fontSize: 19, color: textColor, fontWeight: FontWeight.bold)
                               );
                             }
                           },
                         ),
                       ),
                       DataCell(Text(producto.fecha ?? '',
-                          style: TextStyle(fontSize: 16))),
+                          style: TextStyle(fontSize: 19))),
                     ],
                 );
               }).toList(),
-            ));
+        ),
+            );
           }
         }
       },

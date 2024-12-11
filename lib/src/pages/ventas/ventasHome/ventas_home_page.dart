@@ -22,10 +22,6 @@ class VentasHomePage extends StatelessWidget {
             VentasTabPage(),
             VentasOcListPage(),
             CombinedCotizacionProductoPage(),
-            //ProductoPage(),
-            //ProfileInfoPage(),
-            //NewClientPage(),
-           // VendedoresPage()
           ],
         ))
     );

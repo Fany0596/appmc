@@ -82,69 +82,131 @@ class TabTymController extends GetxController{
 
   Future<List<Map<String, String>>> obtenerTiemposEstimados(String parte) async {
     try {
-      List<Promedio> promedios = await promedioProvider.findByStatus(parte);
+
+
+      String parteCodificada = Uri.encodeComponent(parte);
+
+      List<Promedio> promedios = await promedioProvider.findByStatus(parteCodificada);
 
       return promedios.map((promedio) => {
         'proceso': promedio.proceso ?? '',
         'tiempo': promedio.tiempo ?? '00:00'
       }).toList();
-
     } catch (e) {
       print('Error al obtener tiempos estimados: $e');
       return [];
     }
   }
 
-  /*int calcularTiempoTrabajado(List<Tiempo> tiempos) {
-    int tiempoTotal = 0;
-    DateTime? inicioProceso;
-    DateTime ahora = DateTime.now();
-    DateTime? inicioSuspension;
+  int calcularTiempoTrabajadoConProcesosSimultaneos(List<Tiempo> tiempos) {
+    int tiempoTotal = 0; // Acumula el tiempo total de todos los procesos
+    Map<String, DateTime?> inicioProcesos = {}; // Almacena el inicio por cada proceso
+    Map<String, DateTime?> suspensiones = {};  // Almacena suspensiones por cada proceso
 
-    for (var i = 0; i < tiempos.length; i++) {
-      var tiempo = tiempos[i];
+    // Ordenar los tiempos cronológicamente
+    tiempos.sort((a, b) => DateTime.parse(a.time!).compareTo(DateTime.parse(b.time!)));
+
+    for (var tiempo in tiempos) {
       if (tiempo.time == null) continue;
       DateTime fechaTiempo = DateTime.parse(tiempo.time!);
+      String? idProceso = tiempo.proceso; // Usar el identificador único del proceso
 
-      print('Procesando tiempo: ${tiempo.time}, Estado: ${tiempo.estado}');
+      print('Procesando tiempo: ${tiempo.time}, Estado: ${tiempo.estado}, Proceso: $idProceso');
 
-      if (tiempo.estado == 'INICIO') {
-        inicioProceso = fechaTiempo;
-        print('Inicio de proceso: $inicioProceso');
-      } else if (tiempo.estado == 'SUSPENDIDO') {
-        if (inicioProceso != null && inicioSuspension == null) {
-          inicioSuspension = fechaTiempo;
-          print('Proceso suspendido en: $inicioSuspension');
-        }
-      } else if (tiempo.estado == 'REANUDAR') {
-        if (inicioSuspension != null) {
-          int tiempoSuspendido = calcularTiempoEntreFechas(inicioSuspension, fechaTiempo);
-          print('Proceso reanudado en: $fechaTiempo, Tiempo suspendido: $tiempoSuspendido minutos');
-          tiempoTotal -= tiempoSuspendido;
-          inicioSuspension = null;
-        }
-      } else if (tiempo.estado == 'TERMINÓ') {
-        if (inicioProceso != null) {
-          int tiempoParcial = calcularTiempoEntreFechas(inicioProceso, fechaTiempo);
-          tiempoTotal += tiempoParcial;
-          print('Proceso completado en: $fechaTiempo, Tiempo parcial: $tiempoParcial minutos');
-          inicioProceso = null;
-        }
+      switch (tiempo.estado) {
+        case 'INICIO':
+          inicioProcesos[idProceso!] = fechaTiempo;
+          suspensiones.remove(idProceso); // Limpiar cualquier suspensión previa
+          print('Inicio del proceso "$idProceso" en: $fechaTiempo');
+          break;
+
+        case 'SUSPENDIDO':
+          if (inicioProcesos.containsKey(idProceso) && inicioProcesos[idProceso] != null) {
+            // Calcular tiempo efectivo del proceso suspendido
+            int tiempoParcial = calcularTiempoEfectivo(inicioProcesos[idProceso]!, fechaTiempo);
+            tiempoTotal += tiempoParcial;
+            suspensiones[idProceso!] = fechaTiempo;
+            print('Proceso "$idProceso" suspendido en: $fechaTiempo. Tiempo acumulado: $tiempoTotal');
+            inicioProcesos[idProceso] = null; // Detener el proceso activo
+          }
+          break;
+
+        case 'REANUDAR':
+          if (suspensiones.containsKey(idProceso)) {
+            inicioProcesos[idProceso!] = fechaTiempo;
+            suspensiones.remove(idProceso); // Eliminar la suspensión
+            print('Proceso "$idProceso" reanudado en: $fechaTiempo');
+          }
+          break;
+
+        case 'TERMINÓ':
+          if (inicioProcesos.containsKey(idProceso) && inicioProcesos[idProceso] != null) {
+            // Calcular tiempo efectivo del proceso terminado
+            int tiempoParcial = calcularTiempoEfectivo(inicioProcesos[idProceso]!, fechaTiempo);
+            tiempoTotal += tiempoParcial;
+            print('Proceso "$idProceso" terminado en: $fechaTiempo. Tiempo parcial: $tiempoParcial, Total: $tiempoTotal');
+            inicioProcesos.remove(idProceso); // Eliminar el proceso terminado
+          }
+          break;
       }
     }
 
-    // Si el proceso sigue en curso
-    if (inicioProceso != null) {
-      int tiempoParcial = calcularTiempoEntreFechas(inicioProceso, ahora);
-      tiempoTotal += tiempoParcial;
-      print('Proceso en curso, calculado hasta ahora: $ahora, Tiempo parcial: $tiempoParcial minutos');
+    // Manejar procesos en curso al final
+    DateTime ahora = DateTime.now();
+    for (var idProceso in inicioProcesos.keys) {
+      if (inicioProcesos[idProceso] != null && !suspensiones.containsKey(idProceso)) {
+        // Calcular tiempo efectivo para procesos en curso
+        int tiempoParcial = calcularTiempoEfectivo(inicioProcesos[idProceso]!, ahora);
+        tiempoTotal += tiempoParcial;
+        print('Proceso "$idProceso" en curso hasta: $ahora. Tiempo final: $tiempoParcial, Total: $tiempoTotal');
+      }
     }
 
-    print('Tiempo total calculado: $tiempoTotal minutos');
     return tiempoTotal;
   }
-*/
-  int calcularTiempoTrabajado(List<Tiempo> tiempos) {
+
+  Future<Map<String, String>> calcularTiempoTotal(String productoId, String parte) async {
+    try {
+      List<Tiempo> tiempos = await tiempoProvider.getTiemposByProductId(productoId);
+      if (tiempos.isEmpty) {
+        return {'total': '', 'estimado': '', 'actual': ''};
+      }
+
+      // Calcula el tiempo total trabajado
+      int tiempoTotalTrabajado = calcularTiempoTotalConProcesos(tiempos);
+
+      // Calcula el tiempo del último proceso activo
+      int tiempoProcesoActual = calcularTiempoProcesoActual(tiempos);
+
+      List<Map<String, String>> tiemposEstimados = await obtenerTiemposEstimados(parte);
+
+      String formatTiempo(int minutos) {
+        int horas = minutos ~/ 60;
+        int minutosRestantes = minutos % 60;
+        return '${horas.toString().padLeft(2, '0')}:${minutosRestantes.toString().padLeft(2, '0')}';
+      }
+
+      String tiempoEstimado = '';
+      if (tiemposEstimados.isNotEmpty) {
+        int tiempoTotalEstimado = tiemposEstimados.fold(0, (sum, tiempo) {
+          List<String> partes = tiempo['tiempo']!.split(':');
+          return sum + int.parse(partes[0]) * 60 + int.parse(partes[1]);
+        });
+        tiempoEstimado = formatTiempo(tiempoTotalEstimado);
+      }
+
+      // Retorna el mapa con el tiempo total y el tiempo del último proceso activo
+      return {
+        'total': formatTiempo(tiempoTotalTrabajado),
+        'actual': formatTiempo(tiempoProcesoActual),
+        'estimado': tiempoEstimado
+      };
+    } catch (e) {
+      print('Error al calcular tiempo: $e');
+      return {'total': 'Error', 'actual': 'Error', 'estimado': ''};
+    }
+  }
+  int calcularTiempoProcesoIndividual(List<Tiempo> tiempos) {
     int tiempoTotal = 0;
     DateTime? inicioProceso;
     DateTime? inicioSuspension;
@@ -168,6 +230,7 @@ class TabTymController extends GetxController{
 
         case 'SUSPENDIDO':
           if (inicioProceso != null) {
+            // Calcula tiempo trabajado hasta el momento de la suspensión
             tiempoTotal += calcularTiempoEfectivo(inicioProceso, fechaTiempo);
             inicioSuspension = fechaTiempo;
             print('Proceso suspendido en: $inicioSuspension. Tiempo acumulado: $tiempoTotal');
@@ -177,6 +240,7 @@ class TabTymController extends GetxController{
 
         case 'REANUDAR':
           if (inicioSuspension != null) {
+            // Reactiva el proceso desde el momento de la reanudación
             inicioProceso = fechaTiempo;
             inicioSuspension = null;
             print('Proceso reanudado en: $fechaTiempo');
@@ -194,7 +258,7 @@ class TabTymController extends GetxController{
       }
     }
 
-    // Si hay un proceso en curso
+    // Si hay un proceso en curso, calcula el tiempo hasta el momento actual
     if (inicioProceso != null && inicioSuspension == null) {
       DateTime ahora = DateTime.now();
       int tiempoFinal = calcularTiempoEfectivo(inicioProceso, ahora);
@@ -205,124 +269,27 @@ class TabTymController extends GetxController{
     return tiempoTotal;
   }
 
-  int calcularTiempoEntreFechas(DateTime inicio, DateTime fin) {
-    int tiempoTrabajado = 0;
-    DateTime actual = inicio;
-
-    while (actual.isBefore(fin)) {
-      if (!esHorarioExcluido(actual)) {
-        DateTime finHora = DateTime(actual.year, actual.month, actual.day, actual.hour, 59, 59);
-        if (finHora.isAfter(fin)) finHora = fin;
-        int minutosEnEstaHora = finHora.difference(actual).inMinutes + 1;
-        tiempoTrabajado += minutosEnEstaHora;
-      }
-      actual = DateTime(actual.year, actual.month, actual.day, actual.hour + 1); // Avanza a la siguiente hora
-    }
-
-    return tiempoTrabajado;
-  }
-
-  bool esHorarioExcluido(DateTime fecha) {
-    int hora = fecha.hour;
-    return hora >= 13 && hora < 14; // Excluye el tiempo entre 1 pm y 2 pm
-  }
-
-  Future<Map<String, String>> calcularTiempoTotal(String productoId, String parte) async {
-    try {
-      List<Tiempo> tiempos = await tiempoProvider.getTiemposByProductId(productoId);
-      if (tiempos.isEmpty) {
-        return {'total': '', 'actual': '', 'estimado': ''};
-      }
-      int tiempoTotalTrabajado = calcularTiempoTrabajado(tiempos);
-      int tiempoProcesoActual = calcularTiempoProcesoActual(tiempos);
-      List<Map<String, String>> tiemposEstimados = await obtenerTiemposEstimados(parte);
-
-      String formatTiempo(int minutos) {
-        int horas = minutos ~/ 60;
-        int minutosRestantes = minutos % 60;
-        return '${horas.toString().padLeft(2, '0')}:${minutosRestantes.toString().padLeft(2, '0')}';
-      }
-
-      String tiempoEstimado = '';
-      if (tiemposEstimados.isNotEmpty) {
-        int tiempoTotalEstimado = tiemposEstimados.fold(0, (sum, tiempo) {
-          List<String> partes = tiempo['tiempo']!.split(':');
-          return sum + int.parse(partes[0]) * 60 + int.parse(partes[1]);
-        });
-        tiempoEstimado = formatTiempo(tiempoTotalEstimado);
-      }
-
-      return {
-        'total': formatTiempo(tiempoTotalTrabajado),
-        'actual': formatTiempo(tiempoProcesoActual),
-        'estimado': tiempoEstimado
-      };
-    } catch (e) {
-      print('Error al calcular tiempo: $e');
-      return {'total': 'Error', 'actual': 'Error', 'estimado': ''};
-    }
-  }
-
   int calcularTiempoProcesoActual(List<Tiempo> tiempos) {
-    int tiempoTotal = 0;
-    DateTime? inicioProceso;
-    DateTime? inicioSuspension;
+    // Ordenamos todos los tiempos cronológicamente
+    tiempos.sort((a, b) => DateTime.parse(a.time!).compareTo(DateTime.parse(b.time!)));
 
-    for (var tiempo in tiempos) {
-      if (tiempo.time == null) continue;
-      DateTime fechaTiempo = DateTime.parse(tiempo.time!);
+    // Identificamos el último tiempo registrado (más reciente)
+    Tiempo? ultimoTiempo = tiempos.isNotEmpty ? tiempos.last : null;
 
-      if (tiempo.estado == 'INICIO') {
-        // Reinicia el conteo para el nuevo proceso
-        inicioProceso = fechaTiempo;
-        inicioSuspension = null;
-        tiempoTotal = 0; // Reiniciar el tiempo total al iniciar un nuevo proceso
-      } else if (tiempo.estado == 'SUSPENDIDO') {
-        if (inicioProceso != null) {
-          tiempoTotal += calcularTiempoEfectivo(inicioProceso, fechaTiempo);
-          inicioSuspension = fechaTiempo;
-          inicioProceso = null;
-        }
-      } else if (tiempo.estado == 'REANUDAR') {
-        if (inicioSuspension != null) {
-          inicioProceso = fechaTiempo;
-          inicioSuspension = null;
-        }
-      } else if (tiempo.estado == 'TERMINÓ') {
-        if (inicioProceso != null) {
-          tiempoTotal += calcularTiempoEfectivo(inicioProceso, fechaTiempo);
-          inicioProceso = null;
-        }
-      }
+    if (ultimoTiempo != null && ultimoTiempo.proceso != null) {
+      // Filtramos los tiempos del proceso correspondiente al más reciente
+      List<Tiempo> tiemposUltimoProceso = tiempos.where((t) => t.proceso == ultimoTiempo.proceso).toList();
+
+      // Calculamos el tiempo trabajado solo para el último proceso actualizado
+      int tiempoProceso = calcularTiempoProcesoIndividual(tiemposUltimoProceso);
+
+      print('Proceso más reciente: ${ultimoTiempo.proceso}, Tiempo: $tiempoProceso minutos');
+      return tiempoProceso;
     }
 
-    if (inicioProceso != null) {
-      DateTime ahora = DateTime.now();
-      tiempoTotal += calcularTiempoEfectivo(inicioProceso, ahora);
-    }
-
-    return tiempoTotal;
+    return 0; // Si no hay tiempos registrados, regresamos 0
   }
-  /*int calcularTiempoEfectivo(DateTime inicio, DateTime fin) {
-    int minutos = 0;
-    DateTime temp = inicio;
 
-    while (temp.isBefore(fin)) {
-      // Excluye el tiempo entre 1 pm y 2 pm
-      if (temp.hour >= 13 && temp.hour < 14) {
-        temp = DateTime(temp.year, temp.month, temp.day, 14, 0);
-      } else {
-        DateTime siguienteMinuto = temp.add(Duration(minutes: 1));
-        if (siguienteMinuto.isAfter(fin)) {
-          siguienteMinuto = fin;
-        }
-        minutos += siguienteMinuto.difference(temp).inMinutes;
-        temp = siguienteMinuto;
-      }
-    }
-
-    return minutos;
-  }*/
 
   int calcularTiempoEfectivo(DateTime inicio, DateTime fin) {
     int minutos = 0;
@@ -356,264 +323,33 @@ class TabTymController extends GetxController{
     return minutos;
   }
 
-  Future<void> generarPDF(Producto producto) async {
+  Map<String, List<Tiempo>> agruparTiemposPorProceso(List<Tiempo> tiempos) {
+    Map<String, List<Tiempo>> tiemposPorProceso = {};
 
-    ByteData imageData = await rootBundle.load('assets/img/LOGO1.png');
-    // Convierte los datos de la imagen a un arreglo de bytes
-    Uint8List bytess = imageData.buffer.asUint8List();
-    final currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final pdfPageFormat = PdfPageFormat.letter;
-    final pw.TextStyle headerTextStyle = pw.TextStyle(fontSize: 9);
-
-    final pdf = pw.Document();
-    final List<Tiempo> tiempos = await tiempoProvider.getTiemposByProductId(producto.id!);
-    final int tiempoTotal = calcularTiempoTrabajado(tiempos);
-
-    pdf.addPage(
-      pw.Page(
-        pageFormat: pdfPageFormat,
-        margin: pw.EdgeInsets.fromLTRB(20, 25, 25, 15),
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Container(
-                decoration: pw.BoxDecoration(
-                  border: pw.Border.all(width: 1), // Definir el borde
-                ),
-                //padding: pw.EdgeInsets.all(10),
-                child: pw.Row(
-                  children: [
-                    // Logo en la esquina superior izquierda
-                    pw.Container(
-                      margin: pw.EdgeInsets.only(right: 5),
-                      child: pw.Image(
-                        pw.MemoryImage(
-                            bytess
-                        ),
-                      ),
-                      width: 60,
-                      height: 60,
-                    ),
-                    // Título centrado
-                    pw.Expanded(
-                      child: pw.Center(
-                        child: pw.Text(
-                          'Reporte de tiempos y movimientos',
-                          style: pw.TextStyle(
-                            fontSize: 18,
-                            fontWeight: pw.FontWeight.bold,
-                            font: pw.Font.timesBold(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              pw.Divider(),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Expanded(
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        // Agregar la tabla vertical en la esquina superior derecha
-                        pw.Table.fromTextArray(
-                          context: context,
-                          cellHeight: 5,
-                          columnWidths: {
-                            0: pw.FixedColumnWidth(40),
-                            // Ancho de la primera columna
-                            1: pw.FixedColumnWidth(70),
-                            // Ancho de la segunda columna
-                          },
-                          data: [
-                            ['Producto:', '${producto.articulo}'],
-                          ],
-                          cellAlignment: pw.Alignment.center,
-                          cellStyle: pw.TextStyle(fontSize: 4),
-                          headerStyle: headerTextStyle,
-                        ),
-                        // Añadir otro contenido aquí si es necesario
-                        pw.SizedBox(height: 2),
-                        // Espacio entre la tabla y otro contenido
-                      ],
-                    ),
-                  ),
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      // Agregar la tabla vertical en la esquina superior derecha
-                      pw.Table.fromTextArray(
-                        context: context,
-                        columnWidths: {
-                          0: pw.FixedColumnWidth(30),
-                          // Ancho de la primera columna
-                        },
-                        data: [
-                          ['  '],
-                        ],
-                        border: null,
-                        cellAlignment: pw.Alignment.center,
-                      ),
-                      // Añadir otro contenido aquí si es necesario
-                      pw.SizedBox(height: 2),
-                      // Espacio entre la tabla y otro contenido
-                    ],
-                  ),
-
-                  pw.Expanded(
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.end,
-                        children: [
-                          // Agregar la tabla vertical en la esquina superior derecha
-                          pw.Table.fromTextArray(
-                            columnWidths: {
-                              0: pw.FixedColumnWidth(40),
-                              // Ancho de la primera columna
-                              1: pw.FixedColumnWidth(50),
-                              // Ancho de la segunda columna
-                            },
-                            context: context,
-                            data: [
-                              ['OT:', '${producto.ot}'],
-                            ],
-                            cellAlignment: pw.Alignment.center,
-                            cellStyle: pw.TextStyle(fontSize: 4),
-                            headerStyle: headerTextStyle,
-                          ),
-                          // Añadir otro contenido aquí si es necesario
-                          pw.SizedBox(height: 2),
-                          // Espacio entre la tabla y otro contenido
-                        ],
-                      )
-                  )
-                ],
-              ),
-              pw.Row(
-                children: [
-                  pw.Expanded(
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        // Agregar la tabla vertical en la esquina superior derecha
-                        pw.Table.fromTextArray(
-                          context: context,
-                          columnWidths: {
-                            0: pw.FixedColumnWidth(40),
-                            // Ancho de la primera columna
-                            1: pw.FixedColumnWidth(70),
-                            // Ancho de la segunda columna
-                          },
-                          data: [
-                            ['Parte/plano:', '${producto.parte ?? ''}'],
-                          ],
-                          cellAlignment: pw.Alignment.center,
-                          cellStyle: pw.TextStyle(fontSize: 5),
-                          headerStyle: headerTextStyle,
-                        ),
-                        // Añadir otro contenido aquí si es necesario
-                        pw.SizedBox(height: 2),
-                        // Espacio entre la tabla y otro contenido
-                      ],
-                    ),
-                  ),
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      // Agregar la tabla vertical en la esquina superior derecha
-                      pw.Table.fromTextArray(
-                        context: context,
-                        columnWidths: {
-                          0: pw.FixedColumnWidth(30),
-                          // Ancho de la primera columna
-                        },
-                        data: [
-                          ['  '],
-                        ],
-                        border: null,
-                        cellAlignment: pw.Alignment.center,
-                      ),
-                      // Añadir otro contenido aquí si es necesario
-                      pw.SizedBox(height: 2),
-                      // Espacio entre la tabla y otro contenido
-                    ],
-                  ),
-                  pw.Expanded(
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.end,
-                      children: [
-                        // Agregar la tabla vertical en la esquina superior derecha
-                        pw.Table.fromTextArray(
-                          context: context,
-                          columnWidths: {
-                            0: pw.FixedColumnWidth(40),
-                            // Ancho de la primera columna
-                            1: pw.FixedColumnWidth(50),
-                            // Ancho de la segunda columna
-                          },
-                          data: [
-                            ['Cantidad: ', '${producto.cantidad}'],
-                          ],
-                          cellAlignment: pw.Alignment.center,
-                          cellStyle: pw.TextStyle(fontSize: 5),
-                          headerStyle: headerTextStyle,
-                        ),
-                        // Añadir otro contenido aquí si es necesario
-                        pw.SizedBox(height: 2),
-                        // Espacio entre la tabla y otro contenido
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 15),
-              pw.Table.fromTextArray(
-                headers: [
-                  'Operador','Proceso','Estado', 'Fecha y Hora', 'Comentario'
-                ],
-                headerStyle: pw.TextStyle(color: PdfColors.white),
-                headerDecoration: pw.BoxDecoration(color: PdfColors.blue),
-                data: tiempos.map((t) => [
-                  t.operador!.name,t.proceso, t.estado, t.time ?? 'N/A', t.coment
-                ]).toList(),
-              ),
-              pw.SizedBox(height: 20),
-              pw.Text('Tiempo Total: ${formatTiempo(tiempoTotal)}',
-                  style: pw.TextStyle(
-                      fontSize: 12, fontWeight: pw.FontWeight.bold)),
-            ],
-          );
-        },
-      ),
-    );
-
-  Future<Directory?> getDownloadsDirectory() async {
-    if (Platform.isAndroid) {
-      return Directory('/storage/emulated/0/Download');
-    } else {
-      return getApplicationDocumentsDirectory(); // Alternativa para otros sistemas
+    for (var tiempo in tiempos) {
+      if (tiempo.proceso != null) {
+        tiemposPorProceso.putIfAbsent(tiempo.proceso!, () => []).add(tiempo);
+      }
     }
-  }
-  // Guardar el archivo PDF en la memoria del dispositivo
-  final directory = await getDownloadsDirectory();
-  final file = File('${directory!.path}/${producto.articulo}_reporte.pdf');
-  await file.writeAsBytes(await pdf.save());
-    Get.snackbar('DOCUMENTO DESCARGADO EN:', '${file.path}', backgroundColor: Colors.green,
-      colorText: Colors.white,);
-  print('PDF guardado en: ${file.path}');
-  final bytes = await pdf.save();
 
-  try {
-  await file.writeAsBytes(bytes);
-  logger.i('Se pudo escribir el archivo correctamente');
-  } catch (e) {
-  logger.e('Error al escribir el archivo: $e');
+    return tiemposPorProceso;
   }
 
-}
+  int calcularTiempoTotalConProcesos(List<Tiempo> tiempos) {
+    // Agrupa los tiempos por proceso
+    Map<String, List<Tiempo>> tiemposPorProceso = agruparTiemposPorProceso(tiempos);
+
+    int tiempoTotal = 0;
+
+    // Calcula el tiempo total para cada grupo de tiempos (por proceso)
+    tiemposPorProceso.forEach((proceso, tiemposProceso) {
+      tiempoTotal += calcularTiempoTrabajadoConProcesosSimultaneos(tiemposProceso); // Reutiliza tu método existente
+    });
+
+    return tiempoTotal;
+  }
+
+
   final logger = Logger(
     printer: PrettyPrinter(),
     filter: ProductionFilter(), // Solo registra mensajes de nivel de advertencia o superior en producción

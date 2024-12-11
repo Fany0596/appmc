@@ -367,6 +367,7 @@ class CombinedController extends GetxController {
         // Limpiar formularios y lista de productos pendientes
         clearForm();
         productosPendientes.clear();
+        goToHome();
         update();
       } else {
         throw Exception('Error al guardar la cotización: ${cotizacionResponse.message}');
@@ -431,6 +432,9 @@ class CombinedController extends GetxController {
   }
   void goToNewVendedorPage(){
     Get.toNamed('/ventas/newVendedor');
+  }
+  void goToHome() {  // Método que navega a la pagina de inicio de ventas
+    Get.offNamedUntil('/ventas/home', (route) => false);
   }
   void goToNewClientePage(){
     Get.toNamed('/ventas/newClient');

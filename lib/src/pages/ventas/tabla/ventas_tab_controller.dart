@@ -241,21 +241,136 @@ class VentasTabController extends GetxController{
     }
   }
 
+
   Future<List<Map<String, String>>> obtenerTiemposEstimados(String parte) async {
     try {
-      List<Promedio> promedios = await promedioProvider.findByStatus(parte);
+
+
+      String parteCodificada = Uri.encodeComponent(parte);
+
+      List<Promedio> promedios = await promedioProvider.findByStatus(parteCodificada);
 
       return promedios.map((promedio) => {
         'proceso': promedio.proceso ?? '',
         'tiempo': promedio.tiempo ?? '00:00'
       }).toList();
-
     } catch (e) {
       print('Error al obtener tiempos estimados: $e');
       return [];
     }
   }
-  int calcularTiempoTrabajado(List<Tiempo> tiempos) {
+
+  int calcularTiempoTrabajadoConProcesosSimultaneos(List<Tiempo> tiempos) {
+    int tiempoTotal = 0; // Acumula el tiempo total de todos los procesos
+    Map<String, DateTime?> inicioProcesos = {}; // Almacena el inicio por cada proceso
+    Map<String, DateTime?> suspensiones = {};  // Almacena suspensiones por cada proceso
+
+    // Ordenar los tiempos cronológicamente
+    tiempos.sort((a, b) => DateTime.parse(a.time!).compareTo(DateTime.parse(b.time!)));
+
+    for (var tiempo in tiempos) {
+      if (tiempo.time == null) continue;
+      DateTime fechaTiempo = DateTime.parse(tiempo.time!);
+      String? idProceso = tiempo.proceso; // Usar el identificador único del proceso
+
+      print('Procesando tiempo: ${tiempo.time}, Estado: ${tiempo.estado}, Proceso: $idProceso');
+
+      switch (tiempo.estado) {
+        case 'INICIO':
+          inicioProcesos[idProceso!] = fechaTiempo;
+          suspensiones.remove(idProceso); // Limpiar cualquier suspensión previa
+          print('Inicio del proceso "$idProceso" en: $fechaTiempo');
+          break;
+
+        case 'SUSPENDIDO':
+          if (inicioProcesos.containsKey(idProceso) && inicioProcesos[idProceso] != null) {
+            // Calcular tiempo efectivo del proceso suspendido
+            int tiempoParcial = calcularTiempoEfectivo(inicioProcesos[idProceso]!, fechaTiempo);
+            tiempoTotal += tiempoParcial;
+            suspensiones[idProceso!] = fechaTiempo;
+            print('Proceso "$idProceso" suspendido en: $fechaTiempo. Tiempo acumulado: $tiempoTotal');
+            inicioProcesos[idProceso] = null; // Detener el proceso activo
+          }
+          break;
+
+        case 'REANUDAR':
+          if (suspensiones.containsKey(idProceso)) {
+            inicioProcesos[idProceso!] = fechaTiempo;
+            suspensiones.remove(idProceso); // Eliminar la suspensión
+            print('Proceso "$idProceso" reanudado en: $fechaTiempo');
+          }
+          break;
+
+        case 'TERMINÓ':
+          if (inicioProcesos.containsKey(idProceso) && inicioProcesos[idProceso] != null) {
+            // Calcular tiempo efectivo del proceso terminado
+            int tiempoParcial = calcularTiempoEfectivo(inicioProcesos[idProceso]!, fechaTiempo);
+            tiempoTotal += tiempoParcial;
+            print('Proceso "$idProceso" terminado en: $fechaTiempo. Tiempo parcial: $tiempoParcial, Total: $tiempoTotal');
+            inicioProcesos.remove(idProceso); // Eliminar el proceso terminado
+          }
+          break;
+      }
+    }
+
+    // Manejar procesos en curso al final
+    DateTime ahora = DateTime.now();
+    for (var idProceso in inicioProcesos.keys) {
+      if (inicioProcesos[idProceso] != null && !suspensiones.containsKey(idProceso)) {
+        // Calcular tiempo efectivo para procesos en curso
+        int tiempoParcial = calcularTiempoEfectivo(inicioProcesos[idProceso]!, ahora);
+        tiempoTotal += tiempoParcial;
+        print('Proceso "$idProceso" en curso hasta: $ahora. Tiempo final: $tiempoParcial, Total: $tiempoTotal');
+      }
+    }
+
+    return tiempoTotal;
+  }
+
+  Future<Map<String, String>> calcularTiempoTotal(String productoId, String parte) async {
+    try {
+      List<Tiempo> tiempos = await tiempoProvider.getTiemposByProductId(productoId);
+      if (tiempos.isEmpty) {
+        return {'total': '', 'estimado': '', 'actual': ''};
+      }
+
+      // Calcula el tiempo total trabajado
+      int tiempoTotalTrabajado = calcularTiempoTotalConProcesos(tiempos);
+      double costoTotal = calcularCostoTotal(tiempoTotalTrabajado);
+
+      // Calcula el tiempo del último proceso activo
+      int tiempoProcesoActual = calcularTiempoProcesoActual(tiempos);
+
+      List<Map<String, String>> tiemposEstimados = await obtenerTiemposEstimados(parte);
+
+      String formatTiempo(int minutos) {
+        int horas = minutos ~/ 60;
+        int minutosRestantes = minutos % 60;
+        return '${horas.toString().padLeft(2, '0')}:${minutosRestantes.toString().padLeft(2, '0')}';
+      }
+
+      String tiempoEstimado = '';
+      if (tiemposEstimados.isNotEmpty) {
+        int tiempoTotalEstimado = tiemposEstimados.fold(0, (sum, tiempo) {
+          List<String> partes = tiempo['tiempo']!.split(':');
+          return sum + int.parse(partes[0]) * 60 + int.parse(partes[1]);
+        });
+        tiempoEstimado = formatTiempo(tiempoTotalEstimado);
+      }
+
+      // Retorna el mapa con el tiempo total y el tiempo del último proceso activo
+      return {
+        'total': formatTiempo(tiempoTotalTrabajado),
+        'actual': formatTiempo(tiempoProcesoActual),
+        'estimado': tiempoEstimado,
+        'costo': '\$${costoTotal.toStringAsFixed(2)}'
+      };
+    } catch (e) {
+      print('Error al calcular tiempo: $e');
+      return {'total': 'Error', 'actual': 'Error', 'estimado': ''};
+    }
+  }
+  int calcularTiempoProcesoIndividual(List<Tiempo> tiempos) {
     int tiempoTotal = 0;
     DateTime? inicioProceso;
     DateTime? inicioSuspension;
@@ -279,6 +394,7 @@ class VentasTabController extends GetxController{
 
         case 'SUSPENDIDO':
           if (inicioProceso != null) {
+            // Calcula tiempo trabajado hasta el momento de la suspensión
             tiempoTotal += calcularTiempoEfectivo(inicioProceso, fechaTiempo);
             inicioSuspension = fechaTiempo;
             print('Proceso suspendido en: $inicioSuspension. Tiempo acumulado: $tiempoTotal');
@@ -288,6 +404,7 @@ class VentasTabController extends GetxController{
 
         case 'REANUDAR':
           if (inicioSuspension != null) {
+            // Reactiva el proceso desde el momento de la reanudación
             inicioProceso = fechaTiempo;
             inicioSuspension = null;
             print('Proceso reanudado en: $fechaTiempo');
@@ -305,7 +422,7 @@ class VentasTabController extends GetxController{
       }
     }
 
-    // Si hay un proceso en curso
+    // Si hay un proceso en curso, calcula el tiempo hasta el momento actual
     if (inicioProceso != null && inicioSuspension == null) {
       DateTime ahora = DateTime.now();
       int tiempoFinal = calcularTiempoEfectivo(inicioProceso, ahora);
@@ -316,114 +433,28 @@ class VentasTabController extends GetxController{
     return tiempoTotal;
   }
 
-  int calcularTiempoEntreFechas(DateTime inicio, DateTime fin) {
-    int tiempoTrabajado = 0;
-    DateTime actual = inicio;
-
-    while (actual.isBefore(fin)) {
-      if (!esHorarioExcluido(actual)) {
-        DateTime finHora = DateTime(actual.year, actual.month, actual.day, actual.hour, 59, 59);
-        if (finHora.isAfter(fin)) finHora = fin;
-        int minutosEnEstaHora = finHora.difference(actual).inMinutes + 1;
-        tiempoTrabajado += minutosEnEstaHora;
-      }
-      actual = DateTime(actual.year, actual.month, actual.day, actual.hour + 1); // Avanza a la siguiente hora
-    }
-
-    return tiempoTrabajado;
-  }
-
-  bool esHorarioExcluido(DateTime fecha) {
-    int hora = fecha.hour;
-    return hora >= 13 && hora < 14; // Excluye el tiempo entre 1 pm y 2 pm
-  }
-
-  double calcularCostoTotal(int minutosTrabajados) {
-    // Convierte minutos a horas y calcula el costo
-    double horasTrabajadas = minutosTrabajados / 60.0;
-    return horasTrabajadas * costoPorHora;
-  }
-
-  Future<Map<String, String>> calcularTiempoTotal(String productoId, String parte) async {
-    try {
-      List<Tiempo> tiempos = await tiempoProvider.getTiemposByProductId(productoId);
-      if (tiempos.isEmpty) {
-        return {'total': '', 'estimado': '', 'actual': '', 'costo': ''};
-      }
-      int tiempoTotalTrabajado = calcularTiempoTrabajado(tiempos);
-      double costoTotal = calcularCostoTotal(tiempoTotalTrabajado);
-
-      // Obtén el tiempo actual y estimado
-      int tiempoProcesoActual = calcularTiempoProcesoActual(tiempos);
-      List<Map<String, String>> tiemposEstimados = await obtenerTiemposEstimados(parte);
-
-      String formatTiempo(int minutos) {
-        int horas = minutos ~/ 60;
-        int minutosRestantes = minutos % 60;
-        return '${horas.toString().padLeft(2, '0')}:${minutosRestantes.toString().padLeft(2, '0')}';
-      }
-
-      String tiempoEstimado = '';
-      if (tiemposEstimados.isNotEmpty) {
-        int tiempoTotalEstimado = tiemposEstimados.fold(0, (sum, tiempo) {
-          List<String> partes = tiempo['tiempo']!.split(':');
-          return sum + int.parse(partes[0]) * 60 + int.parse(partes[1]);
-        });
-        tiempoEstimado = formatTiempo(tiempoTotalEstimado);
-      }
-
-      return {
-        'total': formatTiempo(tiempoTotalTrabajado),
-        'actual': formatTiempo(tiempoProcesoActual),
-        'estimado': tiempoEstimado,
-        'costo': '\$${costoTotal.toStringAsFixed(2)}', // Formato a dos decimales
-      };
-    } catch (e) {
-      print('Error al calcular tiempo: $e');
-      return {'total': 'Error', 'actual': 'Error', 'estimado': '', 'costo': 'Error'};
-    }
-  }
-
   int calcularTiempoProcesoActual(List<Tiempo> tiempos) {
-    int tiempoTotal = 0;
-    DateTime? inicioProceso;
-    DateTime? inicioSuspension;
+    // Ordenamos todos los tiempos cronológicamente
+    tiempos.sort((a, b) => DateTime.parse(a.time!).compareTo(DateTime.parse(b.time!)));
 
-    for (var tiempo in tiempos) {
-      if (tiempo.time == null) continue;
-      DateTime fechaTiempo = DateTime.parse(tiempo.time!);
+    // Identificamos el último tiempo registrado (más reciente)
+    Tiempo? ultimoTiempo = tiempos.isNotEmpty ? tiempos.last : null;
 
-      if (tiempo.estado == 'INICIO') {
-        // Reinicia el conteo para el nuevo proceso
-        inicioProceso = fechaTiempo;
-        inicioSuspension = null;
-        tiempoTotal = 0; // Reiniciar el tiempo total al iniciar un nuevo proceso
-      } else if (tiempo.estado == 'SUSPENDIDO') {
-        if (inicioProceso != null) {
-          tiempoTotal += calcularTiempoEfectivo(inicioProceso, fechaTiempo);
-          inicioSuspension = fechaTiempo;
-          inicioProceso = null;
-        }
-      } else if (tiempo.estado == 'REANUDAR') {
-        if (inicioSuspension != null) {
-          inicioProceso = fechaTiempo;
-          inicioSuspension = null;
-        }
-      } else if (tiempo.estado == 'TERMINÓ') {
-        if (inicioProceso != null) {
-          tiempoTotal += calcularTiempoEfectivo(inicioProceso, fechaTiempo);
-          inicioProceso = null;
-        }
-      }
+    if (ultimoTiempo != null && ultimoTiempo.proceso != null) {
+      // Filtramos los tiempos del proceso correspondiente al más reciente
+      List<Tiempo> tiemposUltimoProceso = tiempos.where((t) => t.proceso == ultimoTiempo.proceso).toList();
+
+      // Calculamos el tiempo trabajado solo para el último proceso actualizado
+      int tiempoProceso = calcularTiempoProcesoIndividual(tiemposUltimoProceso);
+
+      print('Proceso más reciente: ${ultimoTiempo.proceso}, Tiempo: $tiempoProceso minutos');
+      return tiempoProceso;
     }
 
-    if (inicioProceso != null) {
-      DateTime ahora = DateTime.now();
-      tiempoTotal += calcularTiempoEfectivo(inicioProceso, ahora);
-    }
-
-    return tiempoTotal;
+    return 0; // Si no hay tiempos registrados, regresamos 0
   }
+
+
   int calcularTiempoEfectivo(DateTime inicio, DateTime fin) {
     int minutos = 0;
     DateTime actual = inicio;
@@ -455,6 +486,39 @@ class VentasTabController extends GetxController{
 
     return minutos;
   }
+
+  Map<String, List<Tiempo>> agruparTiemposPorProceso(List<Tiempo> tiempos) {
+    Map<String, List<Tiempo>> tiemposPorProceso = {};
+
+    for (var tiempo in tiempos) {
+      if (tiempo.proceso != null) {
+        tiemposPorProceso.putIfAbsent(tiempo.proceso!, () => []).add(tiempo);
+      }
+    }
+
+    return tiemposPorProceso;
+  }
+  int calcularTiempoTotalConProcesos(List<Tiempo> tiempos) {
+    // Agrupa los tiempos por proceso
+    Map<String, List<Tiempo>> tiemposPorProceso = agruparTiemposPorProceso(tiempos);
+
+    int tiempoTotal = 0;
+
+    // Calcula el tiempo total para cada grupo de tiempos (por proceso)
+    tiemposPorProceso.forEach((proceso, tiemposProceso) {
+      tiempoTotal += calcularTiempoTrabajadoConProcesosSimultaneos(tiemposProceso); // Reutiliza tu método existente
+    });
+
+    return tiempoTotal;
+  }
+
+  double calcularCostoTotal(int minutosTrabajados) {
+    // Convierte minutos a horas y calcula el costo
+    double horasTrabajadas = minutosTrabajados / 60.0;
+    return horasTrabajadas * costoPorHora;
+  }
+
+
   void goToNewVendedorPage(){
     Get.toNamed('/ventas/newVendedor');
   }

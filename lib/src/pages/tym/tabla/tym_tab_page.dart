@@ -143,7 +143,7 @@ class TymTabPage extends StatelessWidget {
         } else {
           List<Cotizacion>? cotizaciones = snapshot.data;
           if (cotizaciones == null || cotizaciones.isEmpty) {
-            return Center(child: Text('No hay cotizaciones generadas'));
+            return Center(child: Text('No hay ordenes generadas'));
           } else {
             // Listas de estatus en el orden deseado
             List<String> statusOrder = [

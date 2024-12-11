@@ -163,7 +163,7 @@ class ProduccionTabPage extends StatelessWidget {
         } else {
           List<Cotizacion>? cotizaciones = snapshot.data;
           if (cotizaciones == null || cotizaciones.isEmpty) {
-            return Center(child: Text('No hay cotizaciones generadas'));
+            return Center(child: Text('No hay ordenes generadas'));
           } else {
             // Crear una lista plana de todos los productos
             List<Map<String, dynamic>> productosOrdenados = [];

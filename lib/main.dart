@@ -26,7 +26,6 @@ import 'package:maquinados_correa/src/pages/profile/info/update/profile_update_p
 import 'package:maquinados_correa/src/pages/tym/list/tiempos/tiempos_page.dart';
 import 'package:maquinados_correa/src/pages/tym/list/tym_ot_list_page.dart';
 import 'package:maquinados_correa/src/pages/tym/newOperador/new_operador_page.dart';
-import 'package:maquinados_correa/src/pages/home/home_page.dart';
 import 'package:maquinados_correa/src/pages/login/login_page.dart';
 import 'package:maquinados_correa/src/pages/registro/registro_page.dart';
 import 'package:maquinados_correa/src/pages/roles/roles_page.dart';
@@ -79,7 +78,6 @@ class _MyAppState extends State<MyApp> {
       getPages:[
         GetPage(name: '/', page:()=> LoginPage()),
         GetPage(name: '/registro', page:()=> RegisterPage()),
-        GetPage(name: '/home', page:()=> HomePage()),
         GetPage(name: '/roles', page:()=> RolesPage()),
         GetPage(name: '/compras/orders/list', page:()=> ComprasDetallesPage()),
         GetPage(name: '/compras/list', page:()=> ComprasOcListPage()),
