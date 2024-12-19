@@ -117,10 +117,10 @@ class _MyAppState extends State<MyApp> {
         GetPage(name: '/profile/info/update', page:()=> ProfileUpdatePage())
       ],
       theme: ThemeData(
-          primaryColor: Colors.blue,
+          primaryColor: Colors.grey,
           colorScheme: ColorScheme(
             primary: Colors.black,
-            secondary: Colors.blueAccent,
+            secondary: Colors.grey,
             brightness: Brightness.light,
             onBackground: Colors.grey,
             onPrimary: Colors.black,

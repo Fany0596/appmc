@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';  // Importa widgets y utilidades principales de flutter
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart'; // Importa para manjeo de estado y navegación en flutter
 import 'package:get_storage/get_storage.dart';  // Importa para almacenamiento de datos
 import 'package:maquinados_correa/src/models/cotizacion.dart';  // Importa el modelo cotización
@@ -11,6 +12,7 @@ import 'package:maquinados_correa/src/providers/tiempo_provider.dart';  // Impor
 
 class CalidadTabController extends GetxController {  // Controlador que gestiona lógica de la pagina calidadTabPage
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;  // Obtiene y almacena el usuario actual desde almacenamiento
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
 
   CotizacionProvider cotizacionProvider = CotizacionProvider();  // Instancia del proveedor de cotizaciones
   ProductoProvider productoProvider = ProductoProvider();  // Instancia del proveedor de producto

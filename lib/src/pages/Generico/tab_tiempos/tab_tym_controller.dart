@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
-import 'package:maquinados_correa/src/models/producto.dart';
 import 'package:maquinados_correa/src/models/promedio.dart';
 import 'package:maquinados_correa/src/models/tiempo.dart';
 import 'package:maquinados_correa/src/models/user.dart';
@@ -15,12 +12,10 @@ import 'package:maquinados_correa/src/providers/cotizacion_provider.dart';
 import 'package:maquinados_correa/src/providers/producto_provider.dart';
 import 'package:maquinados_correa/src/providers/promedio_provider.dart';
 import 'package:maquinados_correa/src/providers/tiempo_provider.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'package:pdf/pdf.dart';
+
 
 class TabTymController extends GetxController{
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   var cotizaciones = Future.value(<Cotizacion>[]).obs; // Usamos Future.value para inicializar la lista de cotizaciones
 

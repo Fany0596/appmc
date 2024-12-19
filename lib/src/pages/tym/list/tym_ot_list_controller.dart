@@ -1,3 +1,4 @@
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
@@ -6,6 +7,7 @@ import 'package:maquinados_correa/src/models/user.dart';
 import 'package:maquinados_correa/src/providers/cotizacion_provider.dart';
 
 class TymOtListController extends GetxController {
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   CotizacionProvider cotizacionProvider = CotizacionProvider();
   List<String> estatus = <String>['EN ESPERA', 'EN PROCESO', 'SUSPENDIDO', 'SIG. PROCESO', 'RETRABAJO','RECHAZADO', 'LIBERADO', 'ENTREGADO'].obs;

@@ -27,7 +27,7 @@ class ComprasHomePage extends StatelessWidget {  // Define la clase que extiende
 
   Widget _bottomBar() {  // Método para construir la barra de navegación inferior
     return Obx(() => CustomAnimatedBottomBar(  // Obx para observar cambios en el indice seleccionado de la barra
-          containerHeight: 45, // Altura del contenedor de la barra
+          containerHeight: 55, // Altura del contenedor de la barra
           backgroundColor: Colors.grey,  // Color de fondo de la barra
           showElevation: true, // Muestra una sombra en la barra
           itemCornerRadius: 24,  // Radio de esquina de cada item de la barra

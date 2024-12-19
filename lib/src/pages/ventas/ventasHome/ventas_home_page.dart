@@ -29,7 +29,7 @@ class VentasHomePage extends StatelessWidget {
 
   Widget _bottomBar(){
     return Obx (() => CustomAnimatedBottomBar(
-      containerHeight: 70,
+      containerHeight: 55,
       backgroundColor: Colors.grey,
       showElevation: true,
       itemCornerRadius: 24,

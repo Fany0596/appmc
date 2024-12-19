@@ -1,99 +1,278 @@
 import 'package:flutter/material.dart'; // Importa los widgets y utilidades de flutter para construir interfaces de usuario
 import 'package:flutter/services.dart'; // Importa servicios básicos de flutter
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart'; // Importa el modelo cotización
 import 'package:maquinados_correa/src/pages/calidad/tabla/calidad_tab_controller.dart'; // Importa el controlador para manejar la lógica de la pagina
 import 'package:get/get.dart'; // Importa el paquete GetX para la gestión del estado y navegación
 import 'package:maquinados_correa/src/widgets/ScrollableTableWrapper.dart'; // Importa un widget para hacer que la tabla sea desplazable
 
 class CalidadTabPage extends StatelessWidget { // Declara una página de interfaz de usuario
-  CalidadTabController con = Get.put(
-      CalidadTabController()); // Instancia y añade el controlador de calidad usando GetX
+  CalidadTabController con = Get.put(CalidadTabController()); // Instancia y añade el controlador de calidad usando GetX
+  final RxBool isHoveredPerfil =
+      false.obs; // Estado para el hover del botón "Perfil"
+  final RxBool isHoveredRoles = false.obs;
+  final RxBool isHoveredSalir = false.obs;
 
   @override
-  Widget build(BuildContext context) {  // Método que construye la interfaz de la página
-    return Obx(  // Observa cambios en las variables reactivas del controlador
-      () => Scaffold( // Define una estructura visual de la página
-          drawer: Drawer( // Añade un cajón de menú lateral
-            child: Container( // Contenedor para el cajon
-              color: Colors.white60, // Define el color de fondo
-              child: SingleChildScrollView( // Permite desplazar el contenido verticalmente
-                child: Column( // Organiza los widgets en columna
-                  children: [
-                    Container( // Contenedor para la imagen de perfil
-                      margin: EdgeInsets.only(top: 57), // Margen superior
-                      child: CircleAvatar( // Muestra la imagen de perfil de forma circular
-                        backgroundImage: con.user.value.image !=
-                                null // Verifica si hay una imagen del usuario
-                            ? NetworkImage(con.user.value
-                                .image! // Si existe, usa la imagen de la red
-                        )
-                            : AssetImage('assets/img/LOGO1.png')
-                                as ImageProvider, // Si no, usa la imagen local
-                        radius: 70, // Tamaño del circulo
-                      ),
-                    ),
-                    Container( // Contenedor para el nombre de usuario
-                      margin: EdgeInsets.only(top: 10), // Margen superior
-                      child: Text( // Muestra el nombre del usuario
-                        '${con.user.value.name ?? ''}  ${con.user.value.lastname}', // Nombre y apellido del usuario
-                        style: TextStyle( // Estilo del texto
-                          fontSize: 16, // Tamaño de fuente
-                          color: Colors.black, // Color del texto
-                          fontWeight: FontWeight.bold, // Texto en negritas
+  Widget build(BuildContext context) {
+    // Determinar el ancho del drawer basado en el ancho de la pantalla
+    double drawerWidth = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width *
+        0.45 // Celulares (ancho menor a 600)
+        : MediaQuery.of(context).size.width * 0.14; // Pantallas más grandes
+
+    return Obx(() => ZoomDrawer(
+      controller: con.zoomDrawerController,
+      menuScreen: _buildMenuScreen(context),
+      mainScreen: _buildMainScreen(context),
+      mainScreenScale: 0.0,
+      slideWidth: drawerWidth,
+      // Usar el ancho calculado
+      menuScreenWidth: drawerWidth,
+      // Mismo ancho para el menú
+      borderRadius: 0,
+      showShadow: false,
+      angle: 0.0,
+      menuBackgroundColor: Colors.grey,
+      mainScreenTapClose: true,
+    ));
+  }
+
+  Widget _buildMenuScreen(BuildContext context) {
+    // Obtener el tamaño de la pantalla
+    final screenWidth = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width * 0.75
+        : MediaQuery.of(context).size.width * 0.25;
+    final screenHeight = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width * 0.75
+        : MediaQuery.of(context).size.width * 0.25;
+    final containerHeight = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width * 0.48
+        : MediaQuery.of(context).size.width * 0.145;
+    final textHeight = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width * 0.48
+        : MediaQuery.of(context).size.width * 0.11;
+
+    return Scaffold(
+      backgroundColor: Colors.grey,
+      body: Container(
+        width: double.infinity,
+        height:
+        MediaQuery.of(context).size.height, // Altura total de la pantalla
+        child: Column(
+          children: [
+            Expanded(
+                child: SingleChildScrollView(
+                    child: Column(children: [
+                      Container(
+                        height: containerHeight,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/img/fondo2.jpg'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              alignment: Alignment.topCenter,
+                              margin: EdgeInsets.only(top: screenHeight * 0.02),
+                              child: CircleAvatar(
+                                backgroundImage: con.user.value.image != null
+                                    ? NetworkImage(con.user.value.image!)
+                                    : AssetImage('assets/img/LOGO1.png')
+                                as ImageProvider,
+                                radius: screenWidth * 0.2,
+                                backgroundColor: Colors.transparent,
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 10, bottom: 0),
+                              child: Text(
+                                '${con.user.value.name ?? ''}  ${con.user.value.lastname}',
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.05,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 1, bottom: 0),
+                              child: Text(
+                                '${con.user.value.email ?? ''}',
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.035,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    GestureDetector( // Detecta el toque en el contenedor
-                      onTap: () => con.goToPerfilPage(), // Navega a la página de perfil
-                      child: Container( // Contenedor de perfil
-                        margin: EdgeInsets.only(top: 40),  // Margen superior
-                        padding: EdgeInsets.all(10),  // Espacio interno
-                        width: double.infinity, // Ancho total
-                        color: Colors.white, // Color de fondo
-                        child: Text(
-                          'Perfil', // Texto del bóton
-                          style: TextStyle(// Estilo del texto
-                            fontSize: 13, // Tamaño de fuente
-                            color: Colors.black, // Color de texto
-                            fontWeight: FontWeight.bold, // Texto en negritas
+                      MouseRegion(
+                        onEnter: (_) => isHoveredPerfil.value = true,
+                        onExit: (_) => isHoveredPerfil.value = false,
+                        child: GestureDetector(
+                          onTap: () => con.goToPerfilPage(),
+                          child: Obx(() => Container(
+                            margin:
+                            EdgeInsets.only(top: screenHeight * 0.05, left: 1),
+                            padding: EdgeInsets.all(screenWidth * 0.009),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: isHoveredPerfil.value
+                                  ? Colors.blueGrey
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    SizedBox(width: 15),
+                                    Icon(
+                                      Icons.person,
+                                      size: textHeight * 0.15,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 20),
+                                    Text(
+                                      'Perfil',
+                                      style: TextStyle(
+                                        fontSize: textHeight * 0.09,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
+                        ),
+                      ),
+                    ]))),
+
+            // Botones en la parte inferior
+            Container(
+              decoration: BoxDecoration(
+                  border: BorderDirectional(
+                      top: BorderSide(
+                        width: 2,
+                        color: Color.fromARGB(070, 080, 080, 600),
+                      ))),
+              padding: EdgeInsets.symmetric(vertical: 10),
+              // Espaciado alrededor de los botones
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  MouseRegion(
+                    onEnter: (_) => isHoveredRoles.value = true,
+                    onExit: (_) => isHoveredRoles.value = false,
+                    child: GestureDetector(
+                      onTap: () => con.goToRoles(),
+                      child: Obx(
+                            () => Container(
+                          padding: EdgeInsets.all(screenWidth * 0.009),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: isHoveredRoles.value
+                                ? Colors.blueGrey
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  SizedBox(width: 15),
+                                  Icon(
+                                    Icons.supervised_user_circle,
+                                    //size: textHeight * 0.15,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 20),
+                                  Text(
+                                    'Roles',
+                                    style: TextStyle(
+                                      fontSize: textHeight * 0.09,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                    Row(// Fila para mostrar los botones
-                      children: [
-                        Container(  // Contenedor para el bóton de roles
-                          margin: EdgeInsets.only(top: 20, left: 20),  // Margen superior e izquierdo
-                          child: IconButton(  // Bóton de icono
-                              onPressed: () => con.goToRoles(),  // Navega a roles
-                              icon: Icon(
-                                Icons.supervised_user_circle,  // Icono
-                                color: Colors.black,  // Color del icono
-                                size: 30,  // Tamaño del icono
-                              )),
+                  ),
+                  MouseRegion(
+                    onEnter: (_) => isHoveredSalir.value = true,
+                    onExit: (_) => isHoveredSalir.value = false,
+                    child: GestureDetector(
+                      onTap: () => con.signOut(),
+                      child: Obx(
+                            () => Container(
+                          padding: EdgeInsets.all(screenWidth * 0.009),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: isHoveredSalir.value
+                                ? Colors.blueGrey
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  SizedBox(width: 15),
+                                  Icon(
+                                    Icons.output,
+                                    //size: textHeight * 0.15,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 20),
+                                  Text(
+                                    'Salir',
+                                    style: TextStyle(
+                                      fontSize: textHeight * 0.09,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        Container(  // Contenedor para el boton de ceerrar sesión
-                          margin: EdgeInsets.only(top: 20, left: 160), // Margen superior e izquierdo
-                          child: IconButton(  // Bóton de icono
-                              onPressed: () => con.signOut(),  // Cierra sesión
-                              icon: Icon(
-                                Icons.power_settings_new,  // Icono de cerrar sesión
-                                color: Colors.black,  // Color del icono
-                                size: 30,  // Tamaño del icono
-                              )),
-                        ),
-                      ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: 20),
+                ],
               ),
             ),
-          ),
-          appBar: AppBar(  // Barra de la aplicación
-            title: _encabezado(context),  // Llama al widget encabezado
-          ),
-          body: ScrollableTableWrapper(child: _table(context))  // Tabla desplazable
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildMainScreen(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => con.zoomDrawerController.toggle?.call(),
+        ),
+        title: _encabezado(context),
+      ),
+      body: ScrollableTableWrapper(child: _table(context))
     );
   }
 

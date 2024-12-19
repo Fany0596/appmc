@@ -36,7 +36,7 @@ class CustomAnimatedBottomBar extends StatelessWidget {  // Define un widget per
     final bgColor = backgroundColor ?? Theme.of(context).bottomAppBarColor;  // Asigan el color de fondo de la barra o usa el color predeterminado del tema
 
     return Container(
-      margin: EdgeInsets.all(20),  // Margen alrededor del contenedor
+      margin: EdgeInsets.only(left: 10, right: 10, bottom: 20),  // Margen alrededor del contenedor
       decoration: BoxDecoration(
         color: bgColor,  //Color de fondo
         borderRadius: BorderRadius.circular(1),  // Radio de borde de 50

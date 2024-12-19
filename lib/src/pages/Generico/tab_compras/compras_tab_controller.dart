@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
@@ -13,6 +14,8 @@ import 'package:maquinados_correa/src/providers/product_provider.dart';
 import 'package:maquinados_correa/src/providers/producto_provider.dart';
 
 class ComprasTabController2 extends GetxController{
+
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
 
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   var oc = Future.value(<Oc>[]).obs; // Usamos Future.value para inicializar la lista de cotizaciones

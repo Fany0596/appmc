@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:maquinados_correa/src/models/cotizacion.dart';
@@ -17,6 +18,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class VentasTabController extends GetxController{
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
 
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   var tiemposEstimados = <Promedio>[].obs;

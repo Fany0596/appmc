@@ -1,3 +1,4 @@
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart'; // Importa Get para gestión de estado
 import 'package:get_storage/get_storage.dart';  // Importa el paquete para almacenamiento
 import 'package:maquinados_correa/src/models/cotizacion.dart'; // Importa el modelo cotización
@@ -9,6 +10,7 @@ class CalidadOtListController extends GetxController {  // Define el controlador
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;  // Define una variable observable de usuario obtenida desde el almacenamiento local
   CotizacionProvider cotizacionProvider = CotizacionProvider();  // Instancia del proveedor de cotizaciones
   List<String> estatus = <String>['EN PROCESO', 'SUSPENDIDO', 'SIG. PROCESO','RETRABAJO','RECHAZADO','LIBERADO','ENTREGADO',].obs;  // Lista de estatus posibles para los productos, observables para actualizar la UI automaticamente
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
 
   RxList<Producto> allProducts = <Producto>[].obs;  // Lista observable de todos los productos de las cotizaciones
   RxList<Producto> filteredProducts = <Producto>[].obs;  // Lista observable de productos filtraos basada en criterios de busqueda y estado

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -20,6 +21,7 @@ import 'package:maquinados_correa/src/providers/provedor_provider.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
 
 class CombinedOcController extends GetxController {
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
   // Controladores de texto para oc
   TextEditingController numberController = TextEditingController();
   TextEditingController entController = TextEditingController();

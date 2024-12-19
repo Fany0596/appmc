@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart'; // Importa Flutter para construir la interfaz
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart'; // Importa GetX para la gestión de estados y navegación
 import 'package:maquinados_correa/src/pages/roles/roles_controller.dart'; // Importa el controlador de roles
 import 'package:maquinados_correa/src/models/Rol.dart'; // Importa el modelo de Rol
@@ -8,71 +9,226 @@ import 'package:cached_network_image/cached_network_image.dart'; // Importa para
 class RolesPage extends StatelessWidget {
   // Crea una instancia del controlador RolesController y la inicializa con Get.put
   RolesController con = Get.put(RolesController());
+  final RxBool isHoveredPerfil = false.obs; // Estado para el hover del botón "Perfil"
+  final RxBool isHoveredRoles = false.obs;
+  final RxBool isHoveredSalir = false.obs;
 
   // Método principal de construcción de la interfaz
   @override
   Widget build(BuildContext context) {
-    return Scaffold(  // Devuelve un Scaffold como estructura principal de la página
-      drawer: Drawer(  // Define el menú lateral (drawer) de la página
-        child: Container(// Contenedor principal del drawer con un fondo blanco semitransparente
-          color: Colors.white60,
-          child: SingleChildScrollView(  // Usa SingleChildScrollView para permitir el scroll dentro del menú
-            child: Column(   // Define una columna para alinear los elementos del menú
-              children: [
-                SizedBox(height: 57), // Espacio vacío en la parte superior del menú
-                CircleAvatar(  // Si el usuario tiene una imagen, la carga desde la red; de lo contrario, usa una imagen local
-                  backgroundImage: con.user.image != null
-                      ? NetworkImage(con.user.image!)  // Imagen de red
-                      : AssetImage('assets/img/LOGO1.png') as ImageProvider,  // Imagen local
-                  radius: 70,  // Radio del avatar circular
-                  backgroundColor: Colors.transparent,   // Fondo transparente detrás de la imagen
-                ),
-                SizedBox(height: 10),  // Espacio vacío debajo de la imagen del usuario
-                Text(
-                  '${con.user.name ?? ''}  ${con.user.lastname}',  // Muestra el nombre y apellido del usuario
-                  style: TextStyle(  // Estilo del texto que muestra el nombre del usuario
-                    fontSize: 16,  // Tamaño de fuente
-                    color: Colors.black,  // Color de fuente
-                    fontWeight: FontWeight.bold,  // Grosor de la fuente
-                  ),
-                ),
-                // Widget para detectar toques en el texto 'Perfil'
-                GestureDetector(
-                  onTap: () => con.goToPerfilPage(),  // Cuando se toca, navega a la página de perfil
-                  child: Container(  // Contenedor para el texto del perfil
-                    margin: EdgeInsets.only(top: 40, left: 1),  // Margen en la parte superior y lateral izquierdo
-                    padding: EdgeInsets.all(20),  // Espacio interior del contenedor
-                    width: double.infinity,  // Anchura completa del contenedor
-                    color: Colors.white,  // Color de fondo blanco
-                    child: Text(  // Texto del perfil
-                      'Perfil',
-                      style: TextStyle(  // Estilo del texto del perfil
-                        fontSize: 13,  // Tamaño
-                        color: Colors.black,  // Color de fuente
-                        fontWeight: FontWeight.bold,  // Grosor de la fuente
+    // Determinar el ancho del drawer basado en el ancho de la pantalla
+    double drawerWidth = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width *
+        0.45 // Celulares (ancho menor a 600)
+        : MediaQuery.of(context).size.width * 0.14; // Pantallas más grandes
+
+    return  ZoomDrawer(
+      controller: con.zoomDrawerController,
+      menuScreen: _buildMenuScreen(context),
+      mainScreen: _buildMainScreen(context),
+      mainScreenScale: 0.0,
+      slideWidth: drawerWidth,
+      // Usar el ancho calculado
+      menuScreenWidth: drawerWidth,
+      // Mismo ancho para el menú
+      borderRadius: 0,
+      showShadow: false,
+      angle: 0.0,
+      menuBackgroundColor: Colors.grey,
+      mainScreenTapClose: true,
+    );
+  }
+
+  Widget _buildMenuScreen(BuildContext context) {
+    // Obtener el tamaño de la pantalla
+    final screenWidth = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width * 0.75
+        : MediaQuery.of(context).size.width * 0.25;
+    final screenHeight = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width * 0.75
+        : MediaQuery.of(context).size.width * 0.25;
+    final containerHeight = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width * 0.48
+        : MediaQuery.of(context).size.width * 0.145;
+    final textHeight = MediaQuery.of(context).size.width < 600
+        ? MediaQuery.of(context).size.width * 0.48
+        : MediaQuery.of(context).size.width * 0.11;
+
+    return Scaffold(
+      backgroundColor: Colors.grey,
+      body: Container(
+        width: double.infinity,
+        height:
+        MediaQuery.of(context).size.height, // Altura total de la pantalla
+        child: Column(
+          children: [
+            Expanded(
+                child: SingleChildScrollView(
+                    child: Column(children: [
+                      Container(
+                        height: containerHeight,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/img/fondo2.jpg'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              alignment: Alignment.topCenter,
+                              margin: EdgeInsets.only(top: screenHeight * 0.02),
+                              child: CircleAvatar(
+                                backgroundImage: con.user.image != null
+                                    ? NetworkImage(con.user.image!)
+                                    : AssetImage('assets/img/LOGO1.png')
+                                as ImageProvider,
+                                radius: screenWidth * 0.2,
+                                backgroundColor: Colors.transparent,
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 10, bottom: 0),
+                              child: Text(
+                                '${con.user.name ?? ''}  ${con.user.lastname}',
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.05,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 1, bottom: 0),
+                              child: Text(
+                                '${con.user.email ?? ''}',
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.035,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      MouseRegion(
+                        onEnter: (_) => isHoveredPerfil.value = true,
+                        onExit: (_) => isHoveredPerfil.value = false,
+                        child: GestureDetector(
+                          onTap: () => con.goToPerfilPage(),
+                          child: Obx(() => Container(
+                            margin:
+                            EdgeInsets.only(top: screenHeight * 0.05, left: 1),
+                            padding: EdgeInsets.all(screenWidth * 0.009),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: isHoveredPerfil.value
+                                  ? Colors.blueGrey
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    SizedBox(width: 15),
+                                    Icon(
+                                      Icons.person,
+                                      size: textHeight * 0.15,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 20),
+                                    Text(
+                                      'Perfil',
+                                      style: TextStyle(
+                                        fontSize: textHeight * 0.09,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
+                        ),
+                      ),
+                    ]))),
+
+            // Botones en la parte inferior
+            Container(
+              decoration: BoxDecoration(
+                  border: BorderDirectional(
+                      top: BorderSide(
+                        width: 2,
+                        color: Color.fromARGB(070, 080, 080, 600),
+                      ))),
+              padding: EdgeInsets.symmetric(vertical: 10),
+              // Espaciado alrededor de los botones
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  MouseRegion(
+                    onEnter: (_) => isHoveredSalir.value = true,
+                    onExit: (_) => isHoveredSalir.value = false,
+                    child: GestureDetector(
+                      onTap: () => con.signOut(),
+                      child: Obx(
+                            () => Container(
+                          padding: EdgeInsets.all(screenWidth * 0.009),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: isHoveredSalir.value
+                                ? Colors.blueGrey
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  SizedBox(width: 15),
+                                  Icon(
+                                    Icons.output,
+                                    //size: textHeight * 0.15,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 20),
+                                  Text(
+                                    'Salir',
+                                    style: TextStyle(
+                                      fontSize: textHeight * 0.09,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                // Contenedor para el botón de cerrar sesión
-                Container(
-                  margin: EdgeInsets.only(top: 20, left: 160),// Margen en la parte superior e izquierdo
-                  alignment: Alignment.topRight, // Alineación a la derecha del boton
-                  child: IconButton(  // Boton de icono para cerrar sesión
-                      onPressed: () => con.signOut(), // Al presionar, llama al método para cerrar sesión
-                      icon: Icon( // Define el icono de cierre de sesión
-                        Icons.power_settings_new,  // Icono de cierre de sesión
-                        color: Colors.black,  // Color del icono
-                        size: 30,  // Tamaño del icono
-                      )),
-                ),
-              ],
+                  SizedBox(height: 20),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
-      // Barra de aplicación en la parte superior de la página
-      appBar: AppBar(
+    );
+  }
+
+  Widget _buildMainScreen(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar( // Barra de aplicación en la parte superior de la página
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => con.zoomDrawerController.toggle?.call(),
+        ),
         toolbarHeight: 100, // Altura de la barra de herramientas
         title: _encabezado(context),   // Título de la barra de herramientas, llama a un método para construir el encabezado
       ),
@@ -94,23 +250,24 @@ class RolesPage extends StatelessWidget {
             margin: EdgeInsets.symmetric(vertical: constraints.maxHeight * 0.04),  // Margen vertical proporcional al alto disponible
             child: con.user.roles != null  // Comprueba si el usuario tiene roles asignados
                 ? GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(  //  Define las propiedades de la cuadricula
-                      crossAxisCount: gridCrossAxisCount.toInt(),  // Número de columnas según el ancho de pantalla
-                      crossAxisSpacing: 10.0,  // Espacio entre columnas
-                      mainAxisSpacing: 10.0,  // Espacio entre filas
-                      childAspectRatio: 1.5,  // Relación de aspecto de cada tarjeta de rol
-                    ),
-                    itemCount: con.user.roles!.length,  // Número de elementos de la cuadrícula segun los roles de usuario
-                    itemBuilder: (context, index) {  // Construye cada tarjeta de rol
-                      return _cardRol(con.user.roles![index]);
-                    },
-                  )
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(  //  Define las propiedades de la cuadricula
+                crossAxisCount: gridCrossAxisCount.toInt(),  // Número de columnas según el ancho de pantalla
+                crossAxisSpacing: 10.0,  // Espacio entre columnas
+                mainAxisSpacing: 10.0,  // Espacio entre filas
+                childAspectRatio: 1.5,  // Relación de aspecto de cada tarjeta de rol
+              ),
+              itemCount: con.user.roles!.length,  // Número de elementos de la cuadrícula segun los roles de usuario
+              itemBuilder: (context, index) {  // Construye cada tarjeta de rol
+                return _cardRol(con.user.roles![index]);
+              },
+            )
                 : Center(child: Text('No hay roles disponibles')),  // Muestra un mensaje si no hay roles asignados
           );
         },
       ),
     );
   }
+
 
   // Metodo para construir cada tarjeta de rol
   Widget _cardRol(Rol rol) {

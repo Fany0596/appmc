@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
 import 'dart:async';
 import 'package:get_storage/get_storage.dart';
@@ -8,6 +9,7 @@ import 'package:maquinados_correa/src/models/user.dart';
 import 'package:maquinados_correa/src/providers/oc_provider.dart';
 
 class ComprasOcListController extends GetxController {
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
 
   OcProvider ocProvider = OcProvider();

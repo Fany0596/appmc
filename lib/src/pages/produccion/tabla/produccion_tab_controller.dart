@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
@@ -19,6 +20,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class ProduccionTabController extends GetxController{
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
 
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   RxInt totalOTs = 0.obs;

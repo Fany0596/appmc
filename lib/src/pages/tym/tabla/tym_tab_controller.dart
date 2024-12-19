@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +22,7 @@ import 'dart:io';
 import 'package:pdf/pdf.dart';
 
 class TymTabController extends GetxController{
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
   var user = User.fromJson(GetStorage().read('user') ?? {}).obs;
   var cotizaciones = Future.value(<Cotizacion>[]).obs; // Usamos Future.value para inicializar la lista de cotizaciones
   var tiemposEstimados = <Promedio>[].obs;

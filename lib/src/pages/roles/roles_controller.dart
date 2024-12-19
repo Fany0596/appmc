@@ -1,3 +1,4 @@
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';  // Importa la libreria para el controlador del drawer
 import 'package:get/get.dart'; // Importa GetX para la gestión de estados y navegación
 import 'package:get_storage/get_storage.dart'; // Importa GetStorage para almacenamiento persistente
 import 'package:maquinados_correa/src/models/user.dart'; // Importa el modelo de usuario
@@ -5,6 +6,7 @@ import '../../models/Rol.dart'; // Importa el modelo de Rol
 
 // Controlador para la gestión de roles de usuario
 class RolesController extends GetxController {
+  final ZoomDrawerController zoomDrawerController = ZoomDrawerController();
   // Crea una instancia de User, inicializándola con los datos almacenados en 'user' o un objeto vacío
   User user = User.fromJson(
       GetStorage().read('user') ?? {}  // Obtiene los roles asignados del almacenamiento local
